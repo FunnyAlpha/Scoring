@@ -1,0 +1,3855 @@
+@startuml
+scale 1.5
+
+
+class Application {
+    + evidSrv : char
+    + idCredit : number
+    + agregatorResult : AgregatorResult
+}
+
+Class trial {
++ strategyName : char
++ strategyName : char
++ strategyName : char
++ strategyName : char
+}
+Class registerPreResult {
++ appChars : date
++ strategyVersion : char
++ client : number
++ client : number
++ client : number
++ client : number
+
++ score20Predictors : char
++ blazeStatusItems : char
++ appChars : date
++ client : char
++ client : number
++ client : number
++ score : number
++ workflowCode : char
++ score : char
++ derivedData : number
++ score20Predictors : char
++ blazeStatusItems : number
++ score : char
++ score : number
++ appChars : char
++ score : number
++ client : char
++ client : char
++ appChars : date
+
++ score : number
++ score1Predictors : char
++ score2Predictors : number
++ appChars : date
++ client : number
++ score : char
++ score : char
++ client : number
++ strategyVersionDate : char
++ score : number
++ score9Predictors : char
++ score : number
++ score : char
++ score1Predictors : number
++ client : number
++ client : number
++ client : number
++ client : number
++ nextStrategy : char
++ client : number
++ score : number
++ score : number
++ score : char
++ score : number
++ score : char
++ score : number
++ score3Predictors : char
++ appChars : number
++ score : char
++ blazeStatusItems : number
++ score0Predictors : char
++ score3Predictors : char
++ strategyPassLog : char
++ appChars : number
++ riskGroup : char
++ strategyType : char
++ score : number
++ client : number
++ strategyName : char
+
++ persons : char
++ score9Predictors : char
++ appChars : number
++ score0Predictors : char
++ score1Predictors : char
++ score2Predictors : char
++ appChars : number
++ score : char
++ derivedData : number
++ score : char
++ score : char
++ score : number
++ score2Predictors : char
++ score3Predictors : number
+}
+Class blazeStatusItems {
++ code : number
++ description : char
++ code : number
++ code : number
++ description : char
++ cuid : number
++ cuid : number
++ cuid : number
++ description : char
++ code : number
++ description : char
++ cuid : number
+}
+Class creditData {
++ creditUpdate : date
++ delay30 : number
++ cbId : char
++ creditEndDateFact : date
++ creditDayOverdue : number
++ cbAnnuity : number
++ creditCostRate : number
++ creditSumType : number
++ creditJoint : number
++ creditCollateral : number
++ creditSumLimit : number
++ delay5 : number
++ creditMaxOverdue : number
++ delay90 : number
++ delay60 : number
++ creditOwner : char
++ creditType : number
++ creditCurrency : char
++ creditSum : number
++ cuid : number
++ creditDate : date
++ creditTypeUni : char
++ creditEndDate : date
++ cbOverdueLine : char
++ contractSource : char
++ creditSumOverdue : number
++ creditActive : number
++ delayMore : number
++ cred_ratio : number
++ creditSumDebt : number
++ creditProlong : number
+}
+
+Class incomes {
++ est_income : number
++ income_type : char
++ report_date : date
++ report_date : date
++ est_income : number
++ income_type : char
++ report_date : date
++ est_income : number
++ report_date : date
++ est_income : number
++ income_type : char
++ income_type : char
+}
+Class online_behav_min_dist {
++ my_credit_ob_min_distance_cont_addr : char
++ my_credit_ob_min_distance_reg_addr : char
++ my_credit_ob_min_distance_reg_addr : char
++ my_credit_ob_min_distance_cont_addr : char
++ my_credit_ob_min_distance_cont_addr : char
++ my_credit_ob_min_distance_emp_addr : char
++ my_credit_ob_min_distance_reg_addr : char
++ my_credit_ob_min_distance_emp_addr : char
++ my_credit_ob_min_distance_emp_addr : char
++ my_credit_ob_min_distance_emp_addr : char
++ my_credit_ob_min_distance_cont_addr : char
++ my_credit_ob_min_distance_reg_addr : char
+}
+Class my_credit_ob_min_distance_reg_addr {
++ min_distance_registration_address_90_days_my_credit : char
++ min_distance_registration_address_30_days_my_credit : char
++ min_distance_registration_address_360_days_my_credit : char
++ min_distance_registration_address_180_days_my_credit : char
+}
+Class my_credit_ob_os_mobile_180 {
++ mobile_operational_system_180_days_my_credit : char
++ dtime_calculated_mobile_os_180_days_my_credit : char
++ mobile_os_datetime_first_enter_180_days_my_credit : char
++ mobile_os_datetime_last_enter_180_days_my_credit : char
+}
+
+Class employment {
++ employedFrom : date
+}
+Class online_behav_os_web {
++ my_credit_ob_os_web_180 : char
++ my_credit_ob_os_web_180 : char
++ my_credit_ob_os_web_180 : char
++ my_credit_ob_os_web_180 : char
+}
+Class goods {
++ goodsCategory : char
++ producer : char
++ goodsName : char
++ status : char
+
++ goodsPrice : number
++ basket : number
++ commodityType : char
++ brand : char
++ persons : char
++ goodsId : number
++ sameIdentCard : number
++ persons : char
++ persons : char
++ goodsType : char
+}
+Class score9Predictors {
++ predictorValue : char
++ predictorCode : char
++ predictorCode : char
++ predictorValue : char
++ predictorValue : char
++ predictorValue : char
++ predictorCode : char
++ predictorCode : char
+}
+Class limitDetails {
++ regulatorAvailableAnnuity : number
++ regulatorAvailableAnnuity : number
+}
+Class crossClientChecks {
++ sameIdentCard : number
++ persons : char
+}
+Class resultTrace {
++ resultName : char
++ trialContinued : char
++ cuid : number
+}
+Class previousApplications {
++ appArray : char
+}
+Class onlineApp {
++ applicationDate : char
++ onlineRequestId : char
++ channel : char
++ channelGroup : char
+}
+Class salesPoint {
++ sellerplaceCode : char
+}
+Class undesirablePerson {
++ name1 : char
+}
+Class persons {
++ registeredAddress : date
+}
+Class creditPreferences {
++ lostThings_pref : char
++ sendingStatements : char
+}
+Class biometricData {
+
+
+}
+Class crossClientChecks {
++ sameIdentCard : number
++ sameIdentCard : number
++ sameIdentCard : number
++ sameIdentCard : number
++ sameMobileCheck : number
++ ident : char
++ sameIdentCard : number
++ sameIdentCard : number
++ sameMobileCheck : number
++ persons : char
++ sameIdentCard : number
++ sameIdentCard : number
++ sameIdentCard : number
++ sameIdentCard : number
++ sameIdentCard : number
++ sameIdentCard : number
+}
+Class tele2_score {
++ score_date_calculation_tele2 : char
++ score_value_tele2 : number
++ score_model_code_tele2 : char
+}
+Class undesirablePerson {
++ nameMid : char
+}
+Class previousApplications {
+
+}
+Class wfDetails {
++ rejectReason : char
++ decision : char
++ decision : char
++ decision : char
++ decision : char
++ rejectReason : char
++ decision : char
++ rejectReason : char
++ decision : char
+}
+Class client_score {
++ yandex_score : number
++ mts_score : char
++ juicyscore_score : number
++ yandex_score : char
++ juicyscore_score : char
++ tele2_score : char
++ juicyscore_score : char
++ juicyscore_score : char
++ tele2_score : number
++ mailru_score : number
++ mts_score : number
++ mailru_score : char
++ mailru_sp_score : char
++ mailru_score : char
++ mailru_score : char
++ mts_score_features : number
++ juicyscore_score : char
++ juicyscore_score : char
++ mailru_sp_score : char
++ mailru_sp_score : number
++ tele2_score : char
++ mts_score_features : char
+}
+Class persons {
++ cuid : number
+}
+Class rejectData {
++ lastRejectReasonCashStreet : char
++ lastRejectReasonCardsStreet : char
++ lastRejectReasonCashXsell : char
++ lastRejectDateCashXsell : date
++ lastRejectReasonPos : char
++ lastRejectDateCardsXsell : date
++ lastRejectDateCashStreet : date
++ lastRejectDateCardsStreet : date
++ lastRejectDatePos : date
++ lastRejectReasonCardsXsell : char
+}
+Class previousApplications {
++ appArray : char
++ cbAnnuity : number
++ cbDebtUsed : number
++ limitUsedIC : number
++ regulatorCBAnnuity : number
++ finalPti : number
++ processLine : char
++ regulatorCBAnnuity : number
++ adjustedIncome : number
++ yandex_score : number
+
++ sameIdentCard : number
++ sameIdentCard : number
++ sameMobileCheck : number
++ sameIdentCard : number
++ sameMobileCheck : number
++ availableForSale : number
++ mts_score : char
++ regionalAvailableAnnuity : number
++ regulatorAppIncomeToUwAvailableAnnuity : number
++ regulatorHCFBcashCBAnnuity : number
++ adjustedIncome : number
++ juicyscore_score : number
++ availableForSale : number
++ clientType : char
++ processLine : char
++ usedIncome : number
++ income_type : char
++ confirmedIncome : number
++ regulatorAppIncomeToUwAvailableAnnuity : number
++ availableForSale : number
++ yandex_score : char
++ sameMobileCheck : number
++ sameMobileCheck : number
++ sameIdentCard : number
++ sameMobileCheck : number
+
+
+
++ income_type : char
++ regulatorAppIncomeAvailableAnnuity : number
++ cbDebtRDneverUsed : number
++ cbDebtUsed : number
++ regulatorCBAnnuity : number
++ cbDebtRDneverUsed : number
++ cbDebt : number
++ processLine : char
++ juicyscore_score : char
++ tele2_score : char
++ regionalAvailableAnnuity : number
++ estimatedFamilyIncome : number
++ processLine : char
++ estimatedFamilyIncome : number
++ sameMobileCheck : number
+
++ processLine : char
++ processLine : char
++ uwSegmentsLine : char
++ income_type : char
++ processLine : char
++ cbDebt : number
++ regulatorAvailableAnnuity : number
++ regulatorAppIncomeAvailableAnnuity : number
++ sameMobileCheck : number
++ sameMobileCheck : number
++ uwSegmentsLine : char
++ regulatorAvailableAnnuity : number
++ cbDebt : number
++ juicyscore_score : char
++ juicyscore_score : char
++ persons : char
++ tele2_score : number
++ uwSegmentsLine : char
++ availableForSale : number
++ availableForSale : number
++ regulatorAppIncomeAvailableAnnuity : number
++ currentSumDebtHCFB : number
++ adjustedIncome : number
++ regionalAvailableAnnuity : number
++ regulatorHCFBcashCBAnnuity : number
++ income_type : char
++ riskSet : char
++ mailru_score : number
++ persons : char
++ sameIdentCard : number
++ processLine : char
++ availableForSale : number
++ mts_score : number
++ processLine : char
++ regulatorCBAnnuity : number
++ cbAnnuity : number
++ estimatedFamilyIncome : number
++ confirmedIncome : number
++ cbDebtUsed : number
++ regulatorAppIncomeAvailableAnnuity : number
++ cbAnnuity : number
++ uwSegmentsLine : char
++ availableForSale : number
++ regulatorAppIncomeToUwAvailableAnnuity : number
++ mailru_score : char
++ sameIdentCard : number
++ sameMobileCheck : number
++ availableForSale : number
++ confirmedIncome : number
++ adjustedIncome : number
++ regulatorAppIncomeToUwAvailableAnnuity : number
++ mailru_sp_score : char
++ processLine : char
++ processLine : char
++ cbDebtUsed : number
++ regulatorAvailableAnnuity : number
++ mailru_score : char
++ mailru_score : char
++ sameIdentCard : number
++ sameIdentCard : number
++ sameMobileCheck : number
++ sameIdentCard : number
++ sameIdentCard : number
+
+
++ mts_score_features : number
++ availableForSale : number
++ regionalAvailableAnnuity : number
++ regulatorHCFBcashCBAnnuity : number
++ regulatorAvailableAnnuity : number
++ juicyscore_score : char
++ juicyscore_score : char
++ mailru_sp_score : char
++ mailru_sp_score : number
++ tele2_score : char
++ availableForSale : number
++ confirmedIncome : number
++ regulatorHCFBcashCBAnnuity : number
++ cbDebtRDneverUsed : number
++ availableForSale : number
++ cbDebt : number
++ processLine : char
++ cbDebtRDneverUsed : number
++ cbAnnuity : number
++ sameIdentCard : number
++ sameIdentCard : number
+
++ mts_score_features : char
++ estimatedFamilyIncome : number
++ personContact : char
+}
+
+Class registeredAddress {
++ dateRegistration : date
++ locality : char
++ taxCode : char
++ apartmentNumber : char
++ districtType : char
++ blockNumber : char
++ regionName : char
++ townCode : char
++ localityCode : char
++ districtCode : char
++ persons : char
++ streetType : char
++ streetCode : char
++ regionType : char
++ buildingNum : char
++ street : char
++ region : char
++ standard : char
++ persons : char
++ persons : date
++ district : char
++ town : char
++ persons : char
++ streetNumber : char
++ localityType : char
++ zipCode : char
++ floorsMax : number
++ townType : char
+}
+Class score3Predictors {
++ predictorCode : char
++ predictorValue : char
++ predictorScore : number
++ predictorValue : char
+}
+Class employmentAddress {
++ region : char
++ employment : date
++ town : char
++ employedFrom : date
+}
+Class my_credit_ob_device_180 {
++ mobile_device_180_days_my_credit : char
++ mobile_device_datetime_first_enter_180_days_my_credit : char
++ mobile_device_id_180_days_my_credit : char
++ dtime_calculated_mobile_device_180_days_my_credit : char
++ mobile_device_datetime_last_enter_180_days_my_credit : char
+}
+Class verificationDetailResults {
++ informationValue : char
++ informationValue : char
++ cuid : number
++ informationCode : char
++ cuid : number
++ activityCode : char
++ informationCode : char
++ activityCode : char
+}
+Class outputData {
++ uwInfo : number
++ uwInfo : number
++ uwInfo : number
++ savedInfo : char
++ uwInfo : number
++ uwInfo : number
++ resultTrace : char
++ offers : char
++ offers : char
++ uwInfo : number
++ uwInfo : number
++ resultTrace : char
++ checkPersons : number
++ offers : number
++ savedInfo : number
++ offers : number
++ savedInfo : number
++ checkPersons : char
++ resultTrace : number
+}
+Class uwInfo {
++ productMinAnnuity : number
++ cred_ratio : number
++ annuitySumPaidActive : number
++ totalLoanAmount : number
++ annuitySumPaidCBActive : number
++ totalDebtAmount : number
++ annuitySum : number
+}
+Class undesirablePerson {
++ name2 : char
+}
+Class nextWorkflows {
++ workflowCode : char
++ workflowCode : char
+}
+Class previousApplicationsFraud {
++ persons : char
+}
+Class consolidatedData {
++ overdueDebt : number
++ interestAndFees : number
++ consolidatedAmount : number
++ numContracts3monthsConsolidated : number
++ numInstToPayGrConsolidated : number
++ wAvgInterestRate : number
++ principalOverdueDebtRD : number
++ annuityNextMonthConsolidated : number
++ forgivenPenalties : number
++ monthlyPayOvedueRD : number
++ interestAndFeesRD : number
++ principalDueDebtRD : number
++ accountBalance : number
++ forgivenPenaltiesRD : number
+}
+Class hardCheckPredictors {
+
++ persons : char
++ employerPhone : char
++ sameMobileCheck : number
++ employerPhoneExt : char
++ persons : char
++ persons : date
++ sameIdentCard : number
++ sameIdentCard : number
++ persons : char
++ sameIdentCard : number
+}
+Class offers {
++ scoreGroup : char
++ scoreGroup : char
+}
+Class score0Predictors {
++ predictorCode : char
++ predictorValue : char
++ predictorCode : char
++ predictorValue : char
++ predictorCode : char
++ predictorCode : char
++ predictorValue : char
++ predictorValue : char
+}
+Class agregatorResult {
++ agregatorSegment : char
++ agregatorParamValue : char
++ agregatorParamType : char
++ agregatorCode : char
++ agregatorParamCode : char
+}
+Class persons {
++ lastCarOwner : number
+}
+Class previousApplications {
+
+}
+Class sourceData {
++ updatedData : date
+}
+Class previousApplications {
++ appArray : char
++ zipCode : char
++ localityCode : char
++ workflowCode : char
++ mts_score : char
++ reqCode : char
++ predictorCode : char
++ code : number
++ predictorCode : char
++ predictorCode : char
++ lastInterCode4Date : date
++ persons : char
++ taxCode : char
++ yandex_score : char
++ sameIdentCard : number
++ sellerplaceCode : char
++ reqCode : char
++ predictorCode : char
++ programCode : char
++ code : number
++ juicyscore_score : char
++ interCode : char
++ townCode : char
++ localityCode : char
++ districtCode : char
++ townCode : char
++ persons : char
++ code : char
++ activityCode : char
++ persons : char
++ reqCode : char
++ streetCode : char
++ predictorCode : char
++ persons : char
++ predictorCode : char
++ code : number
++ predictorCode : char
++ predictorCode : char
++ predictorCode : char
++ serviceCode : char
++ lastInterCode3Date : date
++ bureauResponse : number
++ bkiSubRequestCode : char
++ districtCode : char
++ informationCode : char
++ predictorCode : char
++ predictorCode : char
++ predictorCode : char
++ zipCode : char
++ townCode : char
++ mailru_score : char
++ persons : char
++ predictorCode : char
++ mailru_sp_score : char
++ lastInterCodeDate : date
++ predictorCode : char
++ predictorCode : char
++ taxCode : char
++ taxCode : char
++ localityCode : char
++ streetCode : char
++ activityCode : char
++ predictorCode : char
++ code : number
++ predictorCode : char
++ predictorCode : char
++ tele2_score : char
++ predictorCode : char
++ workflowCode : char
++ districtCode : char
++ zipCode : char
++ streetCode : char
++ activityCode : char
++ informationCode : char
++ bkiSubRequestCode : char
++ activityCode : char
++ predictorCode : char
++ predictorCode : char
++ predictorCode : char
+}
+Class mts_score_features {
++ score_value_mts_features : number
++ score_name_mts_features : char
+}
+Class previousApplications {
++ persons : char
+}
+Class trial {
++ limitDetails : char
++ limitDetails : char
+}
+Class crossClientChecks {
++ sameMobileCheck : number
++ sameMobileCheck : number
++ my_credit_ob_device_180 : char
++ my_credit_ob_back_mobile_cnt_180 : char
++ smsMobileCheckRequired : number
++ sameMobileCheck : number
++ sameMobileCheck : number
++ sameMobileCheck : number
++ my_credit_ob_device_sess_cnt_30 : char
++ my_credit_ob_back_mobile_cnt_180 : char
++ sameMobileCheck : number
++ sameMobileCheck : number
++ sameMobileCheck : number
++ persons : char
++ persons : date
++ my_credit_ob_device_180 : char
++ my_credit_ob_device_180 : char
++ my_credit_ob_device_sess_cnt_30 : char
++ my_credit_ob_os_mobile_180 : char
++ my_credit_ob_os_mobile_180 : char
++ sameMobileCheck : number
++ persons : char
++ my_credit_ob_device_180 : char
++ my_credit_ob_device_sess_cnt_30 : char
++ my_credit_ob_device_sess_cnt_30 : char
++ my_credit_ob_os_mobile_180 : char
++ sameIdentCard : number
++ sameMobileCheck : number
++ my_credit_ob_device_180 : char
++ my_credit_ob_os_mobile_180 : char
++ sameIdentCard : number
+}
+Class previousApplications {
+
++ paymentNum_Min : number
+
+
++ paymentNum_Max : number
++ paymentNum_Min : number
++ paymentNum_Max : number
+}
+Class applicantData {
++ previousApplications : number
++ previousApplications : number
++ previousApplications : number
++ previousApplications : number
++ previousApplications : date
++ previousApplications : date
++ previousApplicationsFraud : char
++ previousApplicationsFraud : char
++ derivedData : number
++ creditBureau : number
++ creditBureau : date
++ registeredAddress : date
++ contactAddress : char
++ occupationSector : char
++ employmentAddress : char
++ employmentAddress : char
++ employmentAddress : char
++ occupation : char
++ activeScOffer : number
++ contactAddress : char
++ mobil : char
++ name1 : char
++ score : number
++ limit : number
++ limit : number
+
++ score : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : char
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : date
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ childNum : number
++ mobileCheckTries : number
++ score : number
+
++ score : number
++ employmentAddress : char
++ derivedData : number
+
++ behaviourData : number
++ behaviourData : number
++ registeredAddress : char
++ undesirableCode : char
++ undesirableTo : date
++ onlineLimit : number
++ onlineLimit : number
++ previousApplications : date
++ creditLimit : number
++ previousApplications : date
++ hardCheckPredictors : date
++ previousApplications : char
++ previousApplications : number
++ previousApplications : number
++ previousApplicationsFraud : char
++ previousApplicationsFraud : char
++ previousApplicationsFraud : date
++ derivedData : number
++ creditBureau : number
++ score : number
++ registeredAddress : char
++ incomeType : char
++ registeredAddress : char
++ contactAddress : char
++ email : char
++ employmentAddress : char
++ employmentAddress : char
++ behaviourData : number
++ creditLimit : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ clientReality : number
++ clientReality : number
++ clientReality : number
++ previousApplications : number
++ education : char
++ score : char
++ score : number
++ behaviourData : date
++ registeredAddress : char
++ registeredAddress : char
++ derivedData : number
++ score : char
++ derivedData : number
++ employmentAddress : char
++ behaviourData : number
++ behaviourData : number
++ behaviourData : char
++ behaviourData : number
++ behaviourData : number
++ onlineLimit : number
++ expense : number
++ houseType : char
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : char
++ persons : char
++ previousApplications : number
++ previousApplications : char
++ previousApplications : number
++ previousApplications : number
++ previousApplications : number
++ previousApplications : char
++ previousApplications : char
++ score : char
++ score : char
++ creditBureau : char
++ employment : date
++ fieldExperience : number
++ registeredAddress : char
++ registeredAddress : char
++ registeredAddress : char
++ contactAddress : char
++ employmentAddress : char
++ registeredAddress : char
++ birth : date
++ contactAddress : char
++ employment : char
++ derivedData : number
++ derivedData : number
++ score : number
++ behaviourData : char
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : char
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : date
++ behaviourData : date
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ biometricData : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ clientReality : number
++ previousApplications : date
++ behaviourData : date
++ behaviourData : number
++ updatedData : number
++ previousApplicationsFraud : char
++ score : number
++ persons : char
++ score : number
+
++ score : number
++ derivedData : number
++ flagVipSalaryClient : number
+
++ onlineLimit : number
++ onlineLimit : number
++ previousApplications : number
++ phone : char
++ previousApplicationsFraud : char
++ previousApplicationsFraud : number
++ creditBureau : char
++ creditBureau : number
++ derivedData : number
+
++ contactAddress : char
++ registeredAddress : char
++ isNewApplicant : char
++ contactAddress : char
++ personType : char
++ registeredAddress : char
++ employmentAddress : char
++ nameMother : char
++ registeredAddress : char
++ derivedData : number
++ derivedData : number
++ limit : number
++ behaviourData : date
++ behaviourData : number
++ behaviourData : number
++ behaviourData : char
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ behaviourData : char
++ behaviourData : number
++ behaviourData : char
++ behaviourData : number
++ behaviourData : number
++ behaviourData : char
++ behaviourData : number
++ behaviourData : date
++ behaviourData : number
++ biometricData : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ nameBorn : char
++ activeSalaryClient : char
++ derivedData : number
++ behaviourData : number
++ behaviourData : number
++ score : number
++ derivedData : number
++ previousApplicationsFraud : char
++ behaviourData : date
++ behaviourData : char
++ contactAddress : char
++ registeredAddress : char
++ employmentAddress : char
++ flagFriendDefault : char
++ behaviourData : date
++ phoneEmpExt : char
++ onlineLimit : number
++ onlineLimit : date
+
++ persons : char
++ onlineLimit : number
++ employment : char
++ behaviourData : date
++ behaviourData : number
++ behaviourData : number
++ behaviourData : number
++ previousApplications : number
++ expense : number
++ previousApplications : char
++ previousApplications : number
++ previousApplications : number
++ previousApplications : number
++ previousApplications : char
++ previousApplications : date
++ previousApplications : char
++ previousApplications : number
++ previousApplications : number
++ previousApplications : date
++ persons : char
++ score : number
++ score : number
++ creditBureau : char
++ creditBureau : char
++ persons : char
++ isFakeCuid : number
++ registeredAddress : char
++ registeredAddress : char
++ employmentAddress : char
++ registeredAddress : char
++ name2 : char
++ derivedData : number
++ score : number
+
++ limit : number
++ behaviourData : char
+
++ behaviourData : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ mobileCheckDeliveryStatus : char
++ snilsCheck : char
++ score : char
++ persons : char
++ creditLimit : number
++ updatedData : date
++ employmentAddress : char
++ contactAddress : char
++ score : number
++ score : number
++ score : number
++ employmentAddress : char
++ previousApplications : char
++ behaviourData : date
++ behaviourData : number
++ behaviourData : date
++ behaviourData : number
++ clientType : char
++ onlineLimit : number
++ expense : number
++ expense : number
++ previousApplications : number
++ behaviourData : number
++ behaviourData : char
++ previousApplications : number
++ previousApplications : number
++ previousApplications : char
++ score : number
++ derivedData : number
++ creditBureau : date
++ creditBureau : char
+
++ persons : char
++ score : char
++ score : number
++ checkPersons : number
++ activeRdOffer : number
++ contactAddress : char
++ employment : char
++ contactAddress : char
++ ident : char
++ birthPlace : char
++ employmentAddress : char
++ contactAddress : char
++ employmentAddress : char
++ contactAddress : char
++ employmentAddress : char
++ contactAddress : date
++ derivedData : number
++ derivedData : number
++ score : char
++ score : char
++ score : number
++ score : number
+
++ behaviourData : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ previousApplications : number
++ previousApplications : char
++ contactAddress : char
++ score : char
++ derivedData : number
++ behaviourData : number
++ behaviourData : char
++ updatedData : number
++ registeredAddress : char
+
++ score : number
++ behaviourData : number
++ hardCheckPredictors : number
+
++ onlineLimit : number
++ onlineLimit : number
++ previousApplications : date
+
++ previousApplicationsFraud : char
+
+
++ derivedData : number
++ persons : char
++ score : number
++ sex : char
++ contactAddress : char
++ contactAddress : char
++ personUndesirable : number
++ employmentAddress : char
++ contactAddress : char
++ registeredAddress : char
++ employmentAddress : char
+
++ score : number
++ derivedData : number
++ behaviourData : number
+
++ behaviourData : number
++ hardCheckPredictors : number
+
++ hardCheckPredictors : number
++ clientReality : number
++ clientReality : number
++ previousApplications : number
++ familyState : char
+
++ persons : char
++ persons : char
++ previousApplicationsFraud : char
+
+
++ persons : char
++ score : char
++ behaviourData : number
++ contactAddress : char
++ employmentAddress : char
++ contactMobilePhone : char
++ previousApplications : char
++ phoneEmp : char
++ behaviourData : number
++ onlineLimit : number
++ persons : char
+
++ onlineLimit : number
++ behaviourData : number
++ creditLimit : number
++ previousApplications : date
++ previousApplications : char
++ previousApplications : number
++ previousApplications : char
++ previousApplications : char
++ previousApplications : number
++ previousApplications : date
++ previousApplications : number
++ previousApplications : char
++ previousApplicationsFraud : char
++ derivedData : number
++ score : char
++ score : number
++ creditBureau : char
++ creditBureau : number
++ creditBureau : number
++ checkPersons : char
++ registeredAddress : char
++ mainOccupationIncome : number
++ registeredAddress : char
++ contactAddress : char
++ employmentAddress : char
++ registeredAddress : char
++ contactAddress : char
++ cuid : number
++ employmentAddress : char
++ contactAddress : char
++ employmentAddress : char
++ mobileOperator : char
++ registeredAddress : number
++ registeredAddress : char
++ nameMid : char
++ limit : number
++ behaviourData : number
+
++ behaviourData : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ hardCheckPredictors : number
++ clientReality : number
++ previousApplications : char
++ mobileCheckStatus : number
++ derivedData : number
++ derivedData : number
++ persons : char
++ score : char
++ behaviourData : number
++ behaviourData : char
++ hardCheckPredictors : number
++ contactAddress : char
++ previousApplicationsFraud : number
++ derivedData : number
++ score : char
++ employmentAddress : char
++ employmentAddress : date
++ behaviourData : date
++ behaviourData : date
++ hardCheckPredictors : date
++ onlineLimit : number
+
++ onlineLimit : number
++ onlineLimit : number
+}
+Class prelimPreResult {
++ trial : char
+
++ score : number
++ trial : char
++ strategyVersionDate : char
++ strategyVersion : char
++ strategyName : char
++ trial : char
++ workflowCode : char
++ score : char
++ score : char
++ trial : char
++ client : char
++ client : number
++ persons : char
++ score : char
++ trial : char
++ trial : char
++ trial : char
++ trial : char
++ score : char
++ strategyPassLog : char
++ strategyType : char
++ trial : char
++ nextStrategy : char
++ finalRiskGroup : char
++ persons : char
++ trial : char
++ score : char
++ derivedData : number
++ derivedData : number
++ persons : char
++ score : char
++ score : char
+}
+Class smData {
++ client_score : number
++ geo_activity : number
++ client_score : char
++ smuid_data : number
++ client_score : number
++ online_behav_min_dist : char
++ online_behav_min_dist : char
++ online_behav_min_dist : char
++ online_behav_device : char
++ online_behav_device_type : char
++ online_behav_device_type_s_cnt : char
++ online_behav_device_type_s_cnt : char
++ online_behav_os_web : char
++ smuid_data : char
++ client_score : char
++ smuid_data : number
++ client_score : char
++ client_score : char
++ smuid_data : char
++ online_behav_min_dist : char
++ online_behav_device_s_cnt : char
++ online_behav_os_web : char
++ online_behav_os_web : char
++ smuid_data : char
++ online_behav_min_dist : char
++ online_behav_min_dist : char
++ online_behav_min_dist : char
++ online_behav_device_type : char
++ smuid_data : char
++ smuid_data : char
++ geo_activity : char
++ smuid_data : char
++ smuid_data : number
++ client_score : char
++ client_score : char
++ geo_activity : char
++ client_score : number
++ online_behav_min_dist : char
++ online_behav_os_web : char
++ client_score : number
++ client_score : number
++ online_behav_min_dist : char
++ online_behav_device : char
++ online_behav_device : char
++ online_behav_device_s_cnt : char
++ online_behav_device_type : char
++ online_behav_os_mobile : char
++ online_behav_os_mobile : char
++ client_score : char
++ client_score : char
++ smuid_data : char
++ online_behav_device : char
++ online_behav_device_s_cnt : char
++ online_behav_device_s_cnt : char
++ online_behav_device_type_s_cnt : char
++ online_behav_os_mobile : char
++ client_score : char
++ client_score : char
++ client_score : number
++ client_score : char
++ client_score : char
++ client_score : char
++ client_score : number
++ geo_activity : number
++ client_score : char
++ online_behav_min_dist : char
++ online_behav_device : char
++ online_behav_device_type : char
++ online_behav_os_mobile : char
++ geo_activity : char
++ geo_activity : char
++ client_score : char
++ online_behav_min_dist : char
++ online_behav_min_dist : char
+}
+Class hardCheckPredictors {
++ numContracts3months : number
+
+
+
+
+
+
+
+
++ dateLastInstal40dpd : date
++ persons : date
+
+
+
+
++ processedCreditAmount : number
+
+
+
+
+
+
+
+
++ guaranteeCycle : number
+
+
+
+
+
+
+
+
+
+
+
++ correctDownpayment : number
+
+
+
+
+
+
+
+
+
+
+
+
+
++ persons : date
+}
+Class postResult {
++ derivedData : number
++ strategyVersionDate : char
++ derivedData : number
++ nextStrategy : char
++ strategyType : char
++ score : number
++ riskGroup : char
++ score : number
++ finalRiskGroup : char
++ client : char
++ strategyPassLog : char
++ workflowCode : char
++ strategyVersion : char
+
++ strategyName : char
+}
+Class previousApplications {
+
+
+
+
++ persons : date
++ persons : date
++ persons : char
++ persons : char
+
+
++ persons : date
++ dateRegistration : date
++ zipCode : char
++ localityCode : char
++ street : char
++ streetNumber : char
++ localityType : char
+
+
+
++ cuid : number
+
+
+
+
+
+
+
+
+
+
+
+
+
+
++ persons : char
+
+
+
+
+
+
+
+
+
++ persons : date
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
++ cuid : number
+
++ typeTown : char
+
++ UWAppPriorityTimeOut : number
+
+
++ locality : char
+
+
++ persons : date
+
++ persons : date
++ persons : date
++ persons : char
+
+
++ persons : char
++ persons : char
++ persons : date
+
+
+
++ taxCode : char
++ apartmentNumber : char
++ regionName : char
++ regionType : char
++ region : char
++ cuid : number
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
++ persons : char
+
+
+
+
+
++ persons : date
+
+
+
+
+
+
+
+
+
+
+
++ persons : char
+
++ persons : date
++ districtType : char
++ blockNumber : char
+
++ persons : char
+
++ districtType : char
+
+
++ persons : char
+
+
+
+
+
+
+
++ persons : char
++ interCode : char
+
++ persons : char
+
+
+
++ persons : char
++ persons : char
++ persons : char
++ persons : char
++ persons : char
++ employedFrom : date
++ regionName : char
++ townCode : char
++ localityCode : char
++ regionType : char
++ standard : char
++ districtCode : char
++ townCode : char
++ employerPhone : char
+
+
+
++ persons : char
+
+
+
+
+
+
+
+
+
+
++ persons : char
+
+
+
+
+
+
+
+
+
+
++ persons : date
++ persons : date
+
+
+
+
+
+
+
+
+
+
+
++ persons : date
++ persons : date
+
+
++ persons : char
+
++ bigDataList : char
+
++ cuid : number
+
+
++ UWAppPriority : number
+
+
+
++ persons : char
+
++ persons : char
+
+
++ cuid : number
++ region : char
++ streetType : char
++ street : char
++ streetCode : char
++ town : char
++ regionType : char
+
+
+
++ persons : date
+
+
++ persons : char
+
+
+
+
+
+
+
+
+
+
+
+
+
++ persons : char
+
++ persons : char
+
+
++ persons : char
+
++ persons : date
+
+
+
+
+
+
+
+
+
++ persons : char
++ persons : date
++ persons : char
++ buildingNum : char
++ buildingNum : char
++ buildingNum : char
++ persons : date
+
++ persons : date
++ UWAppPriorityTimeOut : number
++ UWCheckList : char
+
++ employerPhoneExt : char
++ persons : date
+
+
+
+
+
++ persons : char
+
+
+
++ persons : char
++ persons : date
++ persons : char
+
+
++ persons : date
++ bigDataList : char
+
+
++ persons : char
++ persons : char
++ bkiSubRequestCode : char
++ street : char
++ region : char
++ districtCode : char
++ standard : char
+
+
++ cuid : number
+
++ persons : char
+
+
+
+
++ persons : char
+
+
+
+
+
+
+
+
+
+
+
++ persons : char
+
+
+
+
++ persons : date
+
+
+
+
+
+
+
+
+
++ persons : char
++ bkiList : char
+
++ persons : date
++ district : char
++ districtType : char
+
+
+
++ blockNumber : char
++ persons : char
++ persons : date
+
++ persons : date
+
+
+
+
+
+
++ persons : char
+
+
++ persons : char
+
+
++ persons : date
++ persons : char
++ cuid : number
++ bkiList : char
++ persons : char
+
++ cuid : number
++ standard : char
++ name : char
++ town : char
++ zipCode : char
++ streetType : char
++ regionName : char
++ apartmentNumber : char
++ townCode : char
++ dateRegistration : date
+
+
++ persons : char
++ persons : char
+
+
+
+
++ persons : char
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
++ persons : char
+
+
+
++ persons : date
+
++ persons : char
+
+
+
+
+
+
+
+
+
+
+
++ persons : char
++ blockNumber : char
++ persons : char
+
+
++ persons : char
+
++ district : char
++ cuid : number
+
+
+
++ UWAppPriorityTimeOut : number
+
+
++ persons : date
++ persons : char
++ persons : char
++ persons : char
+
++ persons : date
+
++ persons : char
++ persons : date
++ persons : char
++ persons : date
++ persons : date
++ persons : date
++ persons : char
++ cuid : number
++ cuid : number
+
++ bkiSource : char
+
++ streetNumber : char
++ taxCode : char
++ taxCode : char
++ localityCode : char
++ town : char
++ streetCode : char
++ cuid : number
+
+
+
+
+
+
++ persons : char
+
+
++ persons : date
+
+
+
+
+
+
++ persons : char
+
+
+
+
+
+
++ persons : date
+
+
+
+
+
+
+
+
+
+
+
+
+
++ cuid : number
++ bigDataList : char
++ bkiSource : char
++ persons : char
++ cuid : number
++ UWAppPriority : number
++ UWCheckList : char
++ persons : char
+
++ locality : char
++ locality : char
++ persons : char
+
+
++ UWCheckList : char
++ UWAppPriority : number
+
+
+
++ persons : date
++ persons : char
+
++ persons : char
++ persons : char
+
++ persons : date
+
++ persons : char
++ persons : char
+
++ persons : char
+
++ persons : char
+
+
++ workflowCode : char
++ streetNumber : char
++ localityType : char
++ districtCode : char
++ townType : char
++ zipCode : char
++ townType : char
++ localityType : char
++ streetCode : char
++ streetType : char
++ floorsMax : number
++ townType : char
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
++ persons : date
+
+
++ persons : date
+
++ persons : char
+
+
+
+
+
+
+
+
++ persons : char
+
+
++ bkiSubRequestCode : char
++ persons : char
+
++ persons : char
+
++ district : char
+
+
++ persons : char
++ apartmentNumber : char
++ dateRegistration : date
++ persons : date
++ persons : date
++ persons : date
+
++ typeSuite : number
+
+
+}
+Class preApprResult {
++ strategyVersionDate : char
++ strategyName : char
++ client : char
++ riskGroup : char
++ derivedData : number
++ nextStrategy : char
++ strategyVersion : char
+
++ strategyPassLog : char
++ derivedData : number
++ score : number
++ client : char
++ strategyType : char
++ finalRiskGroup : char
++ workflowCode : char
+
++ score : number
++ persons : char
+
++ client : number
+}
+Class linkedVerificationResults {
++ activityResult : char
++ activityCode : char
++ cuid : number
++ activityResult : char
++ cuid : number
++ activityCode : char
+}
+Class online_behav_os_mobile {
++ my_credit_ob_os_mobile_180 : char
++ my_credit_ob_os_mobile_180 : char
++ my_credit_ob_os_mobile_180 : char
++ my_credit_ob_os_mobile_180 : char
+}
+Class online_behav_device_type {
++ my_credit_ob_device_type_180 : char
++ my_credit_ob_dtype_sc_30 : char
++ my_credit_ob_dtype_sc_30 : char
++ my_credit_ob_device_type_180 : char
++ my_credit_ob_device_type_180 : char
++ my_credit_ob_dtype_sc_30 : char
++ my_credit_ob_device_type_180 : char
+}
+Class my_credit_ob_os_web_180 {
++ web_operational_system_180_days_my_credit : char
++ web_os_datetime_first_enter_180_days_my_credit : char
++ dtime_calculated_web_operational_system_180_days_my_credit : char
++ web_os_datetime_last_enter_180_days_my_credit : char
+}
+Class offlineCashFinalResult {
++ availableLimitCash : number
++ scoreSetURG : char
++ scoreSet : char
++ specialSegment : char
+}
+Class creditData {
++ creditOwner : char
++ employmentAddress : char
++ registeredAddress : char
+}
+Class hardCheckPredictors {
+
+}
+Class sameIdentCard {
++ sellerplaceAddressStreetNumCnt : number
++ lastRejectReasonCashStreet : char
++ lastRejectReasonCardsStreet : char
++ lastApprovalDateCashStreet : date
++ diffContactAddressStreetNum : number
++ contactAddressStreetNumCnt : number
++ lastRejectDateCashStreet : date
++ lastRejectDateCardsStreet : date
++ lastApprovalDateCardsStreet : date
+}
+Class employmentAddress {
++ localityCode : char
++ street : char
++ streetNumber : char
++ typeTown : char
++ regionType : char
++ region : char
++ districtType : char
++ persons : char
++ standard : char
++ town : char
++ buildingNum : char
++ districtCode : char
++ district : char
++ blockNumber : char
++ persons : char
++ zipCode : char
++ regionName : char
++ townCode : char
++ persons : char
++ taxCode : char
++ streetCode : char
++ locality : char
++ townType : char
++ localityType : char
++ streetType : char
++ apartmentNumber : char
++ dateRegistration : date
+}
+Class sameIdentCard {
++ sellerplaceAddressStreetNumCnt : number
++ workPeriodDifference : number
++ contactAddressApartmentCnt : number
++ prodCodeCnt : number
++ contactAddressStreetNumCnt : number
++ sellerplaceCnt : number
++ eqGoodsBrandCnt : number
++ mobilePhoneCnt : number
++ employerName : number
++ homePhoneCnt : number
++ applicationCnt : number
++ webMobilePhoneCnt : number
+}
+Class score20Predictors {
++ predictorCode : char
++ predictorValue : char
+}
+Class online_behav_device_s_cnt {
++ my_credit_ob_device_sess_cnt_30 : char
++ my_credit_ob_device_sess_cnt_30 : char
++ my_credit_ob_device_sess_cnt_30 : char
++ my_credit_ob_device_sess_cnt_30 : char
+}
+Class approvalData {
++ lastApprovalDatePos : date
++ lastApprovalDateCashXsell : date
++ lastApprovalDateCashStreet : date
++ lastApprovalDateFullApplication : date
++ lastApprovalDateCardsXsell : date
++ lastApprovalDateCardsStreet : date
+}
+Class online_behav_device_type_s_cnt {
++ my_credit_ob_dtype_sc_30 : char
++ my_credit_ob_dtype_sc_30 : char
++ my_credit_ob_dtype_sc_30 : char
+}
+Class creditData {
++ cred_ratio : number
+}
+Class person {
++ mainOccupationIncome : number
+}
+Class applicantData {
++ previousApplications : char
++ previousApplicationsFraud : char
+}
+Class previousApplications {
+
+}
+Class crossClientChecks {
++ sameMobileCheck : number
+
++ goodsPrice : number
+}
+Class mailru_sp_score {
++ score_model_code_mailru_sp : char
++ score_date_calculation_mailru_sp : char
++ score_value_mailru_sp : number
+}
+Class persons {
++ lastBirth : date
+}
+Class supplement {
++ sellerplaceCode : char
+}
+Class score {
+
++ scoreEnd1 : number
+
+
+
+}
+Class creditBureau {
++ bureauResponse : char
++ creditData : date
++ creditData : number
++ creditData : char
++ creditData : date
+
++ persons : date
++ creditData : number
++ creditData : number
+
++ scoring : char
++ scoring : number
++ creditData : number
++ creditData : number
++ persons : char
++ creditData : number
++ creditData : number
++ creditData : number
++ creditData : number
++ creditData : number
++ persons : char
+
++ bureauResponse : number
++ bureauResponse : number
++ creditData : number
++ creditData : number
++ creditData : char
++ creditData : number
++ creditData : char
++ creditData : number
++ creditData : number
++ persons : char
++ persons : char
++ scoring : number
++ scoring : number
++ creditData : date
++ creditData : char
++ creditData : date
++ creditData : char
++ persons : date
++ persons : char
++ creditData : char
++ creditData : number
++ creditData : number
++ creditData : number
++ creditData : number
++ creditData : number
++ creditData : number
++ persons : char
+
+
+}
+Class trial {
++ strategyFlow : char
++ limitDetails : number
++ limitDetails : number
++ rgDetails : char
++ limitDetails : number
++ limitDetails : number
++ scoringDetails : char
++ name : char
++ name : char
++ wfDetails : char
++ limitDetails : char
++ decisionLog : char
++ wfDetails : char
++ hcDetails : char
++ strategyFlow : char
++ name : char
++ limitDetails : char
++ limitDetails : char
++ limitDetails : number
++ limitDetails : number
++ limitDetails : number
++ limitDetails : number
++ scoringDetails : number
++ limitDetails : number
++ limitDetails : number
++ limitDetails : number
++ hcDetails : char
++ wfDetails : char
++ rgDetails : number
++ scoringDetails : number
++ wfDetails : char
++ limitDetails : number
++ limitDetails : number
++ limitDetails : char
++ limitDetails : number
++ decisionLog : char
++ limitDetails : number
++ limitDetails : number
++ decisionLog : char
++ name : char
++ name : char
++ limitDetails : number
++ limitDetails : char
++ limitDetails : number
++ limitDetails : char
++ limitDetails : char
++ limitDetails : number
++ limitDetails : number
++ limitDetails : number
++ limitDetails : char
++ limitDetails : char
++ hcDetails : char
++ trialContinued : char
++ wfDetails : char
++ limitDetails : number
++ limitDetails : number
++ trialName : char
++ strategyFlow : char
++ limitDetails : number
++ limitDetails : number
++ limitDetails : number
++ limitDetails : char
++ limitDetails : number
++ limitDetails : char
++ limitDetails : number
++ trialName : char
++ hcDetails : char
++ limitDetails : number
++ limitDetails : number
++ decisionLog : char
++ hcDetails : char
++ rgDetails : char
++ strategyName : char
++ rgDetails : char
++ limitDetails : number
++ name : char
++ strategyName : char
++ limitDetails : number
++ limitDetails : number
++ strategyFlow : char
++ limitDetails : number
++ wfDetails : char
++ strategyName : char
++ rgDetails : char
++ limitDetails : number
++ limitDetails : char
++ limitDetails : number
++ wfDetails : char
++ hcDetails : char
++ hcDetails : char
++ rgDetails : char
++ decisionLog : char
++ limitDetails : number
++ wfDetails : char
++ hcDetails : char
++ limitDetails : char
++ limitDetails : number
++ limitDetails : number
++ hcDetails : char
++ limitDetails : number
++ limitDetails : number
++ limitDetails : number
++ strategyName : char
++ scoringDetails : char
++ limitDetails : number
++ limitDetails : number
++ hcDetails : char
++ limitDetails : number
++ limitDetails : char
++ limitDetails : number
++ wfDetails : char
++ limitDetails : number
++ limitDetails : char
++ limitDetails : number
++ hcDetails : char
+}
+Class behaviourData {
+
+
+
+
+
+
+
+
+
+
+
+
+
++ persons : char
+
+
+
+
+
+
+
+
+
++ persons : date
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
++ persons : char
+
+
+
+
+
++ persons : date
+
+
++ persons : date
+
+
++ persons : char
+
+
+
+
+
++ persons : char
++ persons : char
+
+
+
+
+
+
+
+
+
+
++ persons : char
+
+
+
+
+
+
+
+
+
+
++ persons : date
++ persons : date
+
+
+
++ persons : date
+
++ persons : date
+
+
++ persons : char
+
+
+
+
+
+
+
+
+
+
+
+
+
++ persons : char
+
++ persons : char
+
+
++ persons : char
+
++ persons : date
+
+
+
++ persons : date
++ persons : char
++ persons : date
++ persons : date
+
+
+
++ persons : char
+
+
+
+
++ persons : char
+
+
+
+
+
+
+
+
+
+
+
++ persons : char
+
+
+
+
++ persons : date
+
+
+
+
+
+
++ persons : date
+
++ persons : date
+
+
++ persons : char
+
+
++ persons : char
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
++ persons : char
+
+
+
++ persons : date
+
++ persons : char
+
+
+
+
++ persons : char
+
+
+
+
+
++ persons : char
+
+
++ persons : date
+
+
+
+
+
+
++ persons : char
+
+
+
+
+
+
++ persons : date
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
++ persons : date
+
+
++ persons : date
+
++ persons : char
+
+
++ persons : char
++ persons : date
++ persons : date
+}
+Class limitDetails {
++ fact : number
++ fact : number
++ regionalAvailableAnnuity : number
++ fact : number
++ pseudo : char
++ scoreSet : char
++ fact : char
++ regionalAvailableAnnuity : number
++ regulatorAppIncomeToUwAvailableAnnuity : number
++ fact : number
++ fact : number
++ fact : number
++ fact : number
++ pseudo : number
++ fact : number
++ regulatorAppIncomeAvailableAnnuity : number
++ riskSet : char
++ fact : number
++ pseudo : number
++ pseudo : number
++ fact : number
++ fact : char
++ fact : number
++ fact : char
++ riskSet : char
++ fact : number
++ fact : number
++ pseudo : number
++ pseudo : char
++ pseudo : char
++ regulatorAppIncomeAvailableAnnuity : number
++ fact : number
++ fact : number
++ fact : number
++ result : number
++ fact : char
++ fact : number
++ scoreSet : char
++ fact : number
++ pseudo : number
++ pseudo : number
++ regulatorAvailableAnnuity : number
++ fact : number
++ fact : number
++ fact : number
++ pseudo : number
++ fact : char
++ pseudo : number
++ fact : number
++ fact : char
++ fact : number
++ fact : number
++ fact : number
++ pseudo : number
++ pseudo : number
++ fact : number
++ result : number
++ regulatorAppIncomeToUwAvailableAnnuity : number
++ fact : char
++ regulatorAvailableAnnuity : number
++ pseudo : number
++ pseudo : char
++ pseudo : number
+}
+Class previousApplications {
++ appArray : char
++ appArray : char
++ appArray : char
+
+
+
+
++ persons : date
++ persons : date
++ persons : char
++ persons : char
++ rejectData : char
++ lastInterCode4Date : date
++ persons : date
++ persons : date
++ appArray : number
++ approvalData : date
++ persons : char
+
+
++ rejectData : char
++ persons : char
++ persons : char
++ persons : date
++ approvalData : date
+
++ rejectData : char
++ approvalData : date
++ isTwPartnerLimitAvailable : number
++ appArray : char
++ appArray : char
+
++ persons : char
+
+
+
++ persons : char
++ persons : char
++ persons : date
++ persons : char
++ rejectData : date
+
++ appArray : date
++ appArray : char
++ appArray : char
++ approvalData : date
++ rejectData : char
++ persons : char
+
++ persons : char
++ rejectData : date
++ lastInterCode3Date : date
+
++ appArray : date
++ appArray : char
++ approvalData : date
++ persons : char
+
+
+
++ persons : char
++ persons : date
++ persons : char
+
+
++ persons : date
++ persons : char
+
++ appArray : number
++ appArray : char
+
+
++ persons : char
+
++ persons : char
++ rejectData : date
++ lastInterCodeDate : date
++ persons : date
++ appArray : char
++ persons : char
++ persons : char
++ persons : char
+
++ persons : date
+
++ persons : char
++ persons : date
++ persons : char
++ persons : date
++ persons : date
++ persons : date
++ rejectData : date
++ persons : char
+
++ persons : char
++ approvalData : date
++ persons : char
++ personContact : char
++ persons : date
++ persons : char
+
++ persons : char
++ persons : char
+
++ persons : date
+
++ persons : char
++ rejectData : date
++ persons : char
++ persons : char
+
++ lastExistingSCCreditDate : date
++ personContact : char
++ rejectData : char
+}
+Class scoResult {
++ strategyType : char
++ score : char
++ client : number
++ strategyVersion : char
++ client : number
++ limit : number
++ limit : number
+
++ score : number
++ score9Predictors : char
++ trial : number
++ trial : number
++ score : number
++ trial : char
++ offers : number
++ trial : number
++ trial : number
++ trial : char
++ score : char
++ score : number
++ trial : char
++ blazeStatusItems : number
++ offers : number
++ offers : number
++ score0Predictors : char
++ score3Predictors : char
++ offers : number
++ score0Predictors : char
++ score3Predictors : char
++ trial : char
++ score : number
++ onlineLimit : number
++ client : number
++ workflowCode : char
++ score : number
++ client : number
++ strategyVersionDate : char
++ client : number
++ needFullApplication : number
++ trial : char
++ sdQuery : number
++ trial : char
++ trial : number
++ trial : number
++ trial : number
++ trial : number
++ offers : number
++ client : number
++ client : number
++ client : number
++ score : char
++ strategyVersion : char
++ client : number
++ trial : number
++ score : char
++ client : char
++ trial : number
++ trial : number
++ offers : number
++ offers : number
++ offers : char
++ score2Predictors : char
++ score3Predictors : char
++ score : char
++ score : number
++ score2Predictors : number
++ score3Predictors : number
++ trial : number
++ appChars : date
++ trial : char
++ nextStrategy : char
++ finalRiskGroup : char
++ score : char
++ appChars : number
++ client : number
++ sdQuery : number
++ trial : char
++ trial : number
++ trial : number
++ offers : number
++ offers : number
++ offers : char
++ offers : number
++ score : char
++ offers : char
++ score : number
++ appChars : date
++ trial : char
++ appChars : number
++ trial : number
++ trial : number
++ trial : char
++ client : char
++ trial : number
++ trial : char
++ derivedData : number
++ offers : number
++ score : number
++ score2Predictors : char
++ score : number
++ trial : number
++ trial : number
++ score : number
++ onlineLimit : number
++ onlineLimit : number
++ client : number
++ appChars : char
++ derivedData : number
++ derivedData : number
++ limit : number
++ score9Predictors : char
++ sdQuery : char
++ sdQuery : number
++ trial : number
++ trial : char
++ nextStrategyIncomeProof : char
++ trial : number
++ trial : char
++ trial : char
++ trial : number
++ offers : number
++ blazeStatusItems : number
++ strategyType : char
++ score : char
++ score : number
++ trial : number
++ score : char
++ workflowCode : char
++ derivedData : number
++ offers : number
++ score0Predictors : char
++ score2Predictors : number
++ score : number
++ score0Predictors : char
++ score3Predictors : char
++ trial : number
++ trial : char
++ trial : char
++ appChars : number
++ appChars : number
++ client : number
++ client : number
++ riskGroup : char
++ strategyName : char
++ client : char
++ client : char
++ limit : number
++ offers : char
++ trial : number
++ trial : number
++ offers : number
++ offers : number
++ offers : char
++ offers : number
++ client : number
++ trial : char
++ score : char
++ strategyName : char
++ trial : number
++ trial : number
++ trial : number
++ trial : char
++ client : number
++ trial : number
++ trial : char
++ trial : number
++ blazeStatusItems : char
++ offers : char
++ offers : number
++ offers : number
++ score : number
++ score1Predictors : char
++ score1Predictors : char
++ score2Predictors : char
++ score9Predictors : char
++ trial : number
++ trial : number
++ appChars : number
++ score : char
++ score7Predictors : char
++ appChars : date
++ score : char
++ strategyPassLog : char
++ score : char
++ score : number
++ score : number
++ trial : number
++ trial : char
++ trial : char
++ sdQuery : char
++ trial : number
++ trial : number
++ trial : char
++ trial : number
++ offers : char
++ blazeStatusItems : number
++ client : number
++ client : number
++ client : number
++ client : number
++ trial : char
++ trial : char
++ offers : number
++ offers : number
++ offers : number
+
++ score : number
++ score1Predictors : char
++ score3Predictors : number
++ score : number
++ score : char
++ score : number
++ score : char
++ trial : number
++ trial : char
++ trial : number
++ score : char
++ client : number
++ client : number
++ sdQueryContext : char
++ sdQuery : number
++ trial : char
++ sdQuery : char
++ sdQuery : char
++ trial : char
++ trial : char
++ trial : number
++ trial : char
++ offers : number
++ offers : number
++ offers : number
++ offers : number
++ score : number
++ blazeStatusItems : char
++ nextStrategyRD : char
++ trial : char
++ client : number
++ client : number
++ appChars : date
++ appChars : date
++ needFullApplication : number
++ appChars : number
++ trial : number
++ trial : number
++ client : number
++ finalRiskGroup : char
++ score : number
++ trial : char
++ trial : number
++ appChars : number
++ offers : number
++ offers : number
++ score : char
++ score1Predictors : char
++ score1Predictors : number
++ score2Predictors : char
++ score : char
++ score1Predictors : number
++ trial : number
++ trial : number
++ score7Predictors : char
++ appChars : date
++ onlineLimit : number
++ client : number
++ client : char
++ appChars : date
++ score : char
++ client : number
++ client : number
++ score : number
++ limit : number
++ trial : char
++ sdQuery : char
++ trial : number
++ trial : number
++ trial : char
++ offers : number
++ offers : number
++ trial : number
++ appChars : char
++ nextStrategySC : char
++ client : number
++ strategyVersionDate : char
++ trial : char
++ trial : number
++ strategyPassLog : char
++ score : number
++ score : number
++ blazeStatusItems : number
++ offers : number
++ offers : number
++ offers : char
++ offers : number
++ score : char
++ score : char
++ score9Predictors : char
++ trial : number
++ trial : char
++ trial : number
++ score7Predictors : number
++ onlineLimit : number
++ trial : char
+}
+Class preResult {
++ client : number
++ client : number
++ strategyVersion : char
++ client : number
++ strategyName : char
++ client : number
++ client : number
++ strategyType : char
++ score : number
++ score : number
++ trial : char
+
++ score : number
++ request : char
++ sdQueryContext : char
++ appChars : date
++ strategyVersion : char
++ client : number
++ client : number
++ client : number
++ client : number
+
++ score20Predictors : char
++ blazeStatusItems : char
++ appChars : date
++ appChars : date
++ onlineLimit : number
++ client : number
++ strategyPassLog : char
++ client : char
++ nextStrategy : char
++ score : char
++ trial : char
++ strategyVersionDate : char
++ sdQueryContext : char
++ request : char
++ client : char
++ client : number
++ client : number
++ score : number
++ workflowCode : char
++ score : char
++ derivedData : number
++ score20Predictors : char
++ appChars : number
++ score : number
++ score : number
++ score : char
++ score2Predictors : number
++ score2Predictors : char
++ score3Predictors : number
++ blazeStatusItems : number
++ appChars : number
++ score : char
++ score : number
++ finalRiskGroup : char
++ client : number
++ client : number
++ client : char
++ derivedData : number
++ strategyVersion : char
++ strategyName : char
++ sdQuery : number
++ sdQuery : char
++ persons : char
++ score : number
++ appChars : char
++ score : number
++ client : char
++ client : char
++ appChars : date
+
++ score : number
++ trial : char
++ score1Predictors : char
++ score2Predictors : number
++ appChars : date
++ client : number
++ appChars : date
++ client : number
++ appChars : number
++ score : number
++ score9Predictors : char
++ workflowCode : char
++ score : char
++ sdQuery : number
++ client : char
++ client : number
++ score : char
++ score : char
++ client : number
++ strategyVersionDate : char
++ score : number
++ score9Predictors : char
++ appChars : date
++ score : char
++ score : char
++ score0Predictors : char
++ score1Predictors : char
++ score : number
++ score : char
++ score1Predictors : number
++ onlineLimit : number
++ client : number
++ appChars : number
++ client : number
++ client : number
+
++ score : char
++ trial : char
++ client : char
++ client : number
++ persons : char
++ sdQuery : number
++ client : number
++ client : number
++ client : number
++ client : number
++ nextStrategy : char
++ client : number
++ score : number
++ score : number
++ score : number
++ score : number
++ score1Predictors : number
++ score2Predictors : char
++ score : char
++ trial : char
++ score : char
++ score : number
++ score : char
++ score : number
++ score3Predictors : char
++ client : number
++ riskGroup : char
++ workflowCode : char
++ strategyVersionDate : char
++ appChars : date
++ client : number
++ score : number
++ score : char
++ score9Predictors : char
++ trial : char
++ trial : char
++ sdQuery : char
++ sdQuery : char
++ trial : char
++ appChars : number
++ score : char
++ blazeStatusItems : number
++ score3Predictors : char
++ score : char
++ blazeStatusItems : number
++ score0Predictors : char
++ score3Predictors : char
++ onlineLimit : number
++ onlineLimit : number
++ derivedData : number
++ score : char
++ strategyPassLog : char
++ strategyType : char
++ trial : char
++ nextStrategy : char
++ finalRiskGroup : char
++ persons : char
++ sdQuery : char
++ request : char
++ request : char
++ sdQuery : char
++ trial : char
++ strategyPassLog : char
++ appChars : number
++ riskGroup : char
++ strategyType : char
++ score : number
++ client : number
++ strategyName : char
+
++ persons : char
++ score9Predictors : char
++ score : char
++ score : number
++ blazeStatusItems : number
++ score0Predictors : char
++ score3Predictors : char
++ score : char
++ appChars : number
++ score0Predictors : char
++ score1Predictors : char
++ score2Predictors : char
++ appChars : number
++ client : number
++ client : number
++ client : number
++ appChars : char
++ score : char
++ score : char
++ score : number
++ derivedData : number
++ derivedData : number
++ persons : char
++ score : char
++ sdQuery : char
++ sdQuery : number
++ score : char
++ derivedData : number
++ score : char
++ score : char
++ blazeStatusItems : char
++ score1Predictors : char
++ score : char
++ score : char
++ score : number
++ score2Predictors : char
++ score3Predictors : number
++ onlineLimit : number
+}
+Class crossClientChecks {
++ sameIdentCard : number
++ sameIdentCard : number
++ sameMobileCheck : number
++ sameIdentCard : number
++ sameMobileCheck : number
++ sameMobileCheck : number
++ sameMobileCheck : number
++ sameIdentCard : number
++ sameMobileCheck : number
++ sameMobileCheck : number
++ sameMobileCheck : number
++ sameMobileCheck : number
++ sameIdentCard : number
++ sameIdentCard : number
++ sameMobileCheck : number
++ sameIdentCard : number
++ sameIdentCard : number
++ sameMobileCheck : number
++ sameIdentCard : number
++ sameIdentCard : number
++ sameIdentCard : number
++ sameIdentCard : number
+}
+Class undesirablePerson {
++ name1 : char
++ cuid : number
++ ident : char
++ dateUndesirableFrom : date
++ name2 : char
++ idBatch : number
++ birth : date
++ nameMid : char
++ undesirableRiskGroup : number
++ idUndesirableCategory : number
+}
+Class contactAddress {
++ zipCode : char
++ localityType : char
++ sameIdentCard : number
++ sameMobileCheck : number
++ persons : char
++ regionName : char
++ regionType : char
++ townCode : char
++ region : char
++ street : char
++ sameMobileCheck : number
++ buildingNum : char
++ sameIdentCard : number
++ districtType : char
++ standard : char
++ town : char
++ streetType : char
++ apartmentNumber : char
++ dateRegistration : date
++ blockNumber : char
++ streetNumber : char
++ taxCode : char
++ localityCode : char
++ locality : char
++ districtCode : char
++ townType : char
++ streetCode : char
++ district : char
+}
+Class person {
++ familyState : char
+}
+Class sameMobileCheck {
++ lastName3LettCnt : number
++ lastEmploymentName : char
++ lastSellerplaceName : char
++ score_method_name_mailru : char
++ employerName : number
++ score_name_juicyscore : char
++ lastName : char
++ nameEmployerType : char
++ score_name_mts_features : char
+}
+Class derivedData {
+
+
+
+
++ cuid : number
+
++ cuid : number
++ cuid : number
+
+
++ scoring : number
+
++ cuid : number
+
+
+
+
+
+
++ cuid : number
+
+
+
+
+
++ cuid : number
++ cuid : number
+
+
++ cuid : number
++ cuid : number
+
+
++ creditData : number
++ cuid : number
++ cuid : number
+
+
+
++ cuid : number
++ cuid : number
+
+
++ cuid : number
++ cuid : number
++ cuid : number
++ cuid : number
++ cuid : number
++ cuid : number
+
++ cuid : number
+
++ cuid : number
++ cuid : number
++ cuid : number
+
+
+
++ cuid : number
+
++ cuid : number
+}
+Class behaviourData {
++ persons : char
+}
+Class appIncomeCache {
++ income_type : char
++ est_income : number
++ report_date : date
+}
+Class my_credit_ob_dtype_sc_30 {
++ web_session_count_30_days_my_credit : char
++ web_device_type_session_count_30_days_my_credit : char
++ dtime_calculated_web_session_count_30_days_my_credit : char
+}
+Class updatedData {
++ sysdate : date
+
++ persons : date
+
+}
+Class offlineRevFinalResult {
++ availableLimitCard : number
++ specialSegment : char
+}
+Class products {
++ productFamily : char
++ productFamilyType : char
+}
+Class score {
++ score21Function : char
++ score7Function : char
++ responseStatusFlag : char
+
++ mainRules : char
++ responseStatusApplication : char
++ score3Function : char
++ numApplicationsFound : number
++ responseStatusPhoto : char
++ specificRules : char
++ processLine : char
+
++ cuid : number
++ score2Function : char
++ score1Function : char
++ availableForSale : number
++ bkiSubRequestCode : char
++ bkiList : char
++ persons : char
+
++ responseStatusVector : char
++ mainScoreValue : number
+
++ bkiSource : char
+
++ score0Function : char
++ score9Function : char
+}
+Class persons {
++ scoreEnd1 : number
++ scoreEnd1 : number
++ scoreEnd1 : number
++ scoreEnd1 : number
+}
+Class previousApplications {
++ persons : char
+}
+Class crossClientChecks {
++ sameMobileCheck : number
++ name : char
++ name : char
++ regionName : char
++ resultName : char
++ name : char
++ name1 : char
++ goodsName : char
++ regionName : char
++ name2 : char
++ name : char
++ name : char
++ persons : char
++ trialName : char
++ trialName : char
++ name : char
++ regionName : char
++ strategyName : char
++ name : char
++ strategyName : char
++ strategyName : char
++ nameMid : char
++ persons : char
++ mailru_score : char
++ sameIdentCard : number
++ juicyscore_score : char
++ persons : char
++ persons : char
++ strategyName : char
++ mts_score_features : char
+}
+Class nextWorkflows {
++ workflowCode : char
++ nextStrategy : char
+}
+Class previousApplicationsFraud {
++ persons : char
++ appArray : char
+}
+Class sameIdentCard {
++ eqGoodsBrandCnt : number
+}
+Class appArray {
++ credit : char
++ lastStatus : char
++ lastStatus : char
++ codeStatusPlasticRD : char
++ codeContractStatusRD : char
+}
+
+Application*--workflow
+Application*--timeZone
+Application*--systemMessage
+Application*--sysdate
+Application*--stopList
+Application*--sourceData
+Application*--smData
+Application*--scoResult
+Application*--scanResult
+Application*--salesPoint
+Application*--rescoResult
+Application*--registerPreResult
+Application*--randomNumber8
+Application*--randomNumber7
+Application*--randomNumber6
+Application*--randomNumber5
+Application*--randomNumber4
+Application*--randomNumber3
+Application*--randomNumber2
+Application*--randomNumber1
+Application*--processType
+Application*--preResult
+Application*--prelimResult
+Application*--prelimPreResult
+Application*--prelimCbResult
+Application*--preApprResult
+Application*--postResult
+Application*--phoneVerification
+Application*--persons
+Application*--personContact
+Application*--partnerName
+Application*--outputData
+Application*--offlineRevFinalResult
+Application*--offlineResult
+Application*--offlineData
+Application*--offlineCashFinalResult
+Application*--lastOfflineScoreXsellSC
+Application*--lastOfflineScoreXsellRD
+Application*--isOuterLimit
+Application*--idRequest
+Application*--idPerson
+Application*--idCredit
+Application*--fpsResult
+Application*--featureControl
+Application*--evidSrv
+Application*--employeeAdminType
+Application*--empCode
+Application*--documents
+Application*--credit
+Application*--consent
+Application*--channelSale
+Application*--cbResult
+Application*--calculateOnlineLimit
+Application*--calculateLinkedRDLimits
+Application*--bombInBank
+Application*--bdResult
+Application*--appVerifIncome
+Application*--application
+Application*--applicantData
+Application*--appIncomeCache
+Application*--appIncome
+Application*--agregatorResult
+workflow*--stageCounters
+updatedData*--persons
+trial*--wfDetails
+trial*--scoringDetails
+trial*--rgDetails
+trial*--limitDetails
+trial*--hcDetails
+sourceData*--verificationResults
+sourceData*--verificationDetailResults
+sourceData*--updatedData
+sourceData*--undesirablePerson
+sourceData*--onlineLimit
+sourceData*--nextWorkflows
+sourceData*--linkedVerificationResults
+sourceData*--linkedVerificationDetailResults
+sourceData*--hardCheckPredictors
+sourceData*--extData
+sourceData*--crossClientChecks
+sourceData*--creditLimit
+sourceData*--biometricData
+sourceData*--behaviourData
+smuid_data*--pfr_account_advice
+smuid_data*--my_credit_ob_bank_applications
+smuid_data*--my_credit_ob_back_web_cnt_180
+smuid_data*--my_credit_ob_back_mobile_cnt_180
+smData*--smuid_data
+smData*--online_behav_os_web
+smData*--online_behav_os_mobile
+smData*--online_behav_min_dist
+smData*--online_behav_device_type_s_cnt
+smData*--online_behav_device_type
+smData*--online_behav_device_s_cnt
+smData*--online_behav_device
+smData*--geo_activity
+smData*--client_score
+score*--persons
+scanResult*--trial
+scanResult*--persons
+scanResult*--client
+salesPoint*--products
+rescoResult*--trial
+previousApplicationsFraud*--persons
+previousApplications*--rejectData
+previousApplications*--persons
+previousApplications*--personContact
+previousApplications*--approvalData
+previousApplications*--appArray
+persons*--employmentAddress
+persons*--employment
+persons*--contactAddress
+person*--employment
+outputData*--uwInfo
+outputData*--savedInfo
+outputData*--resultTrace
+outputData*--offers
+outputData*--checkPersons
+online_behav_os_web*--my_credit_ob_os_web_180
+online_behav_os_mobile*--my_credit_ob_os_mobile_180
+online_behav_min_dist*--my_credit_ob_min_distance_reg_addr
+online_behav_min_dist*--my_credit_ob_min_distance_emp_addr
+online_behav_min_dist*--my_credit_ob_min_distance_cont_addr
+online_behav_device_type_s_cnt*--my_credit_ob_dtype_sc_30
+online_behav_device_type*--my_credit_ob_device_type_180
+online_behav_device_s_cnt*--my_credit_ob_device_sess_cnt_30
+online_behav_device*--my_credit_ob_device_180
+onlineLimit*--persons
+offlineResult*--score
+limitDetails*--pseudo
+limitDetails*--fact
+limit*--persons
+hardCheckPredictors*--persons
+geo_activity*--mts_geo_activity
+expense*--persons
+derivedData*--persons
+crossClientChecks*--sameMobileCheck
+crossClientChecks*--sameIdentCard
+creditLimit*--persons
+creditBureau*--scoring
+creditBureau*--persons
+creditBureau*--creditData
+creditBureau*--bureauResponse
+credit*--supplement
+credit*--service
+credit*--persons
+credit*--onlineApp
+credit*--insurance
+credit*--goods
+credit*--fps
+credit*--creditProduct
+credit*--creditPreferences
+credit*--creditBureau
+credit*--consolidatedData
+credit*--afs
+client_score*--yandex_score
+client_score*--tele2_score
+client_score*--mts_score_features
+client_score*--mts_score
+client_score*--mailru_sp_score
+client_score*--mailru_score
+client_score*--juicyscore_score
+clientReality*--persons
+biometricData*--persons
+behaviourData*--persons
+applicantData*--previousApplicationsFraud
+applicantData*--previousApplications
+applicantData*--expense
+applicantData*--creditLimit
+applicantData*--clientReality
+applicantData*--cars
+applicantData*--campaigns
+appChars*--tw
+appChars*--pfr
+appChars*--incomes
+appChars*--bki
+appArray*--salesPoint
+appArray*--person
+appArray*--credit
+
+@enduml
