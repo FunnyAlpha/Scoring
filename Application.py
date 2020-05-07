@@ -41,13 +41,14 @@ class BuilderVectorDWH (Builder):
  return product
  
  def getCreditBureauData(self) -> None:
- self._product.get("CreditBurea")
+ self._product.get("CreditBureau")
  def getBehaviourData(self) -> None:
  self._product.get("AgregatorResult")
  def getAggregatorParamData(self) -> None:
  self._product.get("BehaviorData")
  
 class Application():
+    self.CreditBureau_df = None
  """
  get Product
  """
