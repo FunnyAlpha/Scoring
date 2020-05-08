@@ -2,10 +2,13 @@
 from enum import Enum, auto
 import cx_Oracle
 import pandas as pd
+from config import Auhorization,Credit_bureau_data_mart
 
+#conn = cx_Oracle.connect('gp_blaze_uwi/Fender1580@db19c')
+v_sql_query = str(Credit_bureau_data_mart())
+v_con_name = str(Auhorization())
 
-conn = cx_Oracle.connect('gp_blaze_uwi/Fender1580@db19c')
-
+conn = cx_Oracle.connect(v_con_name)
 
 #mycursor = myconnection.cursor()
 
@@ -13,8 +16,11 @@ conn = cx_Oracle.connect('gp_blaze_uwi/Fender1580@db19c')
 
 #result = mycursor.fetchall()
 
-df1 = pd.read_sql_query('select * from gp_blaze_uwi.sm_sco_bureau_tab',conn)
-df2 = pd.read_sql_query('select * from gp_blaze_uwi.sm_sco_bureau_tab',conn)
+print(v_con_name)
+print(v_sql_query)
+
+df1 = pd.read_sql_query(v_sql_query,conn)
+df2 = pd.read_sql_query(v_sql_query,conn)
 
 #for  (sk_application) in result:
 #       print (sk_application)

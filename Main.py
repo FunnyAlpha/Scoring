@@ -1,8 +1,8 @@
+from Application import *
+
 if __name__ == "__main__":
- """
- """
- controller = Controller()
- builder = BuilderVectorDWH()
- controller.builder = builder
- # Initiallize application for XGB
- controller.buildAppforBureauScoreCard()
+
+    vector_dwh = BuilderVectorDWH()
+    vector_dwh.getCreditBureauData()
+
+    print (vector_dwh.product.CreditBureau_df)
