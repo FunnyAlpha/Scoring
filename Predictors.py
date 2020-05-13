@@ -54,18 +54,20 @@ class TestScoreCardPredictors(Predictors):
         #print(df['SK_APPLICATION'])
 
         #print(Predictors.max_date_open_card(self,df))
-        df_base = df['SK_APPLICATION'].unique() 
+        df_base = pd.DataFrame({"SK_APPLICATION":df['SK_APPLICATION'].unique()})
+
+        #print(df_base)
+
         df1 = Predictors.max_date_open_card(self,df)
         df2 = Predictors.min_date_open_card(self,df)
 
-        dfs = [df.set_index(['SK_APPLICATION']) for df in [df_base,df1,df2]]
+        #dfs = [df.set_index(['SK_APPLICATION']) for df in [df_base,df1,df2]]
 
-        #data_frames = [df_base,df1,df2]
-        #df_merged = reduce(lambda  left,right: pd.merge(left,right,how='outer',on=['SK_APPLICATION']), data_frames)
+        dfs = [df_base,df1,df2]
+        df_merged = reduce(lambda  left,right: pd.merge(left,right,how='outer',on=['SK_APPLICATION']), dfs)
 
-
-        #print(df1)
-        self.predictors_out_df = pd.concat(dfs, axis=1).reset_index()
-        #self.predictors_out_df = pd.merge(df1,df2,how='outer',on=['SK_APPLICATION'])
+        #print(df_merged)
+        #print(pd.concat(dfs, axis=1).reset_index())
+        self.predictors_out_df = df_merged
         #self.predictors_out_df = pd.merge(df1,df2,how='outer',on=['SK_APPLICATION'])
         #self.predictors_out_df = df1.set_index('SK_APPLICATION').join(df2.set_index('SK_APPLICATION'))
