@@ -32,7 +32,7 @@ class Predictors:
         #print(df['CREDIT_TYPE'].dtype)
         #print(df['CREDIT_TYPE'].apply(lambda x:1 if x in {4,14,24} else 0))
 
-        v_df=df[
+        v_df = df[
         (df['NFLAG_CREDIT_JOINT'] == 1) &
         (df['FLAG_CREDIT_OWNER'] == '0') &
         (df['CREDIT_TYPE'].apply(lambda x:1 if x in {4,14,24} else 0)) == 1
@@ -41,7 +41,17 @@ class Predictors:
 
         return v_df
 
+    def all_cash_pos(self,df):
 
+        v_df = df[
+        (df['NFLAG_CREDIT_JOINT'] == 1) &
+        (df['FLAG_CREDIT_OWNER'] == '0') &
+        (df['CREDIT_TYPE'].apply(lambda x:1 if x in {5,8,13} else 0)) == 1
+        ].groupby(['SK_APPLICATION']).agg({'SK_APPLICATION':np.count_nonzero}).rename(columns={"SK_APPLICATION": "ALL_CASH_POS"})
+
+        return v_df
+
+  
 
 class TestScoreCardPredictors(Predictors):
 
@@ -60,10 +70,12 @@ class TestScoreCardPredictors(Predictors):
 
         df1 = Predictors.max_date_open_card(self,df)
         df2 = Predictors.min_date_open_card(self,df)
+        df3 = Predictors.all_cash_pos(self,df)
+
 
         #dfs = [df.set_index(['SK_APPLICATION']) for df in [df_base,df1,df2]]
 
-        dfs = [df_base,df1,df2]
+        dfs = [df_base,df1,df2,df3]
         df_merged = reduce(lambda  left,right: pd.merge(left,right,how='outer',on=['SK_APPLICATION']), dfs)
 
         #print(df_merged)
