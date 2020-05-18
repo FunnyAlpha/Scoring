@@ -2,10 +2,10 @@
 from enum import Enum, auto
 import cx_Oracle
 import pandas as pd
-from config import Auhorization,Credit_bureau_data_mart
+from Config import *
 
 #conn = cx_Oracle.connect('gp_blaze_uwi/Fender1580@db19c')
-v_sql_query = str(Credit_bureau_data_mart())
+v_sql_query = str(f_scoring_vector_tt_beh())
 v_con_name = str(Auhorization())
 
 conn = cx_Oracle.connect(v_con_name)
@@ -16,11 +16,11 @@ conn = cx_Oracle.connect(v_con_name)
 
 #result = mycursor.fetchall()
 
-print(v_con_name)
-print(v_sql_query)
+#print(v_con_name)
+#print(v_sql_query)
 
 df1 = pd.read_sql_query(v_sql_query,conn)
-df2 = pd.read_sql_query(v_sql_query,conn)
+#df2 = pd.read_sql_query(v_sql_query,conn)
 
 #for  (sk_application) in result:
 #       print (sk_application)
@@ -32,8 +32,6 @@ conn.close()
 
 print('df1')
 print(df1)
-print('df2')
-print(df2)
 
 #for index, row in df.iterrows(): 
    # print(row['DATE_EFFECTIVE'], row['AMT_ANNUITY'])
