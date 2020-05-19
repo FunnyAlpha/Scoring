@@ -12,12 +12,9 @@ if __name__ == "__main__":
     controller.buildVctForTestScoreCard()
 
     # GET OUTPUT DATA
-    predictors_dwh  = TestScoreCardPredictors
-    (
-    builder.product.Application_df,
-    builder.product.CreditBureau_df,
-    builder.product.Behavioral_df
-    )
+    predictors_dwh  = TestScoreCardPredictors(builder.product.Application_df,builder.product.CreditBureau_df,builder.product.Behavioral_df)
+    
+    #print(dir(predictors_dwh))
 
     predictors_dwh.get_predictors_rez_df()
 
