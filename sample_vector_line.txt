@@ -1,0 +1,3 @@
+n|applicantData.maxValueSc|741000
+c|evidSrv|2335268655
+n|idCredit|209915381
