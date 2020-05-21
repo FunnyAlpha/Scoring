@@ -1,0 +1,29 @@
+n|persons[0].activeRdOffer|1
+c|persons[0].activeSalaryClient|0
+n|persons[0].activeScOffer|1
+d|persons[0].birth|07.08.1989 00:00:00
+n|persons[0].childNum|0
+c|persons[0].contactMobilePhone|9191111187
+n|persons[0].cuid|44003648
+c|persons[0].education|3
+c|persons[0].email|INNA@MAIL.RU
+d|persons[0].employment.employedFrom|01.09.2013 00:00:00
+c|persons[0].employment.employerPhone|4741111197
+c|persons[0].employment.name|ГОБПОУ ЧАПЛЫГИНСКИЙ АГРАРНЫЙ КОЛЛЕДЖ
+c|persons[0].familyState|2
+n|persons[0].fieldExperience|79
+c|persons[0].ident|4211111119
+c|persons[0].incomeType|a
+n|persons[0].isFakeCuid|0
+c|persons[0].isNewApplicant|current
+n|persons[0].mainOccupationIncome|27000
+c|persons[0].mobil|9192511987
+c|persons[0].name1|И111
+c|persons[0].name2|Ч11111111
+c|persons[0].nameMid|Ю111111
+c|persons[0].occupation|ПРЕПОДАВАТЕЛЬ
+c|persons[0].occupationSector|16
+c|persons[0].personType|1
+n|persons[0].personUndesirable|0
+c|persons[0].phoneEmp|4741111197
+c|persons[0].sex|z

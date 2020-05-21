@@ -51,15 +51,15 @@ class f_scoring_vector_tt_cb:
         v.num_group_position,
         max(case when skp_vector_attribute =   3121  then  char_value  end) as  cbOverdueLine  ,
         max(case when skp_vector_attribute =   95  then  char_value  end) as  creditCurrency  ,
-        max(case when skp_vector_attribute =   108  then  dtime_value  end) as  DTIME_CREDIT  ,
+        max(case when skp_vector_attribute =   108  then  dtime_value  end) as  creditDate  ,
         max(case when skp_vector_attribute =   191  then  num_value  end) as  creditDayOverdue  ,
         max(case when skp_vector_attribute =   61  then  dtime_value  end) as  creditEndDate  ,
-        max(case when skp_vector_attribute =   1081  then  num_value  end) as  NFLAG_CREDIT_JOINT  ,
-        max(case when skp_vector_attribute =   504  then  char_value  end) as  FLAG_CREDIT_OWNER  ,
+        max(case when skp_vector_attribute =   1081  then  num_value  end) as  creditJoint  ,
+        max(case when skp_vector_attribute =   504  then  char_value  end) as  creditOwner  ,
         max(case when skp_vector_attribute =   425  then  num_value  end) as  creditSum  ,
         max(case when skp_vector_attribute =   277  then  num_value  end) as  creditSumDebt  ,
         max(case when skp_vector_attribute =   422  then  num_value  end) as  creditSumOverdue  ,
-        max(case when skp_vector_attribute =   285  then  num_value  end) as  CREDIT_TYPE  ,
+        max(case when skp_vector_attribute =   285  then  num_value  end) as  creditType  ,
         max(case when skp_vector_attribute =   7770  then  char_value  end) as creditTypeUni ,
         max(case when skp_vector_attribute =   335  then  dtime_value  end) as  creditEndDateFact  ,
         max(case when skp_vector_attribute =   152  then  num_value  end) as  creditMaxOverdue  ,
@@ -83,5 +83,13 @@ class f_scoring_vector_tt_beh:
         group by v.sk_application, v.sk_date_decision, v.sk_contract_type'''
 
         return v_sql_query
+
+class blaze_vector_output:
+
+    def __str__(self):
+
+        file_name = 'cb'
+
+        return file_name        
 
         

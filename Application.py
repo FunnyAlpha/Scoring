@@ -4,6 +4,7 @@ from typing import Any
 import cx_Oracle
 import pandas as pd
 from Config import *
+from Parse_temp import *
  
 #################################
 
@@ -71,6 +72,41 @@ class BuilderVectorDWH (Builder):
          self._product.Behavioral_df = self._product.get_df_dwh(f_scoring_vector_tt_beh())
 #################################
 
+
+class BuilderVectorBlaze (Builder):
+
+    def __init__(self) -> None:
+        #Null object of the Application is creating
+        self.reset()
+ 
+    def reset(self) -> None:
+        self._product = Application()
+ 
+    @property
+    def product(self) -> Application:
+        #Should reset the builder, if we want to initiallizwe new object , using decorator
+        product = self._product
+        #self.reset()
+        return product
+ 
+    def getCreditBureauData(self,source) -> None:
+        
+        if source == 'txt':
+            self._product.CreditBureau_df = self._product.get_df_blaze(blaze_vector_output())
+        else:
+            self._product.CreditBureau_df = self._product.get_df_blaze(blaze_vector_output())
+
+    def getApplicationData(self,source) -> None:
+        
+        self._product.Application_df = None
+
+    def getBehavioralData(self,source) -> None:
+
+        self._product.Behavioral_df = None
+
+#################################
+
+
 class Application():
  
  #get Product
@@ -97,6 +133,13 @@ class Application():
 
      return df
 
+ def get_df_blaze(self,type:Any):
+     
+     df = get_df(type)
+     
+     return df
+
+
 #################################
 
 class Controller:
@@ -118,3 +161,8 @@ class Controller:
      self.builder.getBehavioralData('vct')
  #################################
  
+ def buildVctForTestScoreCardBlaze(self) -> None:
+     self.builder.getCreditBureauData('txt')
+     self.builder.getApplicationData('txt')
+     self.builder.getBehavioralData('txt')
+ #################################

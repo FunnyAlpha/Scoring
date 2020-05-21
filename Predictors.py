@@ -34,10 +34,10 @@ class Predictors:
         #print(df['CREDIT_TYPE'].apply(lambda x:1 if x in {4,14,24} else 0))
 
         v_df=df[
-        (df['NFLAG_CREDIT_JOINT'] == 1) &
-        (df['FLAG_CREDIT_OWNER'] == '0') &
-        (df['CREDIT_TYPE'].apply(lambda x:1 if x in {4,14,24} else 0)) == 1
-        ].groupby(['SK_APPLICATION']).agg({'DTIME_CREDIT':np.max}).rename(columns={"DTIME_CREDIT": "MAX_DATE_OPEN_CARD"})
+        (df['CREDITJOINT'] == 1) &
+        (df['CREDITOWNER'] == '0') &
+        (df['CREDITTYPE'].apply(lambda x:1 if x in {4,14,24} else 0)) == 1
+        ].groupby(['SK_APPLICATION']).agg({'CREDITDATE':np.max}).rename(columns={"CREDITDATE": "MAX_DATE_OPEN_CARD"})
     
        # df.rename(columns={"B": "c"})
 
@@ -49,10 +49,10 @@ class Predictors:
         #print(df['CREDIT_TYPE'].apply(lambda x:1 if x in {4,14,24} else 0))
 
         v_df = df[
-        (df['NFLAG_CREDIT_JOINT'] == 1) &
-        (df['FLAG_CREDIT_OWNER'] == '0') &
-        (df['CREDIT_TYPE'].apply(lambda x:1 if x in {4,14,24} else 0)) == 1
-        ].groupby(['SK_APPLICATION']).agg({'DTIME_CREDIT':np.min}).rename(columns={"DTIME_CREDIT": "MIN_DATE_OPEN_CARD"})
+        (df['CREDITJOINT'] == 1) &
+        (df['CREDITOWNER'] == '0') &
+        (df['CREDITTYPE'].apply(lambda x:1 if x in {4,14,24} else 0)) == 1
+        ].groupby(['SK_APPLICATION']).agg({'CREDITDATE':np.min}).rename(columns={"CREDITDATE": "MIN_DATE_OPEN_CARD"})
   
 
         return v_df
@@ -60,9 +60,9 @@ class Predictors:
     def all_cash_pos(self,df):
 
         v_df = df[
-        (df['NFLAG_CREDIT_JOINT'] == 1) &
-        (df['FLAG_CREDIT_OWNER'] == '0') &
-        (df['CREDIT_TYPE'].apply(lambda x:1 if x in {5,8,13} else 0)) == 1
+        (df['CREDITJOINT'] == 1) &
+        (df['CREDITOWNER'] == '0') &
+        (df['CREDITTYPE'].apply(lambda x:1 if x in {5,8,13} else 0)) == 1
         ].groupby(['SK_APPLICATION']).agg({'SK_APPLICATION':np.count_nonzero}).rename(columns={"SK_APPLICATION": "ALL_CASH_POS"})
 
         return v_df
@@ -75,13 +75,38 @@ class Predictors:
         df = reduce(lambda  left,right: pd.merge(left,right,how='outer',on=['SK_APPLICATION']), dfs)
 
         v_df = df[
-        (df['NFLAG_CREDIT_JOINT'] == 1) &
-        (df['FLAG_CREDIT_OWNER'] == '0') &
-        (df['CREDIT_TYPE'].apply(lambda x:1 if x in {4,14,24} else 0)) == 1
+        (df['CREDITJOINT'] == 1) &
+        (df['CREDITOWNER'] == '0') &
+        (df['CREDITTYPE'].apply(lambda x:1 if x in {4,14,24} else 0)) == 1
         #(df['SK_DATE_DECISION']==df['SK_DATE_DECISION'])
         ].groupby(['SK_APPLICATION']).agg({'SK_APPLICATION':np.count_nonzero}).rename(columns={"SK_APPLICATION": "CNT_CLOSED_CASH_POS"})
 
         return v_df
+
+class TestScoreCardPredictorsBlaze(Predictors):
+
+    def __init__(self,app_df,cb_df,beh_df):
+        self.app_df = app_df
+        self.cb_df = cb_df
+        self.beh_df = beh_df 
+        self.rez_df = None
+        
+    def get_predictors_rez_df(self)->None:
+
+        df_base = pd.DataFrame({"SK_APPLICATION":self.cb_df['SK_APPLICATION'].unique()})
+
+        dfs = [
+        df_base,
+        Predictors.max_date_open_card(self,self.cb_df),                  # max_date_open_card
+        Predictors.min_date_open_card(self,self.cb_df),                  # min_date_open_card
+        Predictors.all_cash_pos(self,self.cb_df),                        # all_cash_pos
+        ]
+
+        df_merged = reduce(lambda  left,right: pd.merge(left,right,how='outer',on=['SK_APPLICATION']), dfs)
+
+        self.rez_df = df_merged
+
+
 
 class TestScoreCardPredictors(Predictors):
 
