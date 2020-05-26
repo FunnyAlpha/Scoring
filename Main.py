@@ -19,4 +19,9 @@ if __name__ == "__main__":
     predictors_dwh.get_predictors_rez_df()
 
     # PRINT OUTPUT DATAFRAME
-    print(tabulate(predictors_dwh.rez_df, headers='keys',tablefmt='psql',disable_numparse=True))
+
+    #print(predictors_dwh.rez_df[predictors_dwh.rez_df['SK_APPLICATION']==203841905])
+
+    print(tabulate(predictors_dwh.rez_df[predictors_dwh.rez_df['SK_APPLICATION']==203841905], headers='keys',tablefmt='psql',disable_numparse=True))
+
+    #print(tabulate(predictors_dwh.rez_df, headers='keys',tablefmt='psql',disable_numparse=True))

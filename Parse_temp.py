@@ -1,6 +1,7 @@
 import re
 import pandas as pd
 from io import StringIO
+from datetime import datetime
 
 
 def parse_line(p_type,str_list,index_arr):
@@ -25,7 +26,14 @@ def parse_line(p_type,str_list,index_arr):
         match_counter+=1
         #print(df_output_list)
         if ArrInd == int(index_arr[0]):
-            df_output_list[str_list[1].split('.')[3].upper()] = str_list[2]
+            if str_list[1].split('.')[3].upper() == 'CREDITTYPE':
+                df_output_list[str_list[1].split('.')[3].upper()] = int(str_list[2])
+            elif str_list[1].split('.')[3].upper() == 'CREDITJOINT':
+                df_output_list[str_list[1].split('.')[3].upper()] = int(str_list[2])
+            elif str_list[1].split('.')[3].upper() == 'CREDITDATE':
+                df_output_list[str_list[1].split('.')[3].upper()] = datetime.strptime(str_list[2], '%d.%m.%Y %H:%M:%S') 
+            else:
+                df_output_list[str_list[1].split('.')[3].upper()] = str(str_list[2])    
             ArrInd = int(index_arr[0])
         else:
             df_output_dict.append(df_output_list)
@@ -59,7 +67,7 @@ def get_df(p_type):
                 sk_application = result[2]
 
             line = file.readline()
-
+        df_output_dict.append(df_output_list)
     df_output = pd.DataFrame(df_output_dict)
     df_output['SK_APPLICATION'] = sk_application
 

@@ -1,0 +1,12 @@
+n|vechicle.car.characteristics[0].speed|180
+n|vechicle.car.characteristics[0].weight|3
+c|vechicle.car.characteristics[0].color|black
+c|vechicle.car.characteristics[0].fuel|95
+n|vechicle.car.characteristics[1].speed|160
+n|vechicle.car.characteristics[1].weight|4
+c|vechicle.car.characteristics[1].color|green
+c|vechicle.car.characteristics[1].fuel|92
+n|vechicle.car.characteristics[2].speed|200
+n|vechicle.car.characteristics[2].weight|5
+c|vechicle.car.characteristics[2].color|white
+c|vechicle.car.characteristics[2].fuel|95

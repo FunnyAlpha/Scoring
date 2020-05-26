@@ -11,12 +11,7 @@ if __name__ == "__main__":
     controller.builder = builder
     controller.buildVctForTestScoreCardBlaze()
 
-    print(builder.product.CreditBureau_df[['CREDITJOINT','CREDITOWNER','CREDITTYPE','CREDITDATE']])
-
-    #df = builder.product.CreditBureau_df
-    #df['CREDITJOINT'].astype(str).
-
-    #print(df['CREDITJOINT'].dtype)
+    #print(builder.product.CreditBureau_df[['CREDITJOINT','CREDITOWNER','CREDITTYPE','CREDITDATE']])
 
     # GET OUTPUT DATA
     predictors_dwh  = TestScoreCardPredictorsBlaze(builder.product.Application_df,builder.product.CreditBureau_df,builder.product.Behavioral_df)
