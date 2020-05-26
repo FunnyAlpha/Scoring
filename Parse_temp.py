@@ -24,7 +24,7 @@ def parse_line(p_type,str_list,index_arr):
         if match_counter == 1:
             ArrInd = 0
         match_counter+=1
-        #print(df_output_list)
+        print(match_counter)
         if ArrInd == int(index_arr[0]):
             if str_list[1].split('.')[3].upper() == 'CREDITTYPE':
                 df_output_list[str_list[1].split('.')[3].upper()] = int(str_list[2])
