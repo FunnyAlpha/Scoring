@@ -24,5 +24,5 @@ if __name__ == "__main__":
     #print(predictors_dwh.rez_df[predictors_dwh.rez_df['SK_APPLICATION']==203841905])
 
     print(tabulate(predictors_dwh.rez_df[predictors_dwh.rez_df['SK_APPLICATION']==203841905], headers='keys',tablefmt='psql',disable_numparse=True))
-
+    print(1)
     #print(tabulate(predictors_dwh.rez_df, headers='keys',tablefmt='psql',disable_numparse=True))
