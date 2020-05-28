@@ -4,8 +4,9 @@ from typing import Any
 import cx_Oracle
 import pandas as pd
 from Config import *
-from Parse_temp import *
- 
+from Parse import *
+from functools import reduce
+
 #################################
 
 class Builder(ABC):
@@ -81,6 +82,7 @@ class BuilderVectorBlaze (Builder):
  
     def reset(self) -> None:
         self._product = Application()
+        self._product.get_df_blaze('sample_vector_cb.txt')
  
     @property
     def product(self) -> Application:
@@ -90,19 +92,29 @@ class BuilderVectorBlaze (Builder):
         return product
  
     def getCreditBureauData(self,source) -> None:
-        
+
         if source == 'txt':
-            self._product.CreditBureau_df = self._product.get_df_blaze(blaze_vector_output())
+            self._product.CreditBureau_df = get_df_txt('CREDITBUREAU',self._product.Vector_dict)
         else:
-            self._product.CreditBureau_df = self._product.get_df_blaze(blaze_vector_output())
+            self._product.CreditBureau_df = get_df_txt('CREDITBUREAU',self._product.Vector_dict)
 
     def getApplicationData(self,source) -> None:
         
-        self._product.Application_df = None
+        if source == 'txt':
+            v_dfs=[get_df_txt('APPLICATION',self._product.Vector_dict),get_df_txt('PERSONS',self._product.Vector_dict)]
+            v_df_merged = reduce(lambda  left,right: pd.merge(left,right,how='outer',on=['SK_APPLICATION']), v_dfs)
+            self._product.Application_df = v_df_merged
+        else:
+            self._product.Application_df = get_df_txt('APPLICATION',self._product.Vector_dict)
 
     def getBehavioralData(self,source) -> None:
 
-        self._product.Behavioral_df = None
+        if source == 'txt':
+            self._product.Behavioral_df = get_df_txt('BEHAVIOURDATA',self._product.Vector_dict)
+        else:
+            self._product.Behavioral_df = get_df_txt('BEHAVIOURDATA',self._product.Vector_dict)
+
+            self._product.Behavioral_df = None
 
 #################################
 
@@ -116,6 +128,7 @@ class Application():
      self.CreditBureau_df = None
      self.Application_df = None
      self.Behavioral_df = None
+     self.Vector_dict = None
  
  def get_df_dwh(self, p_sql_query: Any):
      
@@ -133,11 +146,13 @@ class Application():
 
      return df
 
- def get_df_blaze(self,type:Any):
+ def get_df_blaze(self,p_type):
      
-     df = get_df(type)
+     v_dict = parse_vct(p_type,df_dict,rx_dict)
      
-     return df
+     self.Vector_dict = v_dict
+
+     pass
 
 
 #################################

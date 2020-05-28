@@ -32,7 +32,7 @@ class f_scoring_vector_tt_app:
         max(case when skp_vector_attribute =   190  then  num_value  end) as  maxDpdTol6m  ,
         nvl(max(case when skp_vector_attribute =   430  then  num_value  end), max(case when skp_vector_attribute =   414 /*413*/  then  num_value  end)) as  actualDpdTolerance,
         max(case when skp_vector_attribute =   4112  then  num_value  end) as  amtDpd30Ever,
-        max(case when skp_vector_attribute =   33  then  dtime_value  end) as  dtime_approval_start,
+        max(case when skp_vector_attribute =   33  then  dtime_value  end) as  "SYSDATE",
         max(case when skp_vector_attribute =   492  then  dtime_value  end) as  birth,
         max(case when skp_vector_attribute =   3887  then  char_value  end) as  lasteducation,
         max(case when skp_vector_attribute =   196  then  char_value  end) as  education
@@ -88,7 +88,7 @@ class blaze_vector_output:
 
     def __str__(self):
 
-        file_name = 'cb'
+        file_name = 'sample_vector_cb.txt'
 
         return file_name        
 

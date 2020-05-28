@@ -12,17 +12,20 @@ class Predictors:
 
     def age_years_real(self,p_app_df):
 
-        v_df= p_app_df[['SK_APPLICATION']].assign(AGE_YEARS_REAL=(p_app_df['DTIME_APPROVAL_START'] - p_app_df['BIRTH'])/np.timedelta64(1,'Y'))
+        v_df= p_app_df[['SK_APPLICATION']].assign(AGE_YEARS_REAL=(p_app_df['SYSDATE'] - p_app_df['BIRTH'])/np.timedelta64(1,'Y'))
 
         return v_df
 
     def education(self,p_app_df,p_beh_df):
 
+        if 'EDUCATION' not in p_app_df.columns:
+            p_app_df['EDUCATION']=np.nan
+
         df = reduce(
         lambda  left,right: pd.merge(left,right,how='outer',on=['SK_APPLICATION']),
         [p_app_df,p_beh_df.rename(columns={"EDUCATION": "BEHEDUCATION"})]
         )
-        v_df= p_app_df[['SK_APPLICATION']].assign(EDUCATION=(df['EDUCATION'].fillna(df['LASTEDUCATION']).fillna(df['BEHEDUCATION'])))
+        v_df= p_app_df[['SK_APPLICATION']].assign(EDUCATION=(df['EDUCATION'].fillna(df['BEHEDUCATION'])))
 
         #print(v_df)
 

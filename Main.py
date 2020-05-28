@@ -14,7 +14,8 @@ if __name__ == "__main__":
     # GET OUTPUT DATA
     predictors_dwh  = TestScoreCardPredictors(builder.product.Application_df,builder.product.CreditBureau_df,builder.product.Behavioral_df)
     
-    #print(dir(predictors_dwh))
+    #print(dir(builder.product.Application_df))
+    #print(builder.product.Application_df['SYSDATE'])
 
     predictors_dwh.get_predictors_rez_df()
 

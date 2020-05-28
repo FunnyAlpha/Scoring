@@ -1,52 +1,76 @@
 import re
 import pandas as pd
+from dateutil.parser import parse
 
-'''
-df_output_list  = {}
-df_output_dict  = []
-match_counter = 1
 
-with open('sample_car.txt',encoding='utf-8') as file:
-    line = file.readline()
-    while line:
+rx_dict = {
+    re.compile(r'(.*?)\|sourceData\.behaviourData\.persons\[(\d+)\]\.(.*)\|(.*?)\s*$'):'BEHAVIOURDATA',
+    re.compile(r'(.*?)\|documents\[(\d+)\]\.(.*)\|(.*?)\s*$'):'DOCUMENTS',
+    re.compile(r'(.*?)\|persons\[(\d+)\]\.(\w*)\|(.*?)\s*$'):'APPLICATION',
+    re.compile(r'(.*?)\|(idCredit)\|(.*?)\s*$'):'SK_APPLICATION',
+    re.compile(r'(.*?)\|credit\.creditBureau\.creditData\[(\d+)\]\.(.*)\|(.*?)\s*$'):'CREDITBUREAU'
+}
 
-        result = re.split(r'\|',line.rstrip())
-        result2 = re.findall(r'.(?<=\[)(\d+)(?=\])',result[1])
 
-        regex = re.compile('vechicle.car.characteristics.')
-        match = re.search(regex, result[1])
-        if match:
+df_dict  = {
+    'CREDITBUREAU':[],
+    'APPLICATION':[],
+    'DOCUMENTS':[],
+    'SK_APPLICATION':[],
+    'BEHAVIOURDATA':[]
+}
 
-            if match_counter == 1:
-                ArrInd = 0
-            match_counter+=1
-            #print(df_output_list)
-            if ArrInd == int(result2[0]):
-                df_output_list[result[1].split('.')[3]] = result[2]
-                ArrInd = int(result2[0])
 
-            else:
-                df_output_dict.append(df_output_list)
-                df_output_list  = {}
-                df_output_list[result[1].split('.')[3]] = result[2]
-                ArrInd = int(result2[0])
 
+def set_vct_data_type(p_list):
+
+    if len(p_list) == 3:
+        p_list.insert(1,0)
+
+    p_list[2] = p_list[2].upper()
+
+    if p_list[0]=='d':
+        p_list[3] = parse(p_list[3])
+    elif p_list[0]=='n' and p_list[2]=='IDCREDIT':
+        p_list[3] = int(p_list[3])
+    elif p_list[0]=='n':
+        p_list[3] = float(p_list[3])    
+    else:
+        p_list[3] = str(p_list[3])
+    pass    
+
+
+def parse_vct(p_input,p_dict,p_rx_dict):
+
+    with open(p_input,encoding='utf-8') as file:
         line = file.readline()
-    df_output_dict.append(df_output_list)
-#print(df_output_dict)
-df_output = pd.DataFrame(df_output_dict)
-print(df_output)
-'''
+        while line:
 
-'''
-df = pd.read_csv('sample_car.txt', sep='|', header=None)
+            for rx,val in p_rx_dict.items():
 
-print(df.iloc[:,1])
+                if re.search(rx, line):
+                    #make list from line
+                    temp_list = list(re.findall(rx,line)[0])
+                    #set data types
+                    set_vct_data_type(temp_list)
+                    #append list element to dictionary 
+                    p_dict[val].append(temp_list)
 
-columns = df.iloc[:,1].str.split('.').str[-1].unique()
+            line = file.readline()
 
-df_out = pd.DataFrame(df.iloc[:,-1].to_numpy().reshape(-1,len(columns)), columns=columns)
+    return p_dict
 
-print(df_out)
+def get_df_txt(p_type,p_dict):
 
-'''
+    df = pd.DataFrame(p_dict[p_type])
+    #get column name
+    column = df[2].unique()
+    #unstack and clean dataframe
+    df = df.drop(0,1).set_index([1, 2]).unstack().droplevel(0, axis=1).rename_axis(
+        index=None, columns=None).reindex(column, axis=1)
+    df['SK_APPLICATION'] = p_dict['SK_APPLICATION'][0][3]     
+    return df
+
+v_dict = parse_vct('sample_vector_cb.txt',df_dict,rx_dict)
+df = get_df_txt('BEHAVIOURDATA',v_dict)
+print(df)
