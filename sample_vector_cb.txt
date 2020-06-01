@@ -2963,7 +2963,6 @@ n|sourceData.behaviourData.persons[0].difFinSituation|0
 n|sourceData.behaviourData.persons[0].dpdCurr_SC|0
 n|sourceData.behaviourData.persons[0].dpdCurr_SC_SS|0
 n|sourceData.behaviourData.persons[0].dpdCurr_SS|0
-c|sourceData.behaviourData.persons[0].education|3
 d|sourceData.behaviourData.persons[0].employment.employedFrom|01.02.2012 00:00:00
 c|sourceData.behaviourData.persons[0].employmentAddress.region|63
 c|sourceData.behaviourData.persons[0].employmentAddress.town|сызрань

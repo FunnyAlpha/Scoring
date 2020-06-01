@@ -7,6 +7,13 @@ class Predictors:
     def __init__(self):
         pass
 
+    def add_unknown_columns(self,df,features_list):
+        
+        for el in features_list:
+            if el not in df:
+                df[el] = np.nan
+        pass
+
     def is_card(self,credit_type):
         return 1 if credit_type == 4  else 0
 
@@ -18,8 +25,8 @@ class Predictors:
 
     def education(self,p_app_df,p_beh_df):
 
-        if 'EDUCATION' not in p_app_df.columns:
-            p_app_df['EDUCATION']=np.nan
+        self.add_unknown_columns(p_app_df,['EDUCATION'])
+        self.add_unknown_columns(p_beh_df,['EDUCATION'])
 
         df = reduce(
         lambda  left,right: pd.merge(left,right,how='outer',on=['SK_APPLICATION']),

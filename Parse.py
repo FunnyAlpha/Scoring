@@ -1,6 +1,6 @@
 import re
 import pandas as pd
-from dateutil.parser import parse
+from dateutil import parser
 
 
 rx_dict = {
@@ -34,7 +34,7 @@ def set_vct_data_type(p_list):
     p_list[2] = p_list[2].upper()
 
     if p_list[0]=='d':
-        p_list[3] = parse(p_list[3])
+        p_list[3] = parser.parse(p_list[3],dayfirst=True)
     elif p_list[0]=='n' and p_list[2]=='IDCREDIT':
         p_list[3] = int(p_list[3])
     elif p_list[0]=='n':

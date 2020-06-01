@@ -2,7 +2,6 @@ import re
 import pandas as pd
 from dateutil.parser import parse
 
-
 rx_dict = {
     re.compile(r'(.*?)\|sourceData\.behaviourData\.persons\[(\d+)\]\.(.*)\|(.*?)\s*$'):'BEHAVIOURDATA',
     re.compile(r'(.*?)\|documents\[(\d+)\]\.(.*)\|(.*?)\s*$'):'DOCUMENTS',
