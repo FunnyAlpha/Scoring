@@ -31,12 +31,12 @@ class BuilderVectorDWH (Builder):
  
  #Builder class - realization of the concrete builder
 
- def __init__(self) -> None:
+ def __init__(self,p_InputData) -> None:
      #Null object of the Application is creating
-     self.reset()
+     self.reset(p_InputData)
  
- def reset(self) -> None:
-     self._product = Application()
+ def reset(self,p_InputData) -> None:
+     self._product = Application(p_InputData)
  
  @property
  def product(self) -> Application:
@@ -76,13 +76,16 @@ class BuilderVectorDWH (Builder):
 
 class BuilderVectorBlaze (Builder):
 
-    def __init__(self) -> None:
+    def __init__(self,p_InputData) -> None:
         #Null object of the Application is creating
-        self.reset()
+        self.reset(p_InputData)
  
-    def reset(self) -> None:
-        self._product = Application()
-        self._product.get_df_blaze('sample_vector_cb.txt')
+    def reset(self,p_InputData) -> None:
+
+        self._product = Application(p_InputData)
+        # TO DO - p_input_data
+        #print(self._product.InputData)
+        self._product.get_df_blaze()
  
     @property
     def product(self) -> Application:
@@ -119,16 +122,65 @@ class BuilderVectorBlaze (Builder):
 #################################
 
 
+class BuilderVectorBlazeStr (Builder):
+
+    def __init__(self,p_InputData) -> None:
+        #Null object of the Application is creating
+        self.reset(p_InputData)
+ 
+    def reset(self,p_InputData) -> None:
+
+        self._product = Application(p_InputData)
+        # TO DO - p_input_data
+        self._product.get_df_blaze_str()
+
+        #print(self._product.Vector_dict['DOCUMENTS'])
+ 
+    @property
+    def product(self) -> Application:
+        #Should reset the builder, if we want to initiallizwe new object , using decorator
+        product = self._product
+        #self.reset()
+        return product
+ 
+    def getCreditBureauData(self,source) -> None:
+
+        if source == 'txt':
+            self._product.CreditBureau_df = get_df_txt('CREDITBUREAU',self._product.Vector_dict)
+        else:
+            self._product.CreditBureau_df = get_df_txt('CREDITBUREAU',self._product.Vector_dict)
+
+    def getApplicationData(self,source) -> None:
+        
+        if source == 'txt':
+            v_dfs=[get_df_txt('APPLICATION',self._product.Vector_dict),get_df_txt('PERSONS',self._product.Vector_dict)]
+            v_df_merged = reduce(lambda  left,right: pd.merge(left,right,how='outer',on=['SK_APPLICATION']), v_dfs)
+            self._product.Application_df = v_df_merged
+        else:
+            self._product.Application_df = get_df_txt('APPLICATION',self._product.Vector_dict)
+
+    def getBehavioralData(self,source) -> None:
+
+        if source == 'txt':
+            self._product.Behavioral_df = get_df_txt('BEHAVIOURDATA',self._product.Vector_dict)
+        else:
+            self._product.Behavioral_df = get_df_txt('BEHAVIOURDATA',self._product.Vector_dict)
+
+            self._product.Behavioral_df = None
+
+#################################
+
 class Application():
  
  #get Product
  
- def __init__(self) -> None:
+ def __init__(self,p_InputData) -> None:
 
      self.CreditBureau_df = None
      self.Application_df = None
      self.Behavioral_df = None
      self.Vector_dict = None
+     self.InputData = p_InputData
  
  def get_df_dwh(self, p_sql_query: Any):
      
@@ -146,13 +198,39 @@ class Application():
 
      return df
 
- def get_df_blaze(self,p_type):
+ def get_df_blaze(self):
      
-     v_dict = parse_vct(p_type,df_dict,rx_dict)
+     #print(df_dict)
+     #print(rx_dict)s
+     reset_config_vars()
+     v_dict = parse_vct(self.InputData,df_dict,rx_dict)
      
      self.Vector_dict = v_dict
 
      pass
+
+ def get_df_blaze_str(self):
+     
+     #print(df_dict)
+     #print(rx_dict)
+     #reset_config_vars()
+     
+     df_dict  = {
+    'CREDITBUREAU':[],
+    'BEHAVIOURDATA':[],
+    'APPLICATION':[],
+    'PREVAPPLICATION':[],
+    'DOCUMENTS':[],
+    'PERSONS':[],
+    'SK_APPLICATION':[]
+    }
+    
+     #print(df_dict)
+     v_dict = parse_vct_str(self.InputData,df_dict,rx_dict)
+     
+     self.Vector_dict = v_dict
+
+     pass   
 
 
 #################################

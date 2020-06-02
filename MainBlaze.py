@@ -6,8 +6,10 @@ from tabulate import tabulate
 if __name__ == "__main__":
 
     # GET INPUT DATA
+    input_data = 'sample_vector_cb.txt'
+
     controller = Controller()
-    builder = BuilderVectorBlaze()
+    builder = BuilderVectorBlaze(input_data)
     controller.builder = builder
     controller.buildVctForTestScoreCardBlaze()
 

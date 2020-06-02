@@ -70,6 +70,6 @@ def get_df_txt(p_type,p_dict):
     df['SK_APPLICATION'] = p_dict['SK_APPLICATION'][0][3]     
     return df
 
-v_dict = parse_vct('sample_vector_cb.txt',df_dict,rx_dict)
-df = get_df_txt('BEHAVIOURDATA',v_dict)
-print(df)
+#v_dict = parse_vct('sample_vector_cb.txt',df_dict,rx_dict)
+#df = get_df_txt('BEHAVIOURDATA',v_dict)
+#print(df)
