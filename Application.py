@@ -25,6 +25,12 @@ class Builder(ABC):
  @abstractmethod
  def getBehavioralData(self) -> None:
      pass   
+ @abstractmethod
+ def getPredictorListData(self) -> None:
+     pass
+ @abstractmethod
+ def getPredictorCashData(self) -> None:
+     pass
 #################################
 
 class BuilderVectorDWH (Builder):
@@ -71,6 +77,15 @@ class BuilderVectorDWH (Builder):
          self._product.Behavioral_df = self._product.get_df_dwh(f_scoring_vector_tt_beh())
      else:
          self._product.Behavioral_df = self._product.get_df_dwh(f_scoring_vector_tt_beh())
+
+ def getPredictorListData(self,source)->None:
+
+     pass
+
+ def getPredictorCashData(self,source)->None:
+
+     pass
+ 
 #################################
 
 
@@ -119,6 +134,14 @@ class BuilderVectorBlaze (Builder):
 
             self._product.Behavioral_df = None
 
+    def getPredictorListData(self,source)->None:
+
+        pass
+
+    def getPredictorCashData(self,source)->None:
+
+        pass
+
 #################################
 
 
@@ -153,9 +176,11 @@ class BuilderVectorBlazeStr (Builder):
     def getApplicationData(self,source) -> None:
         
         if source == 'txt':
+            #print(self._product.Vector_dict['APPLICATION'])
             v_dfs=[get_df_txt('APPLICATION',self._product.Vector_dict),get_df_txt('PERSONS',self._product.Vector_dict)]
             v_df_merged = reduce(lambda  left,right: pd.merge(left,right,how='outer',on=['SK_APPLICATION']), v_dfs)
             self._product.Application_df = v_df_merged
+            #print(self._product.Application_df)
         else:
             self._product.Application_df = get_df_txt('APPLICATION',self._product.Vector_dict)
 
@@ -168,6 +193,17 @@ class BuilderVectorBlazeStr (Builder):
 
             self._product.Behavioral_df = None
 
+    def getPredictorListData(self,source)->None:
+            #print(self._product.Vector_dict['PREDICTORSLIST'])
+            self._product.predictors_list_df = get_df_txt('PREDICTORSLIST',self._product.Vector_dict)
+
+    def getPredictorCashData(self,source)->None:
+
+            self._product.predictor_cash_df = get_df_txt('PREDICTORSCASH',self._product.Vector_dict)
+            self._product.predictor_cash_df['VALUE']=(self._product.predictor_cash_df['REALVALUE'])
+            #print(self._product.predictor_cash_df)
+
+
 #################################
 
 class Application():
@@ -179,6 +215,8 @@ class Application():
      self.CreditBureau_df = None
      self.Application_df = None
      self.Behavioral_df = None
+     self.predictors_list_df = None
+     self.predictor_cash_df = None
      self.Vector_dict = None
      self.InputData = p_InputData
  
@@ -202,7 +240,7 @@ class Application():
      
      #print(df_dict)
      #print(rx_dict)s
-     reset_config_vars()
+     #reset_config_vars()
      v_dict = parse_vct(self.InputData,df_dict,rx_dict)
      
      self.Vector_dict = v_dict
@@ -222,6 +260,8 @@ class Application():
     'PREVAPPLICATION':[],
     'DOCUMENTS':[],
     'PERSONS':[],
+    'PREDICTORSCASH':[],
+    'PREDICTORSLIST':[],
     'SK_APPLICATION':[]
     }
     
@@ -258,4 +298,12 @@ class Controller:
      self.builder.getCreditBureauData('txt')
      self.builder.getApplicationData('txt')
      self.builder.getBehavioralData('txt')
+ #################################
+
+ def buildVctForBlaze(self) -> None:
+     self.builder.getCreditBureauData('txt')
+     self.builder.getApplicationData('txt')
+     self.builder.getBehavioralData('txt')
+     self.builder.getPredictorListData('txt')
+     self.builder.getPredictorCashData('txt')
  #################################

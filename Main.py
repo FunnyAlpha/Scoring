@@ -38,7 +38,7 @@ if __name__ == "__main__":
     #print(tabulate(predictors_dwh.rez_df, headers='keys',tablefmt='psql',disable_numparse=True))
 
     #print(tabulate(predictors_dwh.rez_df, headers='keys',tablefmt='psql',disable_numparse=True))
-
+    '''
     def load_data_frame(self):
         # GET INPUT DATA
         v_input_data = None
@@ -51,6 +51,7 @@ if __name__ == "__main__":
         predictors_dwh.get_predictors_rez_df()
         return predictors_dwh.rez_df
 
+
     def load_data_frame_blaze():
 
         # GET INPUT DATA
@@ -60,10 +61,15 @@ if __name__ == "__main__":
         controller.builder = builder
         controller.buildVctForTestScoreCardBlaze()
         # GET OUTPUT DATA
-        predictors_dwh  = TestScoreCardPredictors(builder.product.Application_df,builder.product.CreditBureau_df,builder.product.Behavioral_df)
+        predictors_dwh  = Predictors(builder.product.Application_df,
+                                    builder.product.CreditBureau_df,
+                                    builder.product.Behavioral_df,
+                                    builder.product.predictors_list_df,
+                                    builder.product.predictor_cash_df,
+                                    )
         predictors_dwh.get_predictors_rez_df()
         return predictors_dwh.rez_df
-
+    '''
     def load_data_frame_dwh():
 
         # GET INPUT DATA
@@ -73,8 +79,13 @@ if __name__ == "__main__":
         controller.builder = builder
         controller.buildVctForTestScoreCard()
         # GET OUTPUT DATA
-        predictors_dwh  = TestScoreCardPredictors(builder.product.Application_df,builder.product.CreditBureau_df,builder.product.Behavioral_df)
-        predictors_dwh.get_predictors_rez_df()
+        predictors_dwh  = Predictors(builder.product.Application_df,
+                                    builder.product.CreditBureau_df,
+                                    builder.product.Behavioral_df,
+                                    builder.product.predictors_list_df,
+                                    builder.product.predictor_cash_df
+                                    )
+        predictors_dwh.get_predictors_dwh_df()
         return predictors_dwh.rez_df[predictors_dwh.rez_df['SK_APPLICATION']==203841905]   
 
 
@@ -85,17 +96,22 @@ if __name__ == "__main__":
         controller = Controller()
         builder = BuilderVectorBlazeStr(p_input_str)
         controller.builder = builder
-        controller.buildVctForTestScoreCardBlaze()
+        controller.buildVctForBlaze()
         # GET OUTPUT DATA
-        predictors_dwh  = TestScoreCardPredictors(builder.product.Application_df,builder.product.CreditBureau_df,builder.product.Behavioral_df)
-        predictors_dwh.get_predictors_rez_df()
+        #print(builder.product.Behavioral_df)
+        predictors_dwh  = Predictors(builder.product.Application_df,
+                                    builder.product.CreditBureau_df,
+                                    builder.product.Behavioral_df,
+                                    builder.product.predictors_list_df,
+                                    builder.product.predictor_cash_df
+                                    )
+        predictors_dwh.get_predictors_blaze_df()
         return predictors_dwh.rez_df
 
     #print('dwh: ',load_data_frame_dwh())
     #print('blaze :',load_data_frame_blaze())   
 
 
-    #print(tabulate(load_data_frame_dwh(), headers='keys',tablefmt='psql',disable_numparse=True))
+    print(tabulate(load_data_frame_dwh(), headers='keys',tablefmt='psql',disable_numparse=True))
     #print(tabulate(load_data_frame_blaze(), headers='keys',tablefmt='psql',disable_numparse=True))
-    #print("STR_BLAZE")
-    #print(tabulate(load_data_frame_blaze_str(test_str), headers='keys',tablefmt='psql',disable_numparse=True))
+    print(tabulate(load_data_frame_blaze_str(test_str), headers='keys',tablefmt='psql',disable_numparse=True))

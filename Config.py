@@ -92,4 +92,12 @@ class blaze_vector_output:
 
         return file_name        
 
-        
+'''
+predictors_fun={
+    'MAX_DATE_OPEN_CARD':max_date_open_card(),
+    'MIN_DATE_OPEN_CARD':min_date_open_card(),
+    'CNT_CLOSED_CASH_POS':cnt_closed_cash_pos(),
+    'AGE_YEARS_REAL':age_years_real(),
+    'EDUCATION':education()
+}
+'''

@@ -1,6 +1,7 @@
 import re
 import pandas as pd
 from dateutil import parser
+from tabulate import tabulate
 
 
 rx_dict = {
@@ -10,6 +11,8 @@ rx_dict = {
     re.compile(r'(.*?)\|documents\[(\d+)\]\.(.*)\|(.*?)\s*$'):'DOCUMENTS',
     re.compile(r'(.*?)\|persons\[(\d+)\]\.(\w*)\|(.*?)\s*$'):'PERSONS',
     re.compile(r'(.*?)\|(.\w*)\|(.*?)\s*$'):'APPLICATION',
+    re.compile(r'(.*?)\|PredictorsList\[(\d+)\]\.(.*)\|(.*?)\s*$'):'PREDICTORSLIST',
+    re.compile(r'(.*?)\|ApprovalCharacteristics\[(\d+)\]\.(.*)\|(.*?)\s*$'):'PREDICTORSCASH',
     re.compile(r'(.*?)\|(idCredit)\|(.*?)\s*$'):'SK_APPLICATION'
 }
 
@@ -21,25 +24,29 @@ df_dict  = {
     'PREVAPPLICATION':[],
     'DOCUMENTS':[],
     'PERSONS':[],
+    'PREDICTORSCASH':[],
+    'PREDICTORSLIST':[],
     'SK_APPLICATION':[]
 }
 
-
+'''
 def reset_config_vars():
 
     global rx_dict
     global df_dict
 
     rx_dict = {
-    re.compile(r'(.*?)\|credit\.creditBureau\.creditData\[(\d+)\]\.(.*)\|(.*?)\s*$'):'CREDITBUREAU',
-    re.compile(r'(.*?)\|sourceData\.behaviourData\.persons\[(\d+)\]\.(.*)\|(.*?)\s*$'):'BEHAVIOURDATA',
-    re.compile(r'(.*?)\|applicantData\.previousApplications\.persons\[(\d+)\]\.(.*)\|(.*?)\s*$'):'PREVAPPLICATION',
-    re.compile(r'(.*?)\|documents\[(\d+)\]\.(.*)\|(.*?)\s*$'):'DOCUMENTS',
-    re.compile(r'(.*?)\|persons\[(\d+)\]\.(\w*)\|(.*?)\s*$'):'PERSONS',
-    re.compile(r'(.*?)\|(.\w*)\|(.*?)\s*$'):'APPLICATION',
+    #re.compile(r'(.*?)\|credit\.creditBureau\.creditData\[(\d+)\]\.(.*)\|(.*?)\s*$'):'CREDITBUREAU',
+    #re.compile(r'(.*?)\|sourceData\.behaviourData\.persons\[(\d+)\]\.(.*)\|(.*?)\s*$'):'BEHAVIOURDATA',
+    #re.compile(r'(.*?)\|applicantData\.previousApplications\.persons\[(\d+)\]\.(.*)\|(.*?)\s*$'):'PREVAPPLICATION',
+    #re.compile(r'(.*?)\|documents\[(\d+)\]\.(.*)\|(.*?)\s*$'):'DOCUMENTS',
+    #re.compile(r'(.*?)\|persons\[(\d+)\]\.(\w*)\|(.*?)\s*$'):'PERSONS',
+    #re.compile(r'(.*?)\|(.\w*)\|(.*?)\s*$'):'APPLICATION',
+    re.compile(r'(.*?)\|ApprovalCharacteristics\[(\d+)\]\.(.*)\|(.*?)\s*$'):'APPROVALCHARACTERISTIC',
     re.compile(r'(.*?)\|(idCredit)\|(.*?)\s*$'):'SK_APPLICATION'
 }
 
+#c|ApprovalCharacteristics[59].variation|1
 
 df_dict  = {
     'CREDITBUREAU':[],
@@ -48,8 +55,10 @@ df_dict  = {
     'PREVAPPLICATION':[],
     'DOCUMENTS':[],
     'PERSONS':[],
+    'APPROVALCHARACTERISTIC':[],
     'SK_APPLICATION':[]
 }
+'''
 
 def set_vct_data_type(p_list):
 
@@ -97,6 +106,8 @@ def parse_vct_str(p_input,p_dict,p_rx_dict):
 
     v_dict = p_dict
 
+    #print(p_input)
+
     for line in p_input.split('\n'):
         #print(line)
         for rx,val in p_rx_dict.items():
@@ -113,6 +124,7 @@ def parse_vct_str(p_input,p_dict,p_rx_dict):
 
 def get_df_txt(p_type,p_dict):
 
+    #print(p_dict['DOCUMENTS'])
     df = pd.DataFrame(p_dict[p_type])
     #get column name
     column = df[2].unique()
@@ -122,14 +134,31 @@ def get_df_txt(p_type,p_dict):
     df['SK_APPLICATION'] = p_dict['SK_APPLICATION'][0][3]     
     return df
 '''
-v_dict = parse_vct('sample_vector_cb.txt',df_dict,rx_dict)
-print(v_dict['APPLICATION'])
-df = get_df_txt('APPLICATION',v_dict)
-print(df['SYSDATE'])
+v_dict = parse_vct_str(test_str,df_dict,rx_dict)
+print(v_dict['APPROVALCHARACTERISTIC'])
+df = get_df_txt('APPROVALCHARACTERISTIC',v_dict)
+#print(df['SYSDATE'])
 '''
 
 
+'''
+c|credit.creditBureau.creditData[0].creditOwner|0
+n|credit.creditBureau.creditData[0].creditProlong|0
+n|credit.creditBureau.creditData[0].creditSum|3640
+'''
 
+'''
+data=[
+    {'creditData': {'creditOwner': '0',
+                                          'creditProlong': 0}},
+    {'creditData': {'creditOwner': '0',
+                                          'creditProlong': 0,
+                                          'creditSum':3640}}
+]
+
+print(tabulate(pd.json_normalize(data),headers='keys',disable_numparse=True))
+'''
+#print(pd.json_normalize(data))
 
 test_str = '''
 c|applicantData.bankAccountBankCode|2291
@@ -3174,4 +3203,31 @@ c|sourceData.behaviourData.persons[0].textLastRiskProdCombination|Cash Street: l
 c|sourceData.behaviourData.persons[0].typeLastFullApplication|Cash loans
 n|sourceData.behaviourData.persons[0].uak3|3.42
 n|sourceData.behaviourData.persons[0].us3B|0
+n|ApprovalCharacteristics[0].realValue|10
+c|ApprovalCharacteristics[0].name|CNT_CLOSED_CASH_POS
+c|ApprovalCharacteristics[0].class|scoreCardPredictor
+c|ApprovalCharacteristics[0].variation|1
+n|ApprovalCharacteristics[1].realValue|88
+c|ApprovalCharacteristics[1].name|AGE_YEARS_REAL
+c|ApprovalCharacteristics[1].class|scoreCardPredictor
+c|ApprovalCharacteristics[1].variation|1
+c|ApprovalCharacteristics[2].charValue|random
+c|ApprovalCharacteristics[2].name|RANDOM
+c|ApprovalCharacteristics[2].class|scoreCardPredictor
+c|ApprovalCharacteristics[2].variation|1
+c|PredictorsList[0].name|CNT_CLOSED_CASH_POS
+c|PredictorsList[1].name|AGE_YEARS_REAL
+c|PredictorsList[2].name|MAX_DATE_OPEN_CARD
+c|PredictorsList[3].name|MIN_DATE_OPEN_CARD
+c|PredictorsList[4].name|ALL_CASH_POS
+c|PredictorsList[5].name|EDUCATION
+'''
+
+#с|Predictors[0].predictorCode|score_mts_comp
+'''
+v_dict = parse_vct_str(test_str,df_dict,rx_dict)
+#print(v_dict['APPROVALCHARACTERISTIC'])
+df = get_df_txt('PREDICTORSCASH',v_dict)
+print(tabulate(df, headers='keys',tablefmt='psql',disable_numparse=True))
+#print(tabulate(df))
 '''
