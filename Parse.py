@@ -29,22 +29,22 @@ df_dict  = {
     'SK_APPLICATION':[]
 }
 
-'''
-def reset_config_vars():
 
-    global rx_dict
-    global df_dict
+# def reset_config_vars():
 
-    rx_dict = {
-    #re.compile(r'(.*?)\|credit\.creditBureau\.creditData\[(\d+)\]\.(.*)\|(.*?)\s*$'):'CREDITBUREAU',
-    #re.compile(r'(.*?)\|sourceData\.behaviourData\.persons\[(\d+)\]\.(.*)\|(.*?)\s*$'):'BEHAVIOURDATA',
-    #re.compile(r'(.*?)\|applicantData\.previousApplications\.persons\[(\d+)\]\.(.*)\|(.*?)\s*$'):'PREVAPPLICATION',
-    #re.compile(r'(.*?)\|documents\[(\d+)\]\.(.*)\|(.*?)\s*$'):'DOCUMENTS',
-    #re.compile(r'(.*?)\|persons\[(\d+)\]\.(\w*)\|(.*?)\s*$'):'PERSONS',
-    #re.compile(r'(.*?)\|(.\w*)\|(.*?)\s*$'):'APPLICATION',
-    re.compile(r'(.*?)\|ApprovalCharacteristics\[(\d+)\]\.(.*)\|(.*?)\s*$'):'APPROVALCHARACTERISTIC',
-    re.compile(r'(.*?)\|(idCredit)\|(.*?)\s*$'):'SK_APPLICATION'
-}
+#     global rx_dict
+#     global df_dict
+
+#     rx_dict = {
+#     #re.compile(r'(.*?)\|credit\.creditBureau\.creditData\[(\d+)\]\.(.*)\|(.*?)\s*$'):'CREDITBUREAU',
+#     #re.compile(r'(.*?)\|sourceData\.behaviourData\.persons\[(\d+)\]\.(.*)\|(.*?)\s*$'):'BEHAVIOURDATA',
+#     #re.compile(r'(.*?)\|applicantData\.previousApplications\.persons\[(\d+)\]\.(.*)\|(.*?)\s*$'):'PREVAPPLICATION',
+#     #re.compile(r'(.*?)\|documents\[(\d+)\]\.(.*)\|(.*?)\s*$'):'DOCUMENTS',
+#     #re.compile(r'(.*?)\|persons\[(\d+)\]\.(\w*)\|(.*?)\s*$'):'PERSONS',
+#     #re.compile(r'(.*?)\|(.\w*)\|(.*?)\s*$'):'APPLICATION',
+#     re.compile(r'(.*?)\|ApprovalCharacteristics\[(\d+)\]\.(.*)\|(.*?)\s*$'):'APPROVALCHARACTERISTIC',
+#     re.compile(r'(.*?)\|(idCredit)\|(.*?)\s*$'):'SK_APPLICATION'
+# }
 
 #c|ApprovalCharacteristics[59].variation|1
 
@@ -58,7 +58,7 @@ df_dict  = {
     'APPROVALCHARACTERISTIC':[],
     'SK_APPLICATION':[]
 }
-'''
+
 
 def set_vct_data_type(p_list):
 

@@ -155,7 +155,7 @@ class Predictors():
             if row['NAME'] == p_name and row['CLASS'] == 'scoreCardPredictor':
                 #print(self.predictors_cash_df)
                 #print('HERE')
-                v_value = row['VALUE']
+                #v_value = row['VALUE']
                 v_df = pd.DataFrame({
                     'SK_APPLICATION':[self.predictors_cash_df.loc[index,'SK_APPLICATION']],
                     row['NAME']:[self.predictors_cash_df.loc[index,'VALUE']]

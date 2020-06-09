@@ -1,5 +1,5 @@
-from Application import *
-from Predictors import *
+from Application import Controller,BuilderVectorDWH,BuilderVectorBlazeStr
+from Predictors import Predictors
 import numpy as np
 from tabulate import tabulate
 from sklearn.preprocessing import MinMaxScaler
@@ -112,6 +112,6 @@ if __name__ == "__main__":
     #print('blaze :',load_data_frame_blaze())   
 
 
-    print(tabulate(load_data_frame_dwh(), headers='keys',tablefmt='psql',disable_numparse=True))
+    #print(tabulate(load_data_frame_dwh(), headers='keys',tablefmt='psql',disable_numparse=True))
     #print(tabulate(load_data_frame_blaze(), headers='keys',tablefmt='psql',disable_numparse=True))
     print(tabulate(load_data_frame_blaze_str(test_str), headers='keys',tablefmt='psql',disable_numparse=True))
