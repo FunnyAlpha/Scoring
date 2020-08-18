@@ -127,6 +127,7 @@ def get_df_txt(p_type,p_dict):
     #print(p_dict['DOCUMENTS'])
     df = pd.DataFrame(p_dict[p_type])
     #get column name
+    # print(df)
     column = df[2].unique()
     #unstack and clean dataframe
     df = df.drop(0,1).set_index([1, 2]).unstack().droplevel(0, axis=1).rename_axis(
@@ -1796,16 +1797,12 @@ n|credit.creditBureau.creditData[35].cred_ratio|0
 n|credit.creditBureau.creditData[35].creditActive|0
 n|credit.creditBureau.creditData[35].creditCollateral|0
 c|credit.creditBureau.creditData[35].creditCurrency|rur
-d|credit.creditBureau.creditData[35].creditDate|15.02.2014 00:00:00
+d|credit.creditBureau.creditData[35].creditDate|15.03.2020 00:00:00
 n|credit.creditBureau.creditData[35].creditDayOverdue|0
-d|credit.creditBureau.creditData[35].creditEndDate|16.02.2015 00:00:00
-d|credit.creditBureau.creditData[35].creditEndDateFact|15.01.2015 00:00:00
-n|credit.creditBureau.creditData[35].creditJoint|0
+n|credit.creditBureau.creditData[35].creditJoint|1
 n|credit.creditBureau.creditData[35].creditMaxOverdue|0
-c|credit.creditBureau.creditData[35].creditOwner|0
 n|credit.creditBureau.creditData[35].creditProlong|0
-n|credit.creditBureau.creditData[35].creditSum|15950
-n|credit.creditBureau.creditData[35].creditSumDebt|0
+n|credit.creditBureau.creditData[35].creditSum|50000
 n|credit.creditBureau.creditData[35].creditSumLimit|0
 n|credit.creditBureau.creditData[35].creditSumOverdue|0
 n|credit.creditBureau.creditData[35].creditSumType|1
@@ -3215,12 +3212,9 @@ c|ApprovalCharacteristics[2].charValue|random
 c|ApprovalCharacteristics[2].name|RANDOM
 c|ApprovalCharacteristics[2].class|scoreCardPredictor
 c|ApprovalCharacteristics[2].variation|1
-c|PredictorsList[0].name|CNT_CLOSED_CASH_POS
-c|PredictorsList[1].name|AGE_YEARS_REAL
-c|PredictorsList[2].name|MAX_DATE_OPEN_CARD
-c|PredictorsList[3].name|MIN_DATE_OPEN_CARD
-c|PredictorsList[4].name|ALL_CASH_POS
-c|PredictorsList[5].name|EDUCATION
+c|PredictorsList[0].name|CB_MAXAGRMNTHS_1_3
+c|PredictorsList[1].name|CB_MAXAGRMNTHS_2_3
+c|PredictorsList[2].name|CB_MAXAGRMNTHS_3_3
 '''
 
 #с|Predictors[0].predictorCode|score_mts_comp

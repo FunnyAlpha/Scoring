@@ -117,8 +117,8 @@ if __name__ == "__main__":
     print(tabulate(load_data_frame_blaze_str(test_str), headers='keys',tablefmt='psql',disable_numparse=True))
 
 
-    from pycallgraph import PyCallGraph
-    from pycallgraph.output import GraphvizOutput
+    # from pycallgraph import PyCallGraph
+    # from pycallgraph.output import GraphvizOutput
     
-    with PyCallGraph(output=GraphvizOutput()):
-        df=load_data_frame_blaze_str(test_str)
+    # with PyCallGraph(output=GraphvizOutput()):
+    #     df=load_data_frame_blaze_str(test_str)

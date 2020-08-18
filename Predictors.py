@@ -20,7 +20,10 @@ class Predictors():
         'CNT_CLOSED_CASH_POS':self.cnt_closed_cash_pos(),
         'AGE_YEARS_REAL':self.age_years_real(),
         'EDUCATION':self.education(),
-        'ALL_CASH_POS':self.all_cash_pos()
+        'ALL_CASH_POS':self.all_cash_pos(),
+        'CB_MAXAGRMNTHS_1_3':self.cb_maxagrmnths_1_3(),
+        'CB_MAXAGRMNTHS_2_3':self.cb_maxagrmnths_2_3(),
+        'CB_MAXAGRMNTHS_3_3':self.cb_maxagrmnths_3_3()
         }
 
     def add_unknown_columns(self,df,features_list):
@@ -104,6 +107,174 @@ class Predictors():
         #(df['SK_DATE_DECISION']==df['SK_DATE_DECISION'])
         ].groupby(['SK_APPLICATION']).agg({'SK_APPLICATION':np.count_nonzero}).rename(columns={"SK_APPLICATION": "CNT_CLOSED_CASH_POS"})
 
+        #print(v_df)
+
+        return v_df
+
+    def cb_maxagrmnths_1_3(self):
+
+        v_df_pre = reduce(
+        lambda  left,right: pd.merge(left,right,how='outer',on=['SK_APPLICATION']), 
+        [
+        #APPLICATIONS
+        pd.DataFrame({"SK_APPLICATION":self.app_df['SK_APPLICATION'].unique()}),
+        #NUMACTIVECONCB 
+        self.cb_df[
+        ((self.cb_df['CREDITOWNER'] == '0') | (self.cb_df['CREDITOWNER'].isna())) &
+        ((self.cb_df['CREDITSUMDEBT'].isna()) & (self.cb_df['CREDITSUM']>40000)) &
+        (self.cb_df['CREDITJOINT'] == 1) &
+        (self.cb_df['CREDITENDDATEFACT'].isna()) &
+        (
+            (self.cb_df['CREDITENDDATE'].isna()) | 
+            (
+                ((self.cb_df['CREDITSUMOVERDUE']>200) & (self.cb_df['CREDITENDDATE'] > self.app_df.iloc[0]['SYSDATE'])) |
+                ((self.cb_df['CREDITENDDATE'] < self.app_df.iloc[0]['SYSDATE']))
+            )
+        )
+        ].groupby(['SK_APPLICATION']).agg({'SK_APPLICATION':np.count_nonzero}).rename(columns={"SK_APPLICATION": "NUMACTIVECONCB"}).reset_index(),
+        #MINMONTHLASTAPP
+        self.cb_df[
+        ((self.cb_df['CREDITOWNER'] == '0') | (self.cb_df['CREDITOWNER'].isna())) &
+        ((self.cb_df['CREDITSUMDEBT'].isna()) & (self.cb_df['CREDITSUM']>40000)) &
+        (self.cb_df['CREDITJOINT'] == 1) &
+        (self.cb_df['CREDITENDDATEFACT'].isna()) &
+        (
+            (self.cb_df['CREDITENDDATE'].isna()) | 
+            (
+                ((self.cb_df['CREDITSUMOVERDUE']>200) & (self.cb_df['CREDITENDDATE'] > self.app_df.iloc[0]['SYSDATE'])) |
+                (self.cb_df['CREDITENDDATE'] < self.app_df.iloc[0]['SYSDATE'])
+            )
+        )
+
+        ].assign(MONTHLASTAPP = (self.app_df.iloc[0]['SYSDATE']-self.cb_df['CREDITDATE'])/np.timedelta64(1,'M')
+        ).groupby(['SK_APPLICATION']).agg({'MONTHLASTAPP':np.min}).rename(columns={"MONTHLASTAPP": "MINMONTHLASTAPP"}).reset_index()
+        ]
+        )
+
+        v_df_pre['CB_MAXAGRMNTHS_1_3'] = np.where(
+        (v_df_pre['NUMACTIVECONCB']==1) & 
+        (v_df_pre['MINMONTHLASTAPP']<3),
+        1,
+        0
+        )
+         
+        v_df = v_df_pre[['SK_APPLICATION','CB_MAXAGRMNTHS_1_3']]
+            
+            # .groupby(['SK_APPLICATION']
+            # ).agg({'SK_APPLICATION':np.count_nonzero}
+            # ).rename(columns={"SK_APPLICATION": "CB_MAXAGRMNTHS_1_3"}).reset_index()
+
+        return v_df
+
+
+    def cb_maxagrmnths_2_3(self):
+
+        v_df_pre = reduce(
+        lambda  left,right: pd.merge(left,right,how='outer',on=['SK_APPLICATION']), 
+        [
+        #APPLICATIONS
+        pd.DataFrame({"SK_APPLICATION":self.app_df['SK_APPLICATION'].unique()}),
+        #NUMACTIVECONCB 
+        self.cb_df[
+        ((self.cb_df['CREDITOWNER'] == '0') | (self.cb_df['CREDITOWNER'].isna())) &
+        ((self.cb_df['CREDITSUMDEBT'].isna()) & (self.cb_df['CREDITSUM']>40000)) &
+        (self.cb_df['CREDITJOINT'] == 1) &
+        (self.cb_df['CREDITENDDATEFACT'].isna()) &
+        (
+            (self.cb_df['CREDITENDDATE'].isna()) | 
+            (
+                ((self.cb_df['CREDITSUMOVERDUE']>200) & (self.cb_df['CREDITENDDATE'] > self.app_df.iloc[0]['SYSDATE'])) |
+                ((self.cb_df['CREDITENDDATE'] < self.app_df.iloc[0]['SYSDATE']))
+            )
+        )
+        ].groupby(['SK_APPLICATION']).agg({'SK_APPLICATION':np.count_nonzero}).rename(columns={"SK_APPLICATION": "NUMACTIVECONCB"}).reset_index(),
+        #MINMONTHLASTAPP
+        self.cb_df[
+        ((self.cb_df['CREDITOWNER'] == '0') | (self.cb_df['CREDITOWNER'].isna())) &
+        ((self.cb_df['CREDITSUMDEBT'].isna()) & (self.cb_df['CREDITSUM']>40000)) &
+        (self.cb_df['CREDITJOINT'] == 1) &
+        (self.cb_df['CREDITENDDATEFACT'].isna()) &
+        (
+            (self.cb_df['CREDITENDDATE'].isna()) | 
+            (
+                ((self.cb_df['CREDITSUMOVERDUE']>200) & (self.cb_df['CREDITENDDATE'] > self.app_df.iloc[0]['SYSDATE'])) |
+                (self.cb_df['CREDITENDDATE'] < self.app_df.iloc[0]['SYSDATE'])
+            )
+        )
+
+        ].assign(MONTHLASTAPP = (self.app_df.iloc[0]['SYSDATE']-self.cb_df['CREDITDATE'])/np.timedelta64(1,'M')
+        ).groupby(['SK_APPLICATION']).agg({'MONTHLASTAPP':np.min}).rename(columns={"MONTHLASTAPP": "MINMONTHLASTAPP"}).reset_index()
+        ]
+        )
+
+        v_df_pre['CB_MAXAGRMNTHS_2_3'] = np.where(
+        (v_df_pre['NUMACTIVECONCB']==2) & 
+        (v_df_pre['MINMONTHLASTAPP']<3),
+        1,
+        0
+        )
+         
+        v_df = v_df_pre[['SK_APPLICATION','CB_MAXAGRMNTHS_2_3']]
+            
+            # .groupby(['SK_APPLICATION']
+            # ).agg({'SK_APPLICATION':np.count_nonzero}
+            # ).rename(columns={"SK_APPLICATION": "CB_MAXAGRMNTHS_1_3"}).reset_index()
+
+        return v_df
+
+    def cb_maxagrmnths_3_3(self):
+
+        v_df_pre = reduce(
+        lambda  left,right: pd.merge(left,right,how='outer',on=['SK_APPLICATION']), 
+        [
+        #APPLICATIONS
+        pd.DataFrame({"SK_APPLICATION":self.app_df['SK_APPLICATION'].unique()}),
+        #NUMACTIVECONCB 
+        self.cb_df[
+        ((self.cb_df['CREDITOWNER'] == '0') | (self.cb_df['CREDITOWNER'].isna())) &
+        ((self.cb_df['CREDITSUMDEBT'].isna()) & (self.cb_df['CREDITSUM']>40000)) &
+        (self.cb_df['CREDITJOINT'] == 1) &
+        (self.cb_df['CREDITENDDATEFACT'].isna()) &
+        (
+            (self.cb_df['CREDITENDDATE'].isna()) | 
+            (
+                ((self.cb_df['CREDITSUMOVERDUE']>200) & (self.cb_df['CREDITENDDATE'] > self.app_df.iloc[0]['SYSDATE'])) |
+                ((self.cb_df['CREDITENDDATE'] < self.app_df.iloc[0]['SYSDATE']))
+            )
+        )
+        ].groupby(['SK_APPLICATION']).agg({'SK_APPLICATION':np.count_nonzero}).rename(columns={"SK_APPLICATION": "NUMACTIVECONCB"}).reset_index(),
+        #MINMONTHLASTAPP
+        self.cb_df[
+        ((self.cb_df['CREDITOWNER'] == '0') | (self.cb_df['CREDITOWNER'].isna())) &
+        ((self.cb_df['CREDITSUMDEBT'].isna()) & (self.cb_df['CREDITSUM']>40000)) &
+        (self.cb_df['CREDITJOINT'] == 1) &
+        (self.cb_df['CREDITENDDATEFACT'].isna()) &
+        (
+            (self.cb_df['CREDITENDDATE'].isna()) | 
+            (
+                ((self.cb_df['CREDITSUMOVERDUE']>200) & (self.cb_df['CREDITENDDATE'] > self.app_df.iloc[0]['SYSDATE'])) |
+                (self.cb_df['CREDITENDDATE'] < self.app_df.iloc[0]['SYSDATE'])
+            )
+        )
+
+        ].assign(MONTHLASTAPP = (self.app_df.iloc[0]['SYSDATE']-self.cb_df['CREDITDATE'])/np.timedelta64(1,'M')
+        ).groupby(['SK_APPLICATION']).agg({'MONTHLASTAPP':np.min}).rename(columns={"MONTHLASTAPP": "MINMONTHLASTAPP"}).reset_index()
+        ]
+        )
+
+        v_df_pre['CB_MAXAGRMNTHS_3_3'] = np.where(
+        (v_df_pre['NUMACTIVECONCB']==3) & 
+        (v_df_pre['MINMONTHLASTAPP']<3),
+        1,
+        0
+        )
+         
+        v_df = v_df_pre[['SK_APPLICATION','CB_MAXAGRMNTHS_3_3']]
+            
+            # .groupby(['SK_APPLICATION']
+            # ).agg({'SK_APPLICATION':np.count_nonzero}
+            # ).rename(columns={"SK_APPLICATION": "CB_MAXAGRMNTHS_1_3"}).reset_index()
+
         return v_df
 
 
@@ -119,6 +290,7 @@ class Predictors():
         self.all_cash_pos(),                        # all_cash_pos
         self.age_years_real(),                      # age_years_real
         self.education(),                           # education
+        self.cb_maxagrmnths_2_3()                   # cb_maxagrmnths_2_3
         ]
 
         df_merged = reduce(lambda  left,right: pd.merge(left,right,how='outer',on=['SK_APPLICATION']), dfs)
