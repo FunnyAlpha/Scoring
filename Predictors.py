@@ -1,12 +1,16 @@
-import pandas as pd
-import numpy as np
 from functools import reduce
+
+import numpy as np
+import pandas as pd
+from pandas.tests.scalar import timestamp
 from tabulate import tabulate
+
 #from Config import predictors_fun
 
 class Predictors():
     #construct object
     def __init__(self,app_df,cb_df,beh_df,predictors_list_df,predictor_cash_df):
+
         self.app_df = app_df
         self.cb_df = cb_df
         self.beh_df = beh_df 
@@ -15,22 +19,30 @@ class Predictors():
         self.predictors_cash_df = predictor_cash_df
 
         self.predictors_fun={
-        'MAX_DATE_OPEN_CARD':self.max_date_open_card(),
-        'MIN_DATE_OPEN_CARD':self.min_date_open_card(),
-        'CNT_CLOSED_CASH_POS':self.cnt_closed_cash_pos(),
-        'AGE_YEARS_REAL':self.age_years_real(),
-        'EDUCATION':self.education(),
-        'ALL_CASH_POS':self.all_cash_pos(),
-        'CB_MAXAGRMNTHS_1_3':self.cb_maxagrmnths_1_3(),
-        'CB_MAXAGRMNTHS_2_3':self.cb_maxagrmnths_2_3(),
-        'CB_MAXAGRMNTHS_3_3':self.cb_maxagrmnths_3_3()
+        'MAX_DATE_OPEN_CARD': self.max_date_open_card,
+        'MIN_DATE_OPEN_CARD':self.min_date_open_card,
+        'CNT_CLOSED_CASH_POS':self.cnt_closed_cash_pos,
+        'AGE_YEARS_REAL':self.age_years_real,
+        'EDUCATION':self.education,
+        'ALL_CASH_POS':self.all_cash_pos,
+        'CB_MAXAGRMNTHS_1_3':self.cb_maxagrmnths_1_3,
+        'CB_MAXAGRMNTHS_2_3':self.cb_maxagrmnths_2_3,
+        'CB_MAXAGRMNTHS_3_3':self.cb_maxagrmnths_3_3
         }
+        # print(self.predictors_fun)
+    def add_unknown_columns(self,df,features):
 
-    def add_unknown_columns(self,df,features_list):
+
         
-        for el in features_list:
-            if el not in df:
-                df[el] = np.nan
+        for key,value in features.items():
+            if key not in df:
+
+                if value=='d':
+                    df[key]= np.datetime64('NaT')
+                elif value =='c':
+                    df[key] = str(np.nan)
+                else:
+                    df[key] = np.nan
         pass
 
     def is_card(self,credit_type):
@@ -38,14 +50,17 @@ class Predictors():
 
     def age_years_real(self):
 
+        self.add_unknown_columns(self.app_df,{'SYSDATE':'d','BIRTH':'d'})
+
         v_df = self.app_df[['SK_APPLICATION']].assign(AGE_YEARS_REAL=(self.app_df['SYSDATE'] - self.app_df['BIRTH'])/np.timedelta64(1,'Y'))
 
         return v_df
 
     def education(self):
 
-        self.add_unknown_columns(self.app_df,['EDUCATION'])
-        self.add_unknown_columns(self.beh_df,['EDUCATION'])
+        # check attributes
+        self.add_unknown_columns(self.app_df,{'EDUCATION':'c'})
+        self.add_unknown_columns(self.beh_df,{'EDUCATION':'c'})
 
         df = reduce(
         lambda  left,right: pd.merge(left,right,how='outer',on=['SK_APPLICATION']),
@@ -53,14 +68,12 @@ class Predictors():
         )
         v_df= self.app_df[['SK_APPLICATION']].assign(EDUCATION=(df['EDUCATION'].fillna(df['BEHEDUCATION'])))
 
-        #print(v_df)
-
         return v_df
     
     def max_date_open_card(self):
 
-        #print(df['CREDIT_TYPE'].dtype)
-        #print(df['CREDIT_TYPE'].apply(lambda x:1 if x in {4,14,24} else 0))
+        # check attributes
+        self.add_unknown_columns(self.cb_df,{'CREDITJOINT':'n','CREDITOWNER':'c','CREDITTYPE':'n','CREDITDATE':'d'})
 
         v_df=self.cb_df[
         (self.cb_df['CREDITJOINT'] == 1) &
@@ -74,8 +87,7 @@ class Predictors():
     
     def min_date_open_card(self):
 
-        #print(df['CREDIT_TYPE'].dtype)
-        #print(df['CREDIT_TYPE'].apply(lambda x:1 if x in {4,14,24} else 0))
+        self.add_unknown_columns(self.cb_df,{'CREDITJOINT':'n','CREDITOWNER':'c','CREDITTYPE':'n','CREDITDATE':'d'})
 
         v_df = self.cb_df[
         (self.cb_df['CREDITJOINT'] == 1) &
@@ -88,6 +100,8 @@ class Predictors():
 
     def all_cash_pos(self):
 
+        self.add_unknown_columns(self.cb_df,{'CREDITJOINT':'n','CREDITOWNER':'c','CREDITTYPE':'n','CREDITDATE':'d'})
+
         v_df = self.cb_df[
         (self.cb_df['CREDITJOINT'] == 1) &
         (self.cb_df['CREDITOWNER'] == '0') &
@@ -98,7 +112,7 @@ class Predictors():
 
     def cnt_closed_cash_pos(self):
 
-        #print(df_test)
+        self.add_unknown_columns(self.cb_df,{'CREDITJOINT':'n','CREDITOWNER':'c','CREDITTYPE':'n','CREDITDATE':'d'})
 
         v_df = self.cb_df[
         (self.cb_df['CREDITJOINT'] == 1) &
@@ -113,6 +127,11 @@ class Predictors():
 
     def cb_maxagrmnths_1_3(self):
 
+        self.add_unknown_columns(self.cb_df,{'CREDITJOINT':'n','CREDITOWNER':'c','CREDITSUMDEBT':'n','CREDITSUM':'n',
+                                            'CREDITENDDATEFACT':'d','CREDITENDDATE':'d','CREDITSUMOVERDUE':'n','CREDITDATE':'d'}
+        )
+        self.add_unknown_columns(self.app_df,{'SYSDATE':'d'})
+
         v_df_pre = reduce(
         lambda  left,right: pd.merge(left,right,how='outer',on=['SK_APPLICATION']), 
         [
@@ -123,7 +142,7 @@ class Predictors():
         ((self.cb_df['CREDITOWNER'] == '0') | (self.cb_df['CREDITOWNER'].isna())) &
         ((self.cb_df['CREDITSUMDEBT'].isna()) & (self.cb_df['CREDITSUM']>40000)) &
         (self.cb_df['CREDITJOINT'] == 1) &
-        (self.cb_df['CREDITENDDATEFACT'].isna()) &
+        (self.cb_df['CREDITENDDATE'].isna()) &
         (
             (self.cb_df['CREDITENDDATE'].isna()) | 
             (
@@ -137,7 +156,7 @@ class Predictors():
         ((self.cb_df['CREDITOWNER'] == '0') | (self.cb_df['CREDITOWNER'].isna())) &
         ((self.cb_df['CREDITSUMDEBT'].isna()) & (self.cb_df['CREDITSUM']>40000)) &
         (self.cb_df['CREDITJOINT'] == 1) &
-        (self.cb_df['CREDITENDDATEFACT'].isna()) &
+        (self.cb_df['CREDITJOINT'].notna()) &
         (
             (self.cb_df['CREDITENDDATE'].isna()) | 
             (
@@ -168,6 +187,12 @@ class Predictors():
 
 
     def cb_maxagrmnths_2_3(self):
+
+        self.add_unknown_columns(self.cb_df,{'CREDITJOINT':'n','CREDITOWNER':'c','CREDITSUMDEBT':'n','CREDITSUM':'n',
+                                            'CREDITENDDATEFACT':'d','CREDITENDDATE':'d','CREDITSUMOVERDUE':'n','CREDITDATE':'d'}
+        )
+
+        self.add_unknown_columns(self.app_df,{'SYSDATE':'d'})
 
         v_df_pre = reduce(
         lambda  left,right: pd.merge(left,right,how='outer',on=['SK_APPLICATION']), 
@@ -223,6 +248,12 @@ class Predictors():
         return v_df
 
     def cb_maxagrmnths_3_3(self):
+
+        self.add_unknown_columns(self.cb_df,{'CREDITJOINT':'n','CREDITOWNER':'c','CREDITSUMDEBT':'n','CREDITSUM':'n',
+                                            'CREDITENDDATEFACT':'d','CREDITENDDATE':'d','CREDITSUMOVERDUE':'n','CREDITDATE':'d'}
+        )
+
+        self.add_unknown_columns(self.app_df,{'SYSDATE':'d'})
 
         v_df_pre = reduce(
         lambda  left,right: pd.merge(left,right,how='outer',on=['SK_APPLICATION']), 
@@ -319,27 +350,20 @@ class Predictors():
 
 
     def get_predictor_value(self,p_name):
-        #print(tabulate(self.predictors_cash_df, headers='keys',tablefmt='psql',disable_numparse=True))
-        #print(self.predictors_cash_df)
-        for index,row in self.predictors_cash_df.iterrows():
-            #print(row['NAME'])
-            #print(p_name)
-            if row['NAME'] == p_name and row['CLASS'] == 'scoreCardPredictor':
-                #print(self.predictors_cash_df)
-                #print('HERE')
-                #v_value = row['VALUE']
-                v_df = pd.DataFrame({
-                    'SK_APPLICATION':[self.predictors_cash_df.loc[index,'SK_APPLICATION']],
-                    row['NAME']:[self.predictors_cash_df.loc[index,'VALUE']]
-                })
-                return v_df
-            else:
-                #print(row['NAME'])
-                v_df = self.predictors_fun.get(p_name)
-        return v_df
+
+        if not self.predictors_cash_df.empty:
+
+            for index,row in self.predictors_cash_df.iterrows():
                 
-            
-
-
-
-        
+                if row['NAME'] == p_name and row['CLASS'] == 'scoreCardPredictor':
+                    
+                    v_df = pd.DataFrame({
+                        'SK_APPLICATION':[self.predictors_cash_df.loc[index,'SK_APPLICATION']],
+                        row['NAME']:[self.predictors_cash_df.loc[index,'VALUE']]
+                    })
+                    return v_df
+        else:
+                
+                #print(row['NAME'])
+                v_df = self.predictors_fun[p_name]()
+        return v_df

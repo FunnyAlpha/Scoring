@@ -1,23 +1,24 @@
 import re
 import pandas as pd
+import numpy as np
 from dateutil import parser
 from tabulate import tabulate
 
 
-rx_dict = {
+_rx_dict = {
     re.compile(r'(.*?)\|credit\.creditBureau\.creditData\[(\d+)\]\.(.*)\|(.*?)\s*$'):'CREDITBUREAU',
     re.compile(r'(.*?)\|sourceData\.behaviourData\.persons\[(\d+)\]\.(.*)\|(.*?)\s*$'):'BEHAVIOURDATA',
     re.compile(r'(.*?)\|applicantData\.previousApplications\.persons\[(\d+)\]\.(.*)\|(.*?)\s*$'):'PREVAPPLICATION',
     re.compile(r'(.*?)\|documents\[(\d+)\]\.(.*)\|(.*?)\s*$'):'DOCUMENTS',
     re.compile(r'(.*?)\|persons\[(\d+)\]\.(\w*)\|(.*?)\s*$'):'PERSONS',
     re.compile(r'(.*?)\|(.\w*)\|(.*?)\s*$'):'APPLICATION',
-    re.compile(r'(.*?)\|PredictorsList\[(\d+)\]\.(.*)\|(.*?)\s*$'):'PREDICTORSLIST',
-    re.compile(r'(.*?)\|ApprovalCharacteristics\[(\d+)\]\.(.*)\|(.*?)\s*$'):'PREDICTORSCASH',
+    re.compile(r'(.*?)\|predictorsList\[(\d+)\]\.(.*)\|(.*?)\s*$'):'PREDICTORSLIST',
+    re.compile(r'(.*?)\|approvalCharacteristics\[(\d+)\]\.(.*)\|(.*?)\s*$'):'PREDICTORSCASH',
     re.compile(r'(.*?)\|(idCredit)\|(.*?)\s*$'):'SK_APPLICATION'
 }
 
 
-df_dict  = {
+_df_dict  = {
     'CREDITBUREAU':[],
     'BEHAVIOURDATA':[],
     'APPLICATION':[],
@@ -26,36 +27,6 @@ df_dict  = {
     'PERSONS':[],
     'PREDICTORSCASH':[],
     'PREDICTORSLIST':[],
-    'SK_APPLICATION':[]
-}
-
-
-# def reset_config_vars():
-
-#     global rx_dict
-#     global df_dict
-
-#     rx_dict = {
-#     #re.compile(r'(.*?)\|credit\.creditBureau\.creditData\[(\d+)\]\.(.*)\|(.*?)\s*$'):'CREDITBUREAU',
-#     #re.compile(r'(.*?)\|sourceData\.behaviourData\.persons\[(\d+)\]\.(.*)\|(.*?)\s*$'):'BEHAVIOURDATA',
-#     #re.compile(r'(.*?)\|applicantData\.previousApplications\.persons\[(\d+)\]\.(.*)\|(.*?)\s*$'):'PREVAPPLICATION',
-#     #re.compile(r'(.*?)\|documents\[(\d+)\]\.(.*)\|(.*?)\s*$'):'DOCUMENTS',
-#     #re.compile(r'(.*?)\|persons\[(\d+)\]\.(\w*)\|(.*?)\s*$'):'PERSONS',
-#     #re.compile(r'(.*?)\|(.\w*)\|(.*?)\s*$'):'APPLICATION',
-#     re.compile(r'(.*?)\|ApprovalCharacteristics\[(\d+)\]\.(.*)\|(.*?)\s*$'):'APPROVALCHARACTERISTIC',
-#     re.compile(r'(.*?)\|(idCredit)\|(.*?)\s*$'):'SK_APPLICATION'
-# }
-
-#c|ApprovalCharacteristics[59].variation|1
-
-df_dict  = {
-    'CREDITBUREAU':[],
-    'BEHAVIOURDATA':[],
-    'APPLICATION':[],
-    'PREVAPPLICATION':[],
-    'DOCUMENTS':[],
-    'PERSONS':[],
-    'APPROVALCHARACTERISTIC':[],
     'SK_APPLICATION':[]
 }
 
@@ -78,7 +49,7 @@ def set_vct_data_type(p_list):
     pass    
 
 
-def parse_vct(p_input,p_dict,p_rx_dict):
+def parse_vct(p_input,p_dict=_df_dict,p_rx_dict=_rx_dict):
 
     v_dict = p_dict
 
@@ -100,16 +71,12 @@ def parse_vct(p_input,p_dict,p_rx_dict):
 
     return v_dict
 
-def parse_vct_str(p_input,p_dict,p_rx_dict):
-
-    #print(p_dict['DOCUMENTS'])
+def parse_vct_str(p_input,p_dict=_df_dict,p_rx_dict=_rx_dict):
 
     v_dict = p_dict
 
-    #print(p_input)
-
     for line in p_input.split('\n'):
-        #print(line)
+        
         for rx,val in p_rx_dict.items():
 
             if re.search(rx, line):
@@ -122,44 +89,27 @@ def parse_vct_str(p_input,p_dict,p_rx_dict):
 
     return v_dict      
 
-def get_df_txt(p_type,p_dict):
+def get_df_vct_blaze(p_type,p_dict):
 
-    #print(p_dict['DOCUMENTS'])
     df = pd.DataFrame(p_dict[p_type])
-    #get column name
-    # print(df)
-    column = df[2].unique()
-    #unstack and clean dataframe
-    df = df.drop(0,1).set_index([1, 2]).unstack().droplevel(0, axis=1).rename_axis(
-        index=None, columns=None).reindex(column, axis=1)
-    df['SK_APPLICATION'] = p_dict['SK_APPLICATION'][0][3]     
+    #get columns name
+
+    if not df.empty:
+
+        column = df[2].unique()
+        #unstack and clean dataframe
+        df = df.drop(0,1).set_index([1, 2]).unstack().droplevel(0, axis=1).rename_axis(
+            index=None, columns=None).reindex(column, axis=1)
+        df['SK_APPLICATION'] = p_dict['SK_APPLICATION'][0][3]
+
+    elif p_type!='PREDICTORSCASH':
+
+        df = df.append({'SK_APPLICATION': p_dict['SK_APPLICATION'][0][3]},ignore_index=True)
+        #print(df)
+
     return df
-'''
-v_dict = parse_vct_str(test_str,df_dict,rx_dict)
-print(v_dict['APPROVALCHARACTERISTIC'])
-df = get_df_txt('APPROVALCHARACTERISTIC',v_dict)
-#print(df['SYSDATE'])
-'''
 
 
-'''
-c|credit.creditBureau.creditData[0].creditOwner|0
-n|credit.creditBureau.creditData[0].creditProlong|0
-n|credit.creditBureau.creditData[0].creditSum|3640
-'''
-
-'''
-data=[
-    {'creditData': {'creditOwner': '0',
-                                          'creditProlong': 0}},
-    {'creditData': {'creditOwner': '0',
-                                          'creditProlong': 0,
-                                          'creditSum':3640}}
-]
-
-print(tabulate(pd.json_normalize(data),headers='keys',disable_numparse=True))
-'''
-#print(pd.json_normalize(data))
 
 test_str = '''
 c|applicantData.bankAccountBankCode|2291
@@ -330,7 +280,6 @@ n|salesPoint.smsMobileCheckAvailable|1
 c|salesPoint.typeSalesroom|1
 n|sourceData.hardCheckPredictors.correctDownpayment|0
 n|sourceData.hardCheckPredictors.numContracts3months|0
-n|sourceData.behaviourData.persons[0].cuid|60268391
 n|sourceData.creditLimit.persons[0].cuid|60268391
 n|sourceData.crossClientChecks.sameIdentCard.applicationCnt|1
 n|sourceData.crossClientChecks.sameIdentCard.contactAddressApartmentCnt|1
@@ -749,1623 +698,6 @@ n|credit.creditBureau.persons[0].requests.request[14].cred_type|99
 n|credit.creditBureau.persons[0].requests.request[14].partner_type|1
 n|credit.creditBureau.persons[0].requests.request[14].timeslot|6
 n|workflow.stageCounters[39].WFSTAGE_INDEX|1
-n|credit.creditBureau.creditData[0].cbAnnuity|0
-c|credit.creditBureau.creditData[0].cbId|exp
-c|credit.creditBureau.creditData[0].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC-0--
-c|credit.creditBureau.creditData[0].contractSource|cb
-n|credit.creditBureau.creditData[0].cred_ratio|0
-n|credit.creditBureau.creditData[0].creditActive|0
-n|credit.creditBureau.creditData[0].creditCollateral|0
-c|credit.creditBureau.creditData[0].creditCurrency|rur
-d|credit.creditBureau.creditData[0].creditDate|29.12.2011 00:00:00
-n|credit.creditBureau.creditData[0].creditDayOverdue|0
-d|credit.creditBureau.creditData[0].creditEndDate|02.04.2012 00:00:00
-d|credit.creditBureau.creditData[0].creditEndDateFact|02.04.2012 00:00:00
-n|credit.creditBureau.creditData[0].creditJoint|0
-n|credit.creditBureau.creditData[0].creditMaxOverdue|0
-c|credit.creditBureau.creditData[0].creditOwner|0
-n|credit.creditBureau.creditData[0].creditProlong|0
-n|credit.creditBureau.creditData[0].creditSum|3640
-n|credit.creditBureau.creditData[0].creditSumDebt|0
-n|credit.creditBureau.creditData[0].creditSumLimit|0
-n|credit.creditBureau.creditData[0].creditSumOverdue|0
-n|credit.creditBureau.creditData[0].creditSumType|1
-n|credit.creditBureau.creditData[0].creditType|5
-c|credit.creditBureau.creditData[0].creditTypeUni|5
-d|credit.creditBureau.creditData[0].creditUpdate|31.07.2012 00:00:00
-n|credit.creditBureau.creditData[0].cuid|60268391
-n|credit.creditBureau.creditData[0].delay30|0
-n|credit.creditBureau.creditData[0].delay5|0
-n|credit.creditBureau.creditData[0].delay60|0
-n|credit.creditBureau.creditData[0].delay90|0
-n|credit.creditBureau.creditData[0].delayMore|0
-c|credit.creditBureau.creditData[1].cbId|equ
-c|credit.creditBureau.creditData[1].contractSource|cb
-n|credit.creditBureau.creditData[1].cred_ratio|0
-n|credit.creditBureau.creditData[1].creditActive|0
-n|credit.creditBureau.creditData[1].creditCollateral|0
-c|credit.creditBureau.creditData[1].creditCurrency|rur
-d|credit.creditBureau.creditData[1].creditDate|29.12.2011 00:00:00
-n|credit.creditBureau.creditData[1].creditDayOverdue|0
-d|credit.creditBureau.creditData[1].creditEndDate|02.04.2012 00:00:00
-d|credit.creditBureau.creditData[1].creditEndDateFact|02.04.2012 00:00:00
-n|credit.creditBureau.creditData[1].creditJoint|0
-n|credit.creditBureau.creditData[1].creditMaxOverdue|0
-c|credit.creditBureau.creditData[1].creditOwner|0
-n|credit.creditBureau.creditData[1].creditProlong|0
-n|credit.creditBureau.creditData[1].creditSum|3640
-n|credit.creditBureau.creditData[1].creditSumDebt|0
-n|credit.creditBureau.creditData[1].creditSumLimit|0
-n|credit.creditBureau.creditData[1].creditSumOverdue|0
-n|credit.creditBureau.creditData[1].creditSumType|1
-n|credit.creditBureau.creditData[1].creditType|5
-c|credit.creditBureau.creditData[1].creditTypeUni|5
-d|credit.creditBureau.creditData[1].creditUpdate|05.04.2012 00:00:00
-n|credit.creditBureau.creditData[1].cuid|60268391
-n|credit.creditBureau.creditData[1].delay30|0
-n|credit.creditBureau.creditData[1].delay5|0
-n|credit.creditBureau.creditData[1].delay60|0
-n|credit.creditBureau.creditData[1].delay90|0
-n|credit.creditBureau.creditData[1].delayMore|0
-n|credit.creditBureau.creditData[2].cbAnnuity|2168
-c|credit.creditBureau.creditData[2].cbId|exp
-c|credit.creditBureau.creditData[2].cbOverdueLine|-000000000100000100
-c|credit.creditBureau.creditData[2].contractSource|cb
-n|credit.creditBureau.creditData[2].cred_ratio|0
-n|credit.creditBureau.creditData[2].creditActive|1
-n|credit.creditBureau.creditData[2].creditCollateral|0
-n|credit.creditBureau.creditData[2].creditCostRate|19.9
-c|credit.creditBureau.creditData[2].creditCurrency|rur
-d|credit.creditBureau.creditData[2].creditDate|17.10.2018 00:00:00
-n|credit.creditBureau.creditData[2].creditDayOverdue|30
-d|credit.creditBureau.creditData[2].creditEndDate|17.10.2020 00:00:00
-n|credit.creditBureau.creditData[2].creditJoint|0
-n|credit.creditBureau.creditData[2].creditMaxOverdue|2173
-c|credit.creditBureau.creditData[2].creditOwner|0
-n|credit.creditBureau.creditData[2].creditProlong|0
-n|credit.creditBureau.creditData[2].creditSum|42635
-n|credit.creditBureau.creditData[2].creditSumDebt|16498
-n|credit.creditBureau.creditData[2].creditSumLimit|0
-n|credit.creditBureau.creditData[2].creditSumOverdue|2173
-n|credit.creditBureau.creditData[2].creditSumType|1
-n|credit.creditBureau.creditData[2].creditType|5
-c|credit.creditBureau.creditData[2].creditTypeUni|5
-d|credit.creditBureau.creditData[2].creditUpdate|11.05.2020 00:00:00
-n|credit.creditBureau.creditData[2].cuid|60268391
-n|credit.creditBureau.creditData[2].delay30|0
-n|credit.creditBureau.creditData[2].delay5|2
-n|credit.creditBureau.creditData[2].delay60|0
-n|credit.creditBureau.creditData[2].delay90|0
-n|credit.creditBureau.creditData[2].delayMore|0
-n|credit.creditBureau.creditData[3].cbAnnuity|1137
-c|credit.creditBureau.creditData[3].cbId|exp
-c|credit.creditBureau.creditData[3].cbOverdueLine|-000000000000000000010000000000
-c|credit.creditBureau.creditData[3].contractSource|cb
-n|credit.creditBureau.creditData[3].cred_ratio|0
-n|credit.creditBureau.creditData[3].creditActive|1
-n|credit.creditBureau.creditData[3].creditCollateral|0
-n|credit.creditBureau.creditData[3].creditCostRate|19.9
-c|credit.creditBureau.creditData[3].creditCurrency|rur
-d|credit.creditBureau.creditData[3].creditDate|24.10.2017 00:00:00
-n|credit.creditBureau.creditData[3].creditDayOverdue|30
-d|credit.creditBureau.creditData[3].creditEndDate|24.10.2022 00:00:00
-n|credit.creditBureau.creditData[3].creditJoint|0
-n|credit.creditBureau.creditData[3].creditMaxOverdue|1141
-c|credit.creditBureau.creditData[3].creditOwner|0
-n|credit.creditBureau.creditData[3].creditProlong|0
-n|credit.creditBureau.creditData[3].creditSum|43000
-n|credit.creditBureau.creditData[3].creditSumDebt|28756
-n|credit.creditBureau.creditData[3].creditSumLimit|0
-n|credit.creditBureau.creditData[3].creditSumOverdue|1139
-n|credit.creditBureau.creditData[3].creditSumType|1
-n|credit.creditBureau.creditData[3].creditType|5
-c|credit.creditBureau.creditData[3].creditTypeUni|5
-d|credit.creditBureau.creditData[3].creditUpdate|11.05.2020 00:00:00
-n|credit.creditBureau.creditData[3].cuid|60268391
-n|credit.creditBureau.creditData[3].delay30|0
-n|credit.creditBureau.creditData[3].delay5|1
-n|credit.creditBureau.creditData[3].delay60|0
-n|credit.creditBureau.creditData[3].delay90|0
-n|credit.creditBureau.creditData[3].delayMore|0
-c|credit.creditBureau.creditData[4].cbId|exp
-c|credit.creditBureau.creditData[4].cbOverdueLine|10110011000011000001111000000000000000000000000000000-0-----
-c|credit.creditBureau.creditData[4].contractSource|cb
-n|credit.creditBureau.creditData[4].cred_ratio|0
-n|credit.creditBureau.creditData[4].creditActive|1
-n|credit.creditBureau.creditData[4].creditCollateral|0
-n|credit.creditBureau.creditData[4].creditCostRate|26.03
-c|credit.creditBureau.creditData[4].creditCurrency|rur
-d|credit.creditBureau.creditData[4].creditDate|07.05.2015 00:00:00
-n|credit.creditBureau.creditData[4].creditDayOverdue|30
-n|credit.creditBureau.creditData[4].creditJoint|0
-n|credit.creditBureau.creditData[4].creditMaxOverdue|1824
-c|credit.creditBureau.creditData[4].creditOwner|0
-n|credit.creditBureau.creditData[4].creditProlong|0
-n|credit.creditBureau.creditData[4].creditSum|30000
-n|credit.creditBureau.creditData[4].creditSumDebt|31254
-n|credit.creditBureau.creditData[4].creditSumLimit|0
-n|credit.creditBureau.creditData[4].creditSumOverdue|1824
-n|credit.creditBureau.creditData[4].creditSumType|1
-n|credit.creditBureau.creditData[4].creditType|4
-c|credit.creditBureau.creditData[4].creditTypeUni|4
-d|credit.creditBureau.creditData[4].creditUpdate|11.05.2020 00:00:00
-n|credit.creditBureau.creditData[4].cuid|60268391
-n|credit.creditBureau.creditData[4].delay30|0
-n|credit.creditBureau.creditData[4].delay5|10
-n|credit.creditBureau.creditData[4].delay60|0
-n|credit.creditBureau.creditData[4].delay90|0
-n|credit.creditBureau.creditData[4].delayMore|0
-c|credit.creditBureau.creditData[5].cbId|equ
-c|credit.creditBureau.creditData[5].contractSource|cb
-n|credit.creditBureau.creditData[5].cred_ratio|0
-n|credit.creditBureau.creditData[5].creditActive|0
-n|credit.creditBureau.creditData[5].creditCollateral|0
-c|credit.creditBureau.creditData[5].creditCurrency|rur
-d|credit.creditBureau.creditData[5].creditDate|15.05.2009 00:00:00
-n|credit.creditBureau.creditData[5].creditDayOverdue|0
-d|credit.creditBureau.creditData[5].creditEndDate|16.11.2009 00:00:00
-d|credit.creditBureau.creditData[5].creditEndDateFact|17.08.2009 00:00:00
-n|credit.creditBureau.creditData[5].creditJoint|0
-n|credit.creditBureau.creditData[5].creditMaxOverdue|0
-c|credit.creditBureau.creditData[5].creditOwner|0
-n|credit.creditBureau.creditData[5].creditProlong|0
-n|credit.creditBureau.creditData[5].creditSum|12990
-n|credit.creditBureau.creditData[5].creditSumDebt|0
-n|credit.creditBureau.creditData[5].creditSumLimit|0
-n|credit.creditBureau.creditData[5].creditSumOverdue|0
-n|credit.creditBureau.creditData[5].creditSumType|1
-n|credit.creditBureau.creditData[5].creditType|5
-c|credit.creditBureau.creditData[5].creditTypeUni|5
-d|credit.creditBureau.creditData[5].creditUpdate|17.08.2009 00:00:00
-n|credit.creditBureau.creditData[5].cuid|60268391
-n|credit.creditBureau.creditData[5].delay30|0
-n|credit.creditBureau.creditData[5].delay5|0
-n|credit.creditBureau.creditData[5].delay60|0
-n|credit.creditBureau.creditData[5].delay90|0
-n|credit.creditBureau.creditData[5].delayMore|0
-n|credit.creditBureau.creditData[6].cbAnnuity|0
-c|credit.creditBureau.creditData[6].cbId|nbk
-c|credit.creditBureau.creditData[6].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC0000--
-c|credit.creditBureau.creditData[6].contractSource|cb
-n|credit.creditBureau.creditData[6].cred_ratio|0
-n|credit.creditBureau.creditData[6].creditActive|0
-n|credit.creditBureau.creditData[6].creditCollateral|0
-c|credit.creditBureau.creditData[6].creditCurrency|rur
-d|credit.creditBureau.creditData[6].creditDate|03.10.2012 00:00:00
-n|credit.creditBureau.creditData[6].creditDayOverdue|0
-d|credit.creditBureau.creditData[6].creditEndDate|03.04.2013 00:00:00
-d|credit.creditBureau.creditData[6].creditEndDateFact|03.04.2013 00:00:00
-n|credit.creditBureau.creditData[6].creditJoint|0
-n|credit.creditBureau.creditData[6].creditMaxOverdue|0
-c|credit.creditBureau.creditData[6].creditOwner|0
-n|credit.creditBureau.creditData[6].creditProlong|0
-n|credit.creditBureau.creditData[6].creditSum|11912
-n|credit.creditBureau.creditData[6].creditSumDebt|0
-n|credit.creditBureau.creditData[6].creditSumLimit|0
-n|credit.creditBureau.creditData[6].creditSumOverdue|0
-n|credit.creditBureau.creditData[6].creditSumType|1
-n|credit.creditBureau.creditData[6].creditType|5
-c|credit.creditBureau.creditData[6].creditTypeUni|5
-d|credit.creditBureau.creditData[6].creditUpdate|06.04.2013 00:00:00
-n|credit.creditBureau.creditData[6].cuid|60268391
-n|credit.creditBureau.creditData[6].delay30|0
-n|credit.creditBureau.creditData[6].delay5|0
-n|credit.creditBureau.creditData[6].delay60|0
-n|credit.creditBureau.creditData[6].delay90|0
-n|credit.creditBureau.creditData[6].delayMore|0
-n|credit.creditBureau.creditData[7].cbAnnuity|0
-c|credit.creditBureau.creditData[7].cbId|nbk
-c|credit.creditBureau.creditData[7].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC0-0000000000-
-c|credit.creditBureau.creditData[7].contractSource|cb
-n|credit.creditBureau.creditData[7].cred_ratio|0
-n|credit.creditBureau.creditData[7].creditActive|0
-n|credit.creditBureau.creditData[7].creditCollateral|0
-n|credit.creditBureau.creditData[7].creditCostRate|31.122
-c|credit.creditBureau.creditData[7].creditCurrency|rur
-d|credit.creditBureau.creditData[7].creditDate|14.07.2015 00:00:00
-n|credit.creditBureau.creditData[7].creditDayOverdue|0
-d|credit.creditBureau.creditData[7].creditEndDate|14.07.2016 00:00:00
-d|credit.creditBureau.creditData[7].creditEndDateFact|16.08.2016 00:00:00
-n|credit.creditBureau.creditData[7].creditJoint|0
-n|credit.creditBureau.creditData[7].creditMaxOverdue|0
-c|credit.creditBureau.creditData[7].creditOwner|0
-n|credit.creditBureau.creditData[7].creditProlong|0
-n|credit.creditBureau.creditData[7].creditSum|15010
-n|credit.creditBureau.creditData[7].creditSumDebt|0
-n|credit.creditBureau.creditData[7].creditSumLimit|0
-n|credit.creditBureau.creditData[7].creditSumOverdue|0
-n|credit.creditBureau.creditData[7].creditSumType|1
-n|credit.creditBureau.creditData[7].creditType|5
-c|credit.creditBureau.creditData[7].creditTypeUni|5
-d|credit.creditBureau.creditData[7].creditUpdate|16.08.2016 00:00:00
-n|credit.creditBureau.creditData[7].cuid|60268391
-n|credit.creditBureau.creditData[7].delay30|0
-n|credit.creditBureau.creditData[7].delay5|0
-n|credit.creditBureau.creditData[7].delay60|0
-n|credit.creditBureau.creditData[7].delay90|0
-n|credit.creditBureau.creditData[7].delayMore|0
-n|credit.creditBureau.creditData[8].cbAnnuity|0
-c|credit.creditBureau.creditData[8].cbId|nbk
-c|credit.creditBureau.creditData[8].contractSource|cb
-n|credit.creditBureau.creditData[8].cred_ratio|0
-n|credit.creditBureau.creditData[8].creditActive|1
-n|credit.creditBureau.creditData[8].creditCollateral|0
-n|credit.creditBureau.creditData[8].creditCostRate|28.75
-c|credit.creditBureau.creditData[8].creditCurrency|rur
-d|credit.creditBureau.creditData[8].creditDate|20.04.2020 00:00:00
-n|credit.creditBureau.creditData[8].creditDayOverdue|0
-d|credit.creditBureau.creditData[8].creditEndDate|28.02.2025 00:00:00
-n|credit.creditBureau.creditData[8].creditJoint|0
-n|credit.creditBureau.creditData[8].creditMaxOverdue|0
-c|credit.creditBureau.creditData[8].creditOwner|0
-n|credit.creditBureau.creditData[8].creditProlong|0
-n|credit.creditBureau.creditData[8].creditSum|5000
-n|credit.creditBureau.creditData[8].creditSumDebt|4953
-n|credit.creditBureau.creditData[8].creditSumLimit|47
-n|credit.creditBureau.creditData[8].creditSumOverdue|0
-n|credit.creditBureau.creditData[8].creditSumType|1
-n|credit.creditBureau.creditData[8].creditType|4
-c|credit.creditBureau.creditData[8].creditTypeUni|4
-d|credit.creditBureau.creditData[8].creditUpdate|03.05.2020 00:00:00
-n|credit.creditBureau.creditData[8].cuid|60268391
-n|credit.creditBureau.creditData[8].delay30|0
-n|credit.creditBureau.creditData[8].delay5|0
-n|credit.creditBureau.creditData[8].delay60|0
-n|credit.creditBureau.creditData[8].delay90|0
-n|credit.creditBureau.creditData[8].delayMore|0
-n|credit.creditBureau.creditData[9].cbAnnuity|4488
-c|credit.creditBureau.creditData[9].cbId|nbk
-c|credit.creditBureau.creditData[9].cbOverdueLine|0000000000020000000-
-c|credit.creditBureau.creditData[9].contractSource|cb
-n|credit.creditBureau.creditData[9].cred_ratio|0
-n|credit.creditBureau.creditData[9].creditActive|1
-n|credit.creditBureau.creditData[9].creditCollateral|0
-n|credit.creditBureau.creditData[9].creditCostRate|22.9
-c|credit.creditBureau.creditData[9].creditCurrency|rur
-d|credit.creditBureau.creditData[9].creditDate|14.09.2018 00:00:00
-n|credit.creditBureau.creditData[9].creditDayOverdue|0
-d|credit.creditBureau.creditData[9].creditEndDate|16.12.2021 00:00:00
-n|credit.creditBureau.creditData[9].creditJoint|0
-n|credit.creditBureau.creditData[9].creditMaxOverdue|0
-c|credit.creditBureau.creditData[9].creditOwner|0
-n|credit.creditBureau.creditData[9].creditProlong|0
-n|credit.creditBureau.creditData[9].creditSum|58224
-n|credit.creditBureau.creditData[9].creditSumDebt|38747
-n|credit.creditBureau.creditData[9].creditSumLimit|0
-n|credit.creditBureau.creditData[9].creditSumOverdue|0
-n|credit.creditBureau.creditData[9].creditSumType|1
-n|credit.creditBureau.creditData[9].creditType|5
-c|credit.creditBureau.creditData[9].creditTypeUni|5
-d|credit.creditBureau.creditData[9].creditUpdate|09.05.2020 00:00:00
-n|credit.creditBureau.creditData[9].cuid|60268391
-n|credit.creditBureau.creditData[9].delay30|1
-n|credit.creditBureau.creditData[9].delay5|0
-n|credit.creditBureau.creditData[9].delay60|0
-n|credit.creditBureau.creditData[9].delay90|0
-n|credit.creditBureau.creditData[9].delayMore|0
-n|credit.creditBureau.creditData[10].cbAnnuity|3018
-c|credit.creditBureau.creditData[10].cbId|exp
-c|credit.creditBureau.creditData[10].cbOverdueLine|-00000000000
-c|credit.creditBureau.creditData[10].contractSource|cb
-n|credit.creditBureau.creditData[10].cred_ratio|0
-n|credit.creditBureau.creditData[10].creditActive|1
-n|credit.creditBureau.creditData[10].creditCollateral|0
-n|credit.creditBureau.creditData[10].creditCostRate|19.94
-c|credit.creditBureau.creditData[10].creditCurrency|rur
-d|credit.creditBureau.creditData[10].creditDate|13.05.2019 00:00:00
-n|credit.creditBureau.creditData[10].creditDayOverdue|30
-d|credit.creditBureau.creditData[10].creditEndDate|13.03.2022 00:00:00
-n|credit.creditBureau.creditData[10].creditJoint|0
-n|credit.creditBureau.creditData[10].creditMaxOverdue|3025
-c|credit.creditBureau.creditData[10].creditOwner|0
-n|credit.creditBureau.creditData[10].creditProlong|0
-n|credit.creditBureau.creditData[10].creditSum|77951
-n|credit.creditBureau.creditData[10].creditSumDebt|60929
-n|credit.creditBureau.creditData[10].creditSumLimit|0
-n|credit.creditBureau.creditData[10].creditSumOverdue|3025
-n|credit.creditBureau.creditData[10].creditSumType|1
-n|credit.creditBureau.creditData[10].creditType|5
-c|credit.creditBureau.creditData[10].creditTypeUni|5
-d|credit.creditBureau.creditData[10].creditUpdate|11.05.2020 00:00:00
-n|credit.creditBureau.creditData[10].cuid|60268391
-n|credit.creditBureau.creditData[10].delay30|0
-n|credit.creditBureau.creditData[10].delay5|0
-n|credit.creditBureau.creditData[10].delay60|0
-n|credit.creditBureau.creditData[10].delay90|0
-n|credit.creditBureau.creditData[10].delayMore|0
-c|credit.creditBureau.creditData[11].cbId|equ
-c|credit.creditBureau.creditData[11].contractSource|cb
-n|credit.creditBureau.creditData[11].cred_ratio|0
-n|credit.creditBureau.creditData[11].creditActive|1
-n|credit.creditBureau.creditData[11].creditCollateral|0
-n|credit.creditBureau.creditData[11].creditCostRate|28.75
-c|credit.creditBureau.creditData[11].creditCurrency|rur
-d|credit.creditBureau.creditData[11].creditDate|20.04.2020 00:00:00
-n|credit.creditBureau.creditData[11].creditDayOverdue|0
-d|credit.creditBureau.creditData[11].creditEndDate|28.02.2025 00:00:00
-n|credit.creditBureau.creditData[11].creditJoint|0
-n|credit.creditBureau.creditData[11].creditMaxOverdue|0
-c|credit.creditBureau.creditData[11].creditOwner|0
-n|credit.creditBureau.creditData[11].creditProlong|0
-n|credit.creditBureau.creditData[11].creditSum|5000
-n|credit.creditBureau.creditData[11].creditSumDebt|4953.29
-n|credit.creditBureau.creditData[11].creditSumLimit|46.71
-n|credit.creditBureau.creditData[11].creditSumOverdue|0
-n|credit.creditBureau.creditData[11].creditSumType|1
-n|credit.creditBureau.creditData[11].creditType|4
-c|credit.creditBureau.creditData[11].creditTypeUni|4
-d|credit.creditBureau.creditData[11].creditUpdate|03.05.2020 00:00:00
-n|credit.creditBureau.creditData[11].cuid|60268391
-n|credit.creditBureau.creditData[11].delay30|0
-n|credit.creditBureau.creditData[11].delay5|0
-n|credit.creditBureau.creditData[11].delay60|0
-n|credit.creditBureau.creditData[11].delay90|0
-n|credit.creditBureau.creditData[11].delayMore|0
-n|credit.creditBureau.creditData[12].cbAnnuity|0
-c|credit.creditBureau.creditData[12].cbId|exp
-c|credit.creditBureau.creditData[12].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC00000000000000000
-c|credit.creditBureau.creditData[12].contractSource|cb
-n|credit.creditBureau.creditData[12].cred_ratio|0
-n|credit.creditBureau.creditData[12].creditActive|0
-n|credit.creditBureau.creditData[12].creditCollateral|0
-n|credit.creditBureau.creditData[12].creditCostRate|22.02
-c|credit.creditBureau.creditData[12].creditCurrency|rur
-d|credit.creditBureau.creditData[12].creditDate|03.05.2016 00:00:00
-n|credit.creditBureau.creditData[12].creditDayOverdue|0
-d|credit.creditBureau.creditData[12].creditEndDate|03.05.2018 00:00:00
-d|credit.creditBureau.creditData[12].creditEndDateFact|24.10.2017 00:00:00
-n|credit.creditBureau.creditData[12].creditJoint|0
-n|credit.creditBureau.creditData[12].creditMaxOverdue|0
-c|credit.creditBureau.creditData[12].creditOwner|0
-n|credit.creditBureau.creditData[12].creditProlong|0
-n|credit.creditBureau.creditData[12].creditSum|37717
-n|credit.creditBureau.creditData[12].creditSumDebt|0
-n|credit.creditBureau.creditData[12].creditSumLimit|0
-n|credit.creditBureau.creditData[12].creditSumOverdue|0
-n|credit.creditBureau.creditData[12].creditSumType|1
-n|credit.creditBureau.creditData[12].creditType|5
-c|credit.creditBureau.creditData[12].creditTypeUni|5
-d|credit.creditBureau.creditData[12].creditUpdate|15.05.2019 00:00:00
-n|credit.creditBureau.creditData[12].cuid|60268391
-n|credit.creditBureau.creditData[12].delay30|0
-n|credit.creditBureau.creditData[12].delay5|0
-n|credit.creditBureau.creditData[12].delay60|0
-n|credit.creditBureau.creditData[12].delay90|0
-n|credit.creditBureau.creditData[12].delayMore|0
-n|credit.creditBureau.creditData[13].cbAnnuity|0
-c|credit.creditBureau.creditData[13].cbId|exp
-c|credit.creditBureau.creditData[13].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC111111111110101011101000
-c|credit.creditBureau.creditData[13].contractSource|cb
-n|credit.creditBureau.creditData[13].cred_ratio|0
-n|credit.creditBureau.creditData[13].creditActive|0
-n|credit.creditBureau.creditData[13].creditCollateral|0
-n|credit.creditBureau.creditData[13].creditCostRate|24.57
-c|credit.creditBureau.creditData[13].creditCurrency|rur
-d|credit.creditBureau.creditData[13].creditDate|07.05.2015 00:00:00
-n|credit.creditBureau.creditData[13].creditDayOverdue|0
-d|credit.creditBureau.creditData[13].creditEndDate|07.05.2017 00:00:00
-d|credit.creditBureau.creditData[13].creditEndDateFact|13.05.2017 00:00:00
-n|credit.creditBureau.creditData[13].creditJoint|0
-n|credit.creditBureau.creditData[13].creditMaxOverdue|5651
-c|credit.creditBureau.creditData[13].creditOwner|0
-n|credit.creditBureau.creditData[13].creditProlong|0
-n|credit.creditBureau.creditData[13].creditSum|106400
-n|credit.creditBureau.creditData[13].creditSumDebt|0
-n|credit.creditBureau.creditData[13].creditSumLimit|0
-n|credit.creditBureau.creditData[13].creditSumOverdue|0
-n|credit.creditBureau.creditData[13].creditSumType|1
-n|credit.creditBureau.creditData[13].creditType|5
-c|credit.creditBureau.creditData[13].creditTypeUni|5
-d|credit.creditBureau.creditData[13].creditUpdate|15.05.2019 00:00:00
-n|credit.creditBureau.creditData[13].cuid|60268391
-n|credit.creditBureau.creditData[13].delay30|0
-n|credit.creditBureau.creditData[13].delay5|17
-n|credit.creditBureau.creditData[13].delay60|0
-n|credit.creditBureau.creditData[13].delay90|0
-n|credit.creditBureau.creditData[13].delayMore|0
-c|credit.creditBureau.creditData[14].cbId|equ
-c|credit.creditBureau.creditData[14].contractSource|cb
-n|credit.creditBureau.creditData[14].cred_ratio|0
-n|credit.creditBureau.creditData[14].creditActive|0
-n|credit.creditBureau.creditData[14].creditCollateral|0
-n|credit.creditBureau.creditData[14].creditCostRate|39.96
-c|credit.creditBureau.creditData[14].creditCurrency|rur
-d|credit.creditBureau.creditData[14].creditDate|28.10.2014 00:00:00
-n|credit.creditBureau.creditData[14].creditDayOverdue|0
-d|credit.creditBureau.creditData[14].creditEndDate|28.04.2015 00:00:00
-d|credit.creditBureau.creditData[14].creditEndDateFact|29.04.2015 00:00:00
-n|credit.creditBureau.creditData[14].creditJoint|0
-n|credit.creditBureau.creditData[14].creditMaxOverdue|0
-c|credit.creditBureau.creditData[14].creditOwner|0
-n|credit.creditBureau.creditData[14].creditProlong|0
-n|credit.creditBureau.creditData[14].creditSum|4390
-n|credit.creditBureau.creditData[14].creditSumDebt|0
-n|credit.creditBureau.creditData[14].creditSumLimit|0
-n|credit.creditBureau.creditData[14].creditSumOverdue|0
-n|credit.creditBureau.creditData[14].creditSumType|1
-n|credit.creditBureau.creditData[14].creditType|5
-c|credit.creditBureau.creditData[14].creditTypeUni|5
-d|credit.creditBureau.creditData[14].creditUpdate|29.04.2015 00:00:00
-n|credit.creditBureau.creditData[14].cuid|60268391
-n|credit.creditBureau.creditData[14].delay30|0
-n|credit.creditBureau.creditData[14].delay5|0
-n|credit.creditBureau.creditData[14].delay60|0
-n|credit.creditBureau.creditData[14].delay90|0
-n|credit.creditBureau.creditData[14].delayMore|0
-c|credit.creditBureau.creditData[15].cbId|equ
-c|credit.creditBureau.creditData[15].contractSource|cb
-n|credit.creditBureau.creditData[15].cred_ratio|0
-n|credit.creditBureau.creditData[15].creditActive|0
-n|credit.creditBureau.creditData[15].creditCollateral|0
-c|credit.creditBureau.creditData[15].creditCurrency|rur
-d|credit.creditBureau.creditData[15].creditDate|15.02.2014 00:00:00
-n|credit.creditBureau.creditData[15].creditDayOverdue|0
-d|credit.creditBureau.creditData[15].creditEndDate|16.02.2015 00:00:00
-d|credit.creditBureau.creditData[15].creditEndDateFact|15.01.2015 00:00:00
-n|credit.creditBureau.creditData[15].creditJoint|0
-n|credit.creditBureau.creditData[15].creditMaxOverdue|0
-c|credit.creditBureau.creditData[15].creditOwner|0
-n|credit.creditBureau.creditData[15].creditProlong|0
-n|credit.creditBureau.creditData[15].creditSum|15950
-n|credit.creditBureau.creditData[15].creditSumDebt|0
-n|credit.creditBureau.creditData[15].creditSumLimit|0
-n|credit.creditBureau.creditData[15].creditSumOverdue|0
-n|credit.creditBureau.creditData[15].creditSumType|1
-n|credit.creditBureau.creditData[15].creditType|5
-c|credit.creditBureau.creditData[15].creditTypeUni|5
-d|credit.creditBureau.creditData[15].creditUpdate|15.01.2015 00:00:00
-n|credit.creditBureau.creditData[15].cuid|60268391
-n|credit.creditBureau.creditData[15].delay30|0
-n|credit.creditBureau.creditData[15].delay5|0
-n|credit.creditBureau.creditData[15].delay60|0
-n|credit.creditBureau.creditData[15].delay90|0
-n|credit.creditBureau.creditData[15].delayMore|0
-c|credit.creditBureau.creditData[16].cbId|equ
-c|credit.creditBureau.creditData[16].contractSource|cb
-n|credit.creditBureau.creditData[16].cred_ratio|0
-n|credit.creditBureau.creditData[16].creditActive|0
-n|credit.creditBureau.creditData[16].creditCollateral|0
-n|credit.creditBureau.creditData[16].creditCostRate|51.1
-c|credit.creditBureau.creditData[16].creditCurrency|rur
-d|credit.creditBureau.creditData[16].creditDate|03.10.2012 00:00:00
-n|credit.creditBureau.creditData[16].creditDayOverdue|0
-d|credit.creditBureau.creditData[16].creditEndDate|31.12.2099 00:00:00
-d|credit.creditBureau.creditData[16].creditEndDateFact|15.03.2018 00:00:00
-n|credit.creditBureau.creditData[16].creditJoint|0
-n|credit.creditBureau.creditData[16].creditMaxOverdue|0
-c|credit.creditBureau.creditData[16].creditOwner|0
-n|credit.creditBureau.creditData[16].creditProlong|0
-n|credit.creditBureau.creditData[16].creditSum|0
-n|credit.creditBureau.creditData[16].creditSumDebt|0
-n|credit.creditBureau.creditData[16].creditSumLimit|0
-n|credit.creditBureau.creditData[16].creditSumOverdue|0
-n|credit.creditBureau.creditData[16].creditSumType|1
-n|credit.creditBureau.creditData[16].creditType|4
-c|credit.creditBureau.creditData[16].creditTypeUni|4
-d|credit.creditBureau.creditData[16].creditUpdate|15.03.2018 00:00:00
-n|credit.creditBureau.creditData[16].cuid|60268391
-n|credit.creditBureau.creditData[16].delay30|0
-n|credit.creditBureau.creditData[16].delay5|0
-n|credit.creditBureau.creditData[16].delay60|0
-n|credit.creditBureau.creditData[16].delay90|0
-n|credit.creditBureau.creditData[16].delayMore|0
-n|credit.creditBureau.creditData[17].cbAnnuity|0
-c|credit.creditBureau.creditData[17].cbId|nbk
-c|credit.creditBureau.creditData[17].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC-0--
-c|credit.creditBureau.creditData[17].contractSource|cb
-n|credit.creditBureau.creditData[17].cred_ratio|0
-n|credit.creditBureau.creditData[17].creditActive|0
-n|credit.creditBureau.creditData[17].creditCollateral|0
-c|credit.creditBureau.creditData[17].creditCurrency|rur
-d|credit.creditBureau.creditData[17].creditDate|29.12.2011 00:00:00
-n|credit.creditBureau.creditData[17].creditDayOverdue|0
-d|credit.creditBureau.creditData[17].creditEndDate|02.04.2012 00:00:00
-d|credit.creditBureau.creditData[17].creditEndDateFact|02.04.2012 00:00:00
-n|credit.creditBureau.creditData[17].creditJoint|0
-n|credit.creditBureau.creditData[17].creditMaxOverdue|0
-c|credit.creditBureau.creditData[17].creditOwner|0
-n|credit.creditBureau.creditData[17].creditProlong|0
-n|credit.creditBureau.creditData[17].creditSum|3640
-n|credit.creditBureau.creditData[17].creditSumDebt|0
-n|credit.creditBureau.creditData[17].creditSumLimit|0
-n|credit.creditBureau.creditData[17].creditSumOverdue|0
-n|credit.creditBureau.creditData[17].creditSumType|1
-n|credit.creditBureau.creditData[17].creditType|5
-c|credit.creditBureau.creditData[17].creditTypeUni|5
-d|credit.creditBureau.creditData[17].creditUpdate|05.04.2012 00:00:00
-n|credit.creditBureau.creditData[17].cuid|60268391
-n|credit.creditBureau.creditData[17].delay30|0
-n|credit.creditBureau.creditData[17].delay5|0
-n|credit.creditBureau.creditData[17].delay60|0
-n|credit.creditBureau.creditData[17].delay90|0
-n|credit.creditBureau.creditData[17].delayMore|0
-c|credit.creditBureau.creditData[18].cbId|equ
-c|credit.creditBureau.creditData[18].contractSource|cb
-n|credit.creditBureau.creditData[18].cred_ratio|0
-n|credit.creditBureau.creditData[18].creditActive|0
-n|credit.creditBureau.creditData[18].creditCollateral|0
-n|credit.creditBureau.creditData[18].creditCostRate|36.49
-c|credit.creditBureau.creditData[18].creditCurrency|rur
-d|credit.creditBureau.creditData[18].creditDate|12.12.2016 00:00:00
-n|credit.creditBureau.creditData[18].creditDayOverdue|0
-d|credit.creditBureau.creditData[18].creditEndDate|12.02.2018 00:00:00
-d|credit.creditBureau.creditData[18].creditEndDateFact|13.11.2017 00:00:00
-n|credit.creditBureau.creditData[18].creditJoint|0
-n|credit.creditBureau.creditData[18].creditMaxOverdue|0
-c|credit.creditBureau.creditData[18].creditOwner|0
-n|credit.creditBureau.creditData[18].creditProlong|0
-n|credit.creditBureau.creditData[18].creditSum|18289
-n|credit.creditBureau.creditData[18].creditSumDebt|0
-n|credit.creditBureau.creditData[18].creditSumLimit|0
-n|credit.creditBureau.creditData[18].creditSumOverdue|0
-n|credit.creditBureau.creditData[18].creditSumType|1
-n|credit.creditBureau.creditData[18].creditType|5
-c|credit.creditBureau.creditData[18].creditTypeUni|5
-d|credit.creditBureau.creditData[18].creditUpdate|13.11.2017 00:00:00
-n|credit.creditBureau.creditData[18].cuid|60268391
-n|credit.creditBureau.creditData[18].delay30|0
-n|credit.creditBureau.creditData[18].delay5|0
-n|credit.creditBureau.creditData[18].delay60|0
-n|credit.creditBureau.creditData[18].delay90|0
-n|credit.creditBureau.creditData[18].delayMore|0
-c|credit.creditBureau.creditData[19].cbId|equ
-c|credit.creditBureau.creditData[19].contractSource|cb
-n|credit.creditBureau.creditData[19].cred_ratio|0
-n|credit.creditBureau.creditData[19].creditActive|1
-n|credit.creditBureau.creditData[19].creditCollateral|0
-n|credit.creditBureau.creditData[19].creditCostRate|22.9
-c|credit.creditBureau.creditData[19].creditCurrency|rur
-d|credit.creditBureau.creditData[19].creditDate|14.09.2018 00:00:00
-n|credit.creditBureau.creditData[19].creditDayOverdue|0
-d|credit.creditBureau.creditData[19].creditEndDate|16.12.2021 00:00:00
-n|credit.creditBureau.creditData[19].creditJoint|0
-n|credit.creditBureau.creditData[19].creditMaxOverdue|1541.24
-c|credit.creditBureau.creditData[19].creditOwner|0
-n|credit.creditBureau.creditData[19].creditProlong|3
-n|credit.creditBureau.creditData[19].creditSum|58224
-n|credit.creditBureau.creditData[19].creditSumDebt|37685.46
-n|credit.creditBureau.creditData[19].creditSumLimit|0
-n|credit.creditBureau.creditData[19].creditSumOverdue|0
-n|credit.creditBureau.creditData[19].creditSumType|1
-n|credit.creditBureau.creditData[19].creditType|5
-c|credit.creditBureau.creditData[19].creditTypeUni|5
-d|credit.creditBureau.creditData[19].creditUpdate|16.04.2020 00:00:00
-n|credit.creditBureau.creditData[19].cuid|60268391
-n|credit.creditBureau.creditData[19].delay30|0
-n|credit.creditBureau.creditData[19].delay5|7
-n|credit.creditBureau.creditData[19].delay60|0
-n|credit.creditBureau.creditData[19].delay90|0
-n|credit.creditBureau.creditData[19].delayMore|0
-n|credit.creditBureau.creditData[20].cbAnnuity|0
-c|credit.creditBureau.creditData[20].cbId|exp
-c|credit.creditBureau.creditData[20].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC0000000001000
-c|credit.creditBureau.creditData[20].contractSource|cb
-n|credit.creditBureau.creditData[20].cred_ratio|0
-n|credit.creditBureau.creditData[20].creditActive|0
-n|credit.creditBureau.creditData[20].creditCollateral|0
-n|credit.creditBureau.creditData[20].creditCostRate|31.122
-c|credit.creditBureau.creditData[20].creditCurrency|rur
-d|credit.creditBureau.creditData[20].creditDate|14.07.2015 00:00:00
-n|credit.creditBureau.creditData[20].creditDayOverdue|0
-d|credit.creditBureau.creditData[20].creditEndDate|14.07.2016 00:00:00
-d|credit.creditBureau.creditData[20].creditEndDateFact|16.08.2016 00:00:00
-n|credit.creditBureau.creditData[20].creditJoint|0
-n|credit.creditBureau.creditData[20].creditMaxOverdue|1740
-c|credit.creditBureau.creditData[20].creditOwner|0
-n|credit.creditBureau.creditData[20].creditProlong|0
-n|credit.creditBureau.creditData[20].creditSum|15010
-n|credit.creditBureau.creditData[20].creditSumDebt|0
-n|credit.creditBureau.creditData[20].creditSumLimit|0
-n|credit.creditBureau.creditData[20].creditSumOverdue|0
-n|credit.creditBureau.creditData[20].creditSumType|1
-n|credit.creditBureau.creditData[20].creditType|5
-c|credit.creditBureau.creditData[20].creditTypeUni|5
-d|credit.creditBureau.creditData[20].creditUpdate|22.08.2016 00:00:00
-n|credit.creditBureau.creditData[20].cuid|60268391
-n|credit.creditBureau.creditData[20].delay30|0
-n|credit.creditBureau.creditData[20].delay5|1
-n|credit.creditBureau.creditData[20].delay60|0
-n|credit.creditBureau.creditData[20].delay90|0
-n|credit.creditBureau.creditData[20].delayMore|0
-n|credit.creditBureau.creditData[21].cbAnnuity|0
-c|credit.creditBureau.creditData[21].cbId|exp
-c|credit.creditBureau.creditData[21].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC00000000000
-c|credit.creditBureau.creditData[21].contractSource|cb
-n|credit.creditBureau.creditData[21].cred_ratio|0
-n|credit.creditBureau.creditData[21].creditActive|0
-n|credit.creditBureau.creditData[21].creditCollateral|0
-n|credit.creditBureau.creditData[21].creditCostRate|36.49
-c|credit.creditBureau.creditData[21].creditCurrency|rur
-d|credit.creditBureau.creditData[21].creditDate|12.12.2016 00:00:00
-n|credit.creditBureau.creditData[21].creditDayOverdue|0
-d|credit.creditBureau.creditData[21].creditEndDate|12.02.2018 00:00:00
-d|credit.creditBureau.creditData[21].creditEndDateFact|13.11.2017 00:00:00
-n|credit.creditBureau.creditData[21].creditJoint|0
-n|credit.creditBureau.creditData[21].creditMaxOverdue|0
-c|credit.creditBureau.creditData[21].creditOwner|0
-n|credit.creditBureau.creditData[21].creditProlong|0
-n|credit.creditBureau.creditData[21].creditSum|18289
-n|credit.creditBureau.creditData[21].creditSumDebt|0
-n|credit.creditBureau.creditData[21].creditSumLimit|0
-n|credit.creditBureau.creditData[21].creditSumOverdue|0
-n|credit.creditBureau.creditData[21].creditSumType|1
-n|credit.creditBureau.creditData[21].creditType|5
-c|credit.creditBureau.creditData[21].creditTypeUni|5
-d|credit.creditBureau.creditData[21].creditUpdate|14.11.2017 00:00:00
-n|credit.creditBureau.creditData[21].cuid|60268391
-n|credit.creditBureau.creditData[21].delay30|0
-n|credit.creditBureau.creditData[21].delay5|0
-n|credit.creditBureau.creditData[21].delay60|0
-n|credit.creditBureau.creditData[21].delay90|0
-n|credit.creditBureau.creditData[21].delayMore|0
-n|credit.creditBureau.creditData[22].cbAnnuity|0
-c|credit.creditBureau.creditData[22].cbId|exp
-c|credit.creditBureau.creditData[22].cbOverdueLine|CCCCCCCCCCCC000000001000000000000000
-c|credit.creditBureau.creditData[22].contractSource|cb
-n|credit.creditBureau.creditData[22].cred_ratio|0
-n|credit.creditBureau.creditData[22].creditActive|0
-n|credit.creditBureau.creditData[22].creditCollateral|0
-n|credit.creditBureau.creditData[22].creditCostRate|18.94
-c|credit.creditBureau.creditData[22].creditCurrency|rur
-d|credit.creditBureau.creditData[22].creditDate|29.05.2017 00:00:00
-n|credit.creditBureau.creditData[22].creditDayOverdue|0
-d|credit.creditBureau.creditData[22].creditEndDate|29.05.2019 00:00:00
-d|credit.creditBureau.creditData[22].creditEndDateFact|30.05.2019 00:00:00
-n|credit.creditBureau.creditData[22].creditJoint|0
-n|credit.creditBureau.creditData[22].creditMaxOverdue|5389
-c|credit.creditBureau.creditData[22].creditOwner|0
-n|credit.creditBureau.creditData[22].creditProlong|0
-n|credit.creditBureau.creditData[22].creditSum|106600
-n|credit.creditBureau.creditData[22].creditSumDebt|0
-n|credit.creditBureau.creditData[22].creditSumLimit|0
-n|credit.creditBureau.creditData[22].creditSumOverdue|0
-n|credit.creditBureau.creditData[22].creditSumType|1
-n|credit.creditBureau.creditData[22].creditType|5
-c|credit.creditBureau.creditData[22].creditTypeUni|5
-d|credit.creditBureau.creditData[22].creditUpdate|02.06.2019 00:00:00
-n|credit.creditBureau.creditData[22].cuid|60268391
-n|credit.creditBureau.creditData[22].delay30|0
-n|credit.creditBureau.creditData[22].delay5|1
-n|credit.creditBureau.creditData[22].delay60|0
-n|credit.creditBureau.creditData[22].delay90|0
-n|credit.creditBureau.creditData[22].delayMore|0
-n|credit.creditBureau.creditData[23].cbAnnuity|0
-c|credit.creditBureau.creditData[23].cbId|exp
-c|credit.creditBureau.creditData[23].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC-00000
-c|credit.creditBureau.creditData[23].contractSource|cb
-n|credit.creditBureau.creditData[23].cred_ratio|0
-n|credit.creditBureau.creditData[23].creditActive|0
-n|credit.creditBureau.creditData[23].creditCollateral|0
-c|credit.creditBureau.creditData[23].creditCurrency|rur
-d|credit.creditBureau.creditData[23].creditDate|28.10.2014 00:00:00
-n|credit.creditBureau.creditData[23].creditDayOverdue|0
-d|credit.creditBureau.creditData[23].creditEndDate|28.04.2015 00:00:00
-d|credit.creditBureau.creditData[23].creditEndDateFact|29.04.2015 00:00:00
-n|credit.creditBureau.creditData[23].creditJoint|0
-n|credit.creditBureau.creditData[23].creditMaxOverdue|0
-c|credit.creditBureau.creditData[23].creditOwner|0
-n|credit.creditBureau.creditData[23].creditProlong|0
-n|credit.creditBureau.creditData[23].creditSum|4390
-n|credit.creditBureau.creditData[23].creditSumDebt|0
-n|credit.creditBureau.creditData[23].creditSumLimit|0
-n|credit.creditBureau.creditData[23].creditSumOverdue|0
-n|credit.creditBureau.creditData[23].creditSumType|1
-n|credit.creditBureau.creditData[23].creditType|5
-c|credit.creditBureau.creditData[23].creditTypeUni|5
-d|credit.creditBureau.creditData[23].creditUpdate|30.05.2015 00:00:00
-n|credit.creditBureau.creditData[23].cuid|60268391
-n|credit.creditBureau.creditData[23].delay30|0
-n|credit.creditBureau.creditData[23].delay5|0
-n|credit.creditBureau.creditData[23].delay60|0
-n|credit.creditBureau.creditData[23].delay90|0
-n|credit.creditBureau.creditData[23].delayMore|0
-n|credit.creditBureau.creditData[24].cbAnnuity|2219
-c|credit.creditBureau.creditData[24].cbId|exp
-c|credit.creditBureau.creditData[24].cbOverdueLine|0000110100001000000110
-c|credit.creditBureau.creditData[24].contractSource|cb
-n|credit.creditBureau.creditData[24].cred_ratio|0
-n|credit.creditBureau.creditData[24].creditActive|1
-n|credit.creditBureau.creditData[24].creditCollateral|0
-n|credit.creditBureau.creditData[24].creditCostRate|19.9
-c|credit.creditBureau.creditData[24].creditCurrency|rur
-d|credit.creditBureau.creditData[24].creditDate|11.07.2018 00:00:00
-n|credit.creditBureau.creditData[24].creditDayOverdue|30
-d|credit.creditBureau.creditData[24].creditEndDate|11.07.2020 00:00:00
-n|credit.creditBureau.creditData[24].creditJoint|0
-n|credit.creditBureau.creditData[24].creditMaxOverdue|2220
-c|credit.creditBureau.creditData[24].creditOwner|0
-n|credit.creditBureau.creditData[24].creditProlong|0
-n|credit.creditBureau.creditData[24].creditSum|43500
-n|credit.creditBureau.creditData[24].creditSumDebt|7868
-n|credit.creditBureau.creditData[24].creditSumLimit|0
-n|credit.creditBureau.creditData[24].creditSumOverdue|1373
-n|credit.creditBureau.creditData[24].creditSumType|1
-n|credit.creditBureau.creditData[24].creditType|5
-c|credit.creditBureau.creditData[24].creditTypeUni|5
-d|credit.creditBureau.creditData[24].creditUpdate|11.05.2020 00:00:00
-n|credit.creditBureau.creditData[24].cuid|60268391
-n|credit.creditBureau.creditData[24].delay30|0
-n|credit.creditBureau.creditData[24].delay5|6
-n|credit.creditBureau.creditData[24].delay60|0
-n|credit.creditBureau.creditData[24].delay90|0
-n|credit.creditBureau.creditData[24].delayMore|0
-n|credit.creditBureau.creditData[25].cbAnnuity|0
-c|credit.creditBureau.creditData[25].cbId|nbk
-c|credit.creditBureau.creditData[25].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCC--0------0000000000000000000000000000-0000000000---000-0000000000
-c|credit.creditBureau.creditData[25].contractSource|cb
-n|credit.creditBureau.creditData[25].cred_ratio|0
-n|credit.creditBureau.creditData[25].creditActive|0
-n|credit.creditBureau.creditData[25].creditCollateral|0
-n|credit.creditBureau.creditData[25].creditCostRate|51.1
-c|credit.creditBureau.creditData[25].creditCurrency|rur
-d|credit.creditBureau.creditData[25].creditDate|03.10.2012 00:00:00
-n|credit.creditBureau.creditData[25].creditDayOverdue|0
-d|credit.creditBureau.creditData[25].creditEndDate|31.12.2099 00:00:00
-d|credit.creditBureau.creditData[25].creditEndDateFact|15.03.2018 00:00:00
-n|credit.creditBureau.creditData[25].creditJoint|0
-n|credit.creditBureau.creditData[25].creditMaxOverdue|0
-c|credit.creditBureau.creditData[25].creditOwner|0
-n|credit.creditBureau.creditData[25].creditProlong|0
-n|credit.creditBureau.creditData[25].creditSum|0
-n|credit.creditBureau.creditData[25].creditSumDebt|0
-n|credit.creditBureau.creditData[25].creditSumLimit|0
-n|credit.creditBureau.creditData[25].creditSumOverdue|0
-n|credit.creditBureau.creditData[25].creditSumType|1
-n|credit.creditBureau.creditData[25].creditType|4
-c|credit.creditBureau.creditData[25].creditTypeUni|4
-d|credit.creditBureau.creditData[25].creditUpdate|15.03.2018 00:00:00
-n|credit.creditBureau.creditData[25].cuid|60268391
-n|credit.creditBureau.creditData[25].delay30|0
-n|credit.creditBureau.creditData[25].delay5|0
-n|credit.creditBureau.creditData[25].delay60|0
-n|credit.creditBureau.creditData[25].delay90|0
-n|credit.creditBureau.creditData[25].delayMore|0
-n|credit.creditBureau.creditData[26].cbAnnuity|0
-c|credit.creditBureau.creditData[26].cbId|exp
-c|credit.creditBureau.creditData[26].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCC--0------000000-0000-0000000000000000-0000000000---00000000000000
-c|credit.creditBureau.creditData[26].contractSource|cb
-n|credit.creditBureau.creditData[26].cred_ratio|0
-n|credit.creditBureau.creditData[26].creditActive|0
-n|credit.creditBureau.creditData[26].creditCollateral|0
-n|credit.creditBureau.creditData[26].creditCostRate|51.1
-c|credit.creditBureau.creditData[26].creditCurrency|rur
-d|credit.creditBureau.creditData[26].creditDate|03.10.2012 00:00:00
-n|credit.creditBureau.creditData[26].creditDayOverdue|0
-d|credit.creditBureau.creditData[26].creditEndDate|31.12.2099 00:00:00
-d|credit.creditBureau.creditData[26].creditEndDateFact|15.03.2018 00:00:00
-n|credit.creditBureau.creditData[26].creditJoint|0
-n|credit.creditBureau.creditData[26].creditMaxOverdue|0
-c|credit.creditBureau.creditData[26].creditOwner|0
-n|credit.creditBureau.creditData[26].creditProlong|0
-n|credit.creditBureau.creditData[26].creditSum|0
-n|credit.creditBureau.creditData[26].creditSumDebt|0
-n|credit.creditBureau.creditData[26].creditSumLimit|0
-n|credit.creditBureau.creditData[26].creditSumOverdue|0
-n|credit.creditBureau.creditData[26].creditSumType|1
-n|credit.creditBureau.creditData[26].creditType|4
-c|credit.creditBureau.creditData[26].creditTypeUni|4
-d|credit.creditBureau.creditData[26].creditUpdate|16.03.2018 00:00:00
-n|credit.creditBureau.creditData[26].cuid|60268391
-n|credit.creditBureau.creditData[26].delay30|0
-n|credit.creditBureau.creditData[26].delay5|0
-n|credit.creditBureau.creditData[26].delay60|0
-n|credit.creditBureau.creditData[26].delay90|0
-n|credit.creditBureau.creditData[26].delayMore|0
-n|credit.creditBureau.creditData[27].cbAnnuity|0
-c|credit.creditBureau.creditData[27].cbId|exp
-c|credit.creditBureau.creditData[27].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC000000
-c|credit.creditBureau.creditData[27].contractSource|cb
-n|credit.creditBureau.creditData[27].cred_ratio|0
-n|credit.creditBureau.creditData[27].creditActive|0
-n|credit.creditBureau.creditData[27].creditCollateral|0
-c|credit.creditBureau.creditData[27].creditCurrency|rur
-d|credit.creditBureau.creditData[27].creditDate|03.10.2012 00:00:00
-n|credit.creditBureau.creditData[27].creditDayOverdue|0
-d|credit.creditBureau.creditData[27].creditEndDate|03.04.2013 00:00:00
-d|credit.creditBureau.creditData[27].creditEndDateFact|03.04.2013 00:00:00
-n|credit.creditBureau.creditData[27].creditJoint|0
-n|credit.creditBureau.creditData[27].creditMaxOverdue|0
-c|credit.creditBureau.creditData[27].creditOwner|0
-n|credit.creditBureau.creditData[27].creditProlong|0
-n|credit.creditBureau.creditData[27].creditSum|11912
-n|credit.creditBureau.creditData[27].creditSumDebt|0
-n|credit.creditBureau.creditData[27].creditSumLimit|0
-n|credit.creditBureau.creditData[27].creditSumOverdue|0
-n|credit.creditBureau.creditData[27].creditSumType|1
-n|credit.creditBureau.creditData[27].creditType|5
-c|credit.creditBureau.creditData[27].creditTypeUni|5
-d|credit.creditBureau.creditData[27].creditUpdate|10.04.2013 00:00:00
-n|credit.creditBureau.creditData[27].cuid|60268391
-n|credit.creditBureau.creditData[27].delay30|0
-n|credit.creditBureau.creditData[27].delay5|0
-n|credit.creditBureau.creditData[27].delay60|0
-n|credit.creditBureau.creditData[27].delay90|0
-n|credit.creditBureau.creditData[27].delayMore|0
-n|credit.creditBureau.creditData[28].cbAnnuity|0
-c|credit.creditBureau.creditData[28].cbId|nbk
-c|credit.creditBureau.creditData[28].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC000-00
-c|credit.creditBureau.creditData[28].contractSource|cb
-n|credit.creditBureau.creditData[28].cred_ratio|0
-n|credit.creditBureau.creditData[28].creditActive|0
-n|credit.creditBureau.creditData[28].creditCollateral|0
-n|credit.creditBureau.creditData[28].creditCostRate|39.96
-c|credit.creditBureau.creditData[28].creditCurrency|rur
-d|credit.creditBureau.creditData[28].creditDate|28.10.2014 00:00:00
-n|credit.creditBureau.creditData[28].creditDayOverdue|0
-d|credit.creditBureau.creditData[28].creditEndDate|28.04.2015 00:00:00
-d|credit.creditBureau.creditData[28].creditEndDateFact|29.04.2015 00:00:00
-n|credit.creditBureau.creditData[28].creditJoint|0
-n|credit.creditBureau.creditData[28].creditMaxOverdue|0
-c|credit.creditBureau.creditData[28].creditOwner|0
-n|credit.creditBureau.creditData[28].creditProlong|0
-n|credit.creditBureau.creditData[28].creditSum|4390
-n|credit.creditBureau.creditData[28].creditSumDebt|0
-n|credit.creditBureau.creditData[28].creditSumLimit|0
-n|credit.creditBureau.creditData[28].creditSumOverdue|0
-n|credit.creditBureau.creditData[28].creditSumType|1
-n|credit.creditBureau.creditData[28].creditType|5
-c|credit.creditBureau.creditData[28].creditTypeUni|5
-d|credit.creditBureau.creditData[28].creditUpdate|29.04.2015 00:00:00
-n|credit.creditBureau.creditData[28].cuid|60268391
-n|credit.creditBureau.creditData[28].delay30|0
-n|credit.creditBureau.creditData[28].delay5|0
-n|credit.creditBureau.creditData[28].delay60|0
-n|credit.creditBureau.creditData[28].delay90|0
-n|credit.creditBureau.creditData[28].delayMore|0
-n|credit.creditBureau.creditData[29].cbAnnuity|0
-c|credit.creditBureau.creditData[29].cbId|nbk
-c|credit.creditBureau.creditData[29].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC00-
-c|credit.creditBureau.creditData[29].contractSource|cb
-n|credit.creditBureau.creditData[29].cred_ratio|0
-n|credit.creditBureau.creditData[29].creditActive|0
-n|credit.creditBureau.creditData[29].creditCollateral|0
-c|credit.creditBureau.creditData[29].creditCurrency|rur
-d|credit.creditBureau.creditData[29].creditDate|15.05.2009 00:00:00
-n|credit.creditBureau.creditData[29].creditDayOverdue|0
-d|credit.creditBureau.creditData[29].creditEndDate|16.11.2009 00:00:00
-d|credit.creditBureau.creditData[29].creditEndDateFact|17.08.2009 00:00:00
-n|credit.creditBureau.creditData[29].creditJoint|0
-n|credit.creditBureau.creditData[29].creditMaxOverdue|0
-c|credit.creditBureau.creditData[29].creditOwner|0
-n|credit.creditBureau.creditData[29].creditProlong|0
-n|credit.creditBureau.creditData[29].creditSum|12990
-n|credit.creditBureau.creditData[29].creditSumDebt|0
-n|credit.creditBureau.creditData[29].creditSumLimit|0
-n|credit.creditBureau.creditData[29].creditSumOverdue|0
-n|credit.creditBureau.creditData[29].creditSumType|1
-n|credit.creditBureau.creditData[29].creditType|5
-c|credit.creditBureau.creditData[29].creditTypeUni|5
-d|credit.creditBureau.creditData[29].creditUpdate|17.08.2009 00:00:00
-n|credit.creditBureau.creditData[29].cuid|60268391
-n|credit.creditBureau.creditData[29].delay30|0
-n|credit.creditBureau.creditData[29].delay5|0
-n|credit.creditBureau.creditData[29].delay60|0
-n|credit.creditBureau.creditData[29].delay90|0
-n|credit.creditBureau.creditData[29].delayMore|0
-c|credit.creditBureau.creditData[30].cbId|equ
-c|credit.creditBureau.creditData[30].contractSource|cb
-n|credit.creditBureau.creditData[30].cred_ratio|0
-n|credit.creditBureau.creditData[30].creditActive|0
-n|credit.creditBureau.creditData[30].creditCollateral|0
-c|credit.creditBureau.creditData[30].creditCurrency|rur
-d|credit.creditBureau.creditData[30].creditDate|03.10.2012 00:00:00
-n|credit.creditBureau.creditData[30].creditDayOverdue|0
-d|credit.creditBureau.creditData[30].creditEndDate|03.04.2013 00:00:00
-d|credit.creditBureau.creditData[30].creditEndDateFact|03.04.2013 00:00:00
-n|credit.creditBureau.creditData[30].creditJoint|0
-n|credit.creditBureau.creditData[30].creditMaxOverdue|0
-c|credit.creditBureau.creditData[30].creditOwner|0
-n|credit.creditBureau.creditData[30].creditProlong|0
-n|credit.creditBureau.creditData[30].creditSum|11911.92
-n|credit.creditBureau.creditData[30].creditSumDebt|0
-n|credit.creditBureau.creditData[30].creditSumLimit|0
-n|credit.creditBureau.creditData[30].creditSumOverdue|0
-n|credit.creditBureau.creditData[30].creditSumType|1
-n|credit.creditBureau.creditData[30].creditType|5
-c|credit.creditBureau.creditData[30].creditTypeUni|5
-d|credit.creditBureau.creditData[30].creditUpdate|06.04.2013 00:00:00
-n|credit.creditBureau.creditData[30].cuid|60268391
-n|credit.creditBureau.creditData[30].delay30|0
-n|credit.creditBureau.creditData[30].delay5|0
-n|credit.creditBureau.creditData[30].delay60|0
-n|credit.creditBureau.creditData[30].delay90|0
-n|credit.creditBureau.creditData[30].delayMore|0
-c|credit.creditBureau.creditData[31].cbId|equ
-c|credit.creditBureau.creditData[31].contractSource|cb
-n|credit.creditBureau.creditData[31].cred_ratio|0
-n|credit.creditBureau.creditData[31].creditActive|0
-n|credit.creditBureau.creditData[31].creditCollateral|0
-n|credit.creditBureau.creditData[31].creditCostRate|31.122
-c|credit.creditBureau.creditData[31].creditCurrency|rur
-d|credit.creditBureau.creditData[31].creditDate|14.07.2015 00:00:00
-n|credit.creditBureau.creditData[31].creditDayOverdue|0
-d|credit.creditBureau.creditData[31].creditEndDate|14.07.2016 00:00:00
-d|credit.creditBureau.creditData[31].creditEndDateFact|16.08.2016 00:00:00
-n|credit.creditBureau.creditData[31].creditJoint|0
-n|credit.creditBureau.creditData[31].creditMaxOverdue|1146.12
-c|credit.creditBureau.creditData[31].creditOwner|0
-n|credit.creditBureau.creditData[31].creditProlong|0
-n|credit.creditBureau.creditData[31].creditSum|15010
-n|credit.creditBureau.creditData[31].creditSumDebt|0
-n|credit.creditBureau.creditData[31].creditSumLimit|0
-n|credit.creditBureau.creditData[31].creditSumOverdue|0
-n|credit.creditBureau.creditData[31].creditSumType|1
-n|credit.creditBureau.creditData[31].creditType|5
-c|credit.creditBureau.creditData[31].creditTypeUni|5
-d|credit.creditBureau.creditData[31].creditUpdate|16.08.2016 00:00:00
-n|credit.creditBureau.creditData[31].cuid|60268391
-n|credit.creditBureau.creditData[31].delay30|1
-n|credit.creditBureau.creditData[31].delay5|0
-n|credit.creditBureau.creditData[31].delay60|0
-n|credit.creditBureau.creditData[31].delay90|0
-n|credit.creditBureau.creditData[31].delayMore|0
-n|credit.creditBureau.creditData[32].cbAnnuity|1128
-c|credit.creditBureau.creditData[32].cbId|exp
-c|credit.creditBureau.creditData[32].cbOverdueLine|-001100000000000100010000
-c|credit.creditBureau.creditData[32].contractSource|cb
-n|credit.creditBureau.creditData[32].cred_ratio|0
-n|credit.creditBureau.creditData[32].creditActive|1
-n|credit.creditBureau.creditData[32].creditCollateral|0
-n|credit.creditBureau.creditData[32].creditCostRate|17.36
-c|credit.creditBureau.creditData[32].creditCurrency|rur
-d|credit.creditBureau.creditData[32].creditDate|05.04.2018 00:00:00
-n|credit.creditBureau.creditData[32].creditDayOverdue|30
-d|credit.creditBureau.creditData[32].creditEndDate|05.04.2021 00:00:00
-n|credit.creditBureau.creditData[32].creditJoint|0
-n|credit.creditBureau.creditData[32].creditMaxOverdue|1131
-c|credit.creditBureau.creditData[32].creditOwner|0
-n|credit.creditBureau.creditData[32].creditProlong|0
-n|credit.creditBureau.creditData[32].creditSum|31490
-n|credit.creditBureau.creditData[32].creditSumDebt|13577
-n|credit.creditBureau.creditData[32].creditSumLimit|0
-n|credit.creditBureau.creditData[32].creditSumOverdue|1131
-n|credit.creditBureau.creditData[32].creditSumType|1
-n|credit.creditBureau.creditData[32].creditType|5
-c|credit.creditBureau.creditData[32].creditTypeUni|5
-d|credit.creditBureau.creditData[32].creditUpdate|11.05.2020 00:00:00
-n|credit.creditBureau.creditData[32].cuid|60268391
-n|credit.creditBureau.creditData[32].delay30|0
-n|credit.creditBureau.creditData[32].delay5|4
-n|credit.creditBureau.creditData[32].delay60|0
-n|credit.creditBureau.creditData[32].delay90|0
-n|credit.creditBureau.creditData[32].delayMore|0
-n|credit.creditBureau.creditData[33].cbAnnuity|0
-c|credit.creditBureau.creditData[33].cbId|exp
-c|credit.creditBureau.creditData[33].cbOverdueLine|0
-c|credit.creditBureau.creditData[33].contractSource|cb
-n|credit.creditBureau.creditData[33].cred_ratio|0
-n|credit.creditBureau.creditData[33].creditActive|1
-n|credit.creditBureau.creditData[33].creditCollateral|0
-n|credit.creditBureau.creditData[33].creditCostRate|28.75
-c|credit.creditBureau.creditData[33].creditCurrency|rur
-d|credit.creditBureau.creditData[33].creditDate|20.04.2020 00:00:00
-n|credit.creditBureau.creditData[33].creditDayOverdue|0
-d|credit.creditBureau.creditData[33].creditEndDate|28.02.2025 00:00:00
-n|credit.creditBureau.creditData[33].creditJoint|0
-n|credit.creditBureau.creditData[33].creditMaxOverdue|0
-c|credit.creditBureau.creditData[33].creditOwner|0
-n|credit.creditBureau.creditData[33].creditProlong|0
-n|credit.creditBureau.creditData[33].creditSum|5000
-n|credit.creditBureau.creditData[33].creditSumDebt|4953
-n|credit.creditBureau.creditData[33].creditSumLimit|47
-n|credit.creditBureau.creditData[33].creditSumOverdue|0
-n|credit.creditBureau.creditData[33].creditSumType|1
-n|credit.creditBureau.creditData[33].creditType|4
-c|credit.creditBureau.creditData[33].creditTypeUni|4
-d|credit.creditBureau.creditData[33].creditUpdate|05.05.2020 00:00:00
-n|credit.creditBureau.creditData[33].cuid|60268391
-n|credit.creditBureau.creditData[33].delay30|0
-n|credit.creditBureau.creditData[33].delay5|0
-n|credit.creditBureau.creditData[33].delay60|0
-n|credit.creditBureau.creditData[33].delay90|0
-n|credit.creditBureau.creditData[33].delayMore|0
-n|credit.creditBureau.creditData[34].cbAnnuity|4488
-c|credit.creditBureau.creditData[34].cbId|exp
-c|credit.creditBureau.creditData[34].cbOverdueLine|01000001000011011000
-c|credit.creditBureau.creditData[34].contractSource|cb
-n|credit.creditBureau.creditData[34].cred_ratio|0
-n|credit.creditBureau.creditData[34].creditActive|1
-n|credit.creditBureau.creditData[34].creditCollateral|0
-n|credit.creditBureau.creditData[34].creditCostRate|22.9
-c|credit.creditBureau.creditData[34].creditCurrency|rur
-d|credit.creditBureau.creditData[34].creditDate|14.09.2018 00:00:00
-n|credit.creditBureau.creditData[34].creditDayOverdue|0
-d|credit.creditBureau.creditData[34].creditEndDate|16.12.2021 00:00:00
-n|credit.creditBureau.creditData[34].creditJoint|0
-n|credit.creditBureau.creditData[34].creditMaxOverdue|3287
-c|credit.creditBureau.creditData[34].creditOwner|0
-n|credit.creditBureau.creditData[34].creditProlong|0
-n|credit.creditBureau.creditData[34].creditSum|58224
-n|credit.creditBureau.creditData[34].creditSumDebt|38747
-n|credit.creditBureau.creditData[34].creditSumLimit|0
-n|credit.creditBureau.creditData[34].creditSumOverdue|0
-n|credit.creditBureau.creditData[34].creditSumType|1
-n|credit.creditBureau.creditData[34].creditType|5
-c|credit.creditBureau.creditData[34].creditTypeUni|5
-d|credit.creditBureau.creditData[34].creditUpdate|07.05.2020 00:00:00
-n|credit.creditBureau.creditData[34].cuid|60268391
-n|credit.creditBureau.creditData[34].delay30|0
-n|credit.creditBureau.creditData[34].delay5|6
-n|credit.creditBureau.creditData[34].delay60|0
-n|credit.creditBureau.creditData[34].delay90|0
-n|credit.creditBureau.creditData[34].delayMore|0
-n|credit.creditBureau.creditData[35].cbAnnuity|0
-c|credit.creditBureau.creditData[35].cbId|exp
-c|credit.creditBureau.creditData[35].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC00000000000
-c|credit.creditBureau.creditData[35].contractSource|cb
-n|credit.creditBureau.creditData[35].cred_ratio|0
-n|credit.creditBureau.creditData[35].creditActive|0
-n|credit.creditBureau.creditData[35].creditCollateral|0
-c|credit.creditBureau.creditData[35].creditCurrency|rur
-d|credit.creditBureau.creditData[35].creditDate|15.03.2020 00:00:00
-n|credit.creditBureau.creditData[35].creditDayOverdue|0
-n|credit.creditBureau.creditData[35].creditJoint|1
-n|credit.creditBureau.creditData[35].creditMaxOverdue|0
-n|credit.creditBureau.creditData[35].creditProlong|0
-n|credit.creditBureau.creditData[35].creditSum|50000
-n|credit.creditBureau.creditData[35].creditSumLimit|0
-n|credit.creditBureau.creditData[35].creditSumOverdue|0
-n|credit.creditBureau.creditData[35].creditSumType|1
-n|credit.creditBureau.creditData[35].creditType|5
-c|credit.creditBureau.creditData[35].creditTypeUni|5
-d|credit.creditBureau.creditData[35].creditUpdate|15.01.2015 00:00:00
-n|credit.creditBureau.creditData[35].cuid|60268391
-n|credit.creditBureau.creditData[35].delay30|0
-n|credit.creditBureau.creditData[35].delay5|0
-n|credit.creditBureau.creditData[35].delay60|0
-n|credit.creditBureau.creditData[35].delay90|0
-n|credit.creditBureau.creditData[35].delayMore|0
-n|credit.creditBureau.creditData[36].cbAnnuity|0
-c|credit.creditBureau.creditData[36].contractSource|cb
-n|credit.creditBureau.creditData[36].cred_ratio|0
-n|credit.creditBureau.creditData[36].creditActive|0
-n|credit.creditBureau.creditData[36].creditCollateral|0
-c|credit.creditBureau.creditData[36].creditCurrency|rur
-d|credit.creditBureau.creditData[36].creditDate|15.02.2014 00:00:00
-n|credit.creditBureau.creditData[36].creditDayOverdue|0
-d|credit.creditBureau.creditData[36].creditEndDate|16.02.2015 00:00:00
-d|credit.creditBureau.creditData[36].creditEndDateFact|15.01.2015 00:00:00
-n|credit.creditBureau.creditData[36].creditJoint|1
-n|credit.creditBureau.creditData[36].creditMaxOverdue|0
-c|credit.creditBureau.creditData[36].creditOwner|0
-n|credit.creditBureau.creditData[36].creditProlong|0
-n|credit.creditBureau.creditData[36].creditSum|15950
-n|credit.creditBureau.creditData[36].creditSumDebt|0
-n|credit.creditBureau.creditData[36].creditSumLimit|0
-n|credit.creditBureau.creditData[36].creditSumOverdue|0
-n|credit.creditBureau.creditData[36].creditSumType|1
-n|credit.creditBureau.creditData[36].creditType|5
-c|credit.creditBureau.creditData[36].creditTypeUni|5
-d|credit.creditBureau.creditData[36].creditUpdate|15.01.2015 00:00:00
-n|credit.creditBureau.creditData[36].cuid|60268391
-n|credit.creditBureau.creditData[36].delay30|0
-n|credit.creditBureau.creditData[36].delay5|0
-n|credit.creditBureau.creditData[36].delay60|0
-n|credit.creditBureau.creditData[36].delay90|0
-n|credit.creditBureau.creditData[36].delayMore|0
-n|credit.creditBureau.creditData[37].cbAnnuity|2219
-c|credit.creditBureau.creditData[37].cbOverdueLine|0000110100001000000110
-c|credit.creditBureau.creditData[37].contractSource|cb
-n|credit.creditBureau.creditData[37].cred_ratio|0
-n|credit.creditBureau.creditData[37].creditActive|1
-n|credit.creditBureau.creditData[37].creditCollateral|0
-n|credit.creditBureau.creditData[37].creditCostRate|19.9
-c|credit.creditBureau.creditData[37].creditCurrency|rur
-d|credit.creditBureau.creditData[37].creditDate|11.07.2018 00:00:00
-n|credit.creditBureau.creditData[37].creditDayOverdue|30
-d|credit.creditBureau.creditData[37].creditEndDate|11.07.2020 00:00:00
-n|credit.creditBureau.creditData[37].creditJoint|1
-n|credit.creditBureau.creditData[37].creditMaxOverdue|2220
-c|credit.creditBureau.creditData[37].creditOwner|0
-n|credit.creditBureau.creditData[37].creditProlong|0
-n|credit.creditBureau.creditData[37].creditSum|43500
-n|credit.creditBureau.creditData[37].creditSumDebt|7868
-n|credit.creditBureau.creditData[37].creditSumLimit|0
-n|credit.creditBureau.creditData[37].creditSumOverdue|1373
-n|credit.creditBureau.creditData[37].creditSumType|1
-n|credit.creditBureau.creditData[37].creditType|5
-c|credit.creditBureau.creditData[37].creditTypeUni|5
-d|credit.creditBureau.creditData[37].creditUpdate|11.05.2020 00:00:00
-n|credit.creditBureau.creditData[37].cuid|60268391
-n|credit.creditBureau.creditData[37].delay30|0
-n|credit.creditBureau.creditData[37].delay5|6
-n|credit.creditBureau.creditData[37].delay60|0
-n|credit.creditBureau.creditData[37].delay90|0
-n|credit.creditBureau.creditData[37].delayMore|0
-c|credit.creditBureau.creditData[38].cbOverdueLine|10110011000011000001111000000000000000000000000000000-0-----
-c|credit.creditBureau.creditData[38].contractSource|cb
-n|credit.creditBureau.creditData[38].cred_ratio|0
-n|credit.creditBureau.creditData[38].creditActive|1
-n|credit.creditBureau.creditData[38].creditCollateral|0
-n|credit.creditBureau.creditData[38].creditCostRate|26.03
-c|credit.creditBureau.creditData[38].creditCurrency|rur
-d|credit.creditBureau.creditData[38].creditDate|07.05.2015 00:00:00
-n|credit.creditBureau.creditData[38].creditDayOverdue|30
-n|credit.creditBureau.creditData[38].creditJoint|1
-n|credit.creditBureau.creditData[38].creditMaxOverdue|1824
-c|credit.creditBureau.creditData[38].creditOwner|0
-n|credit.creditBureau.creditData[38].creditProlong|0
-n|credit.creditBureau.creditData[38].creditSum|30000
-n|credit.creditBureau.creditData[38].creditSumDebt|31254
-n|credit.creditBureau.creditData[38].creditSumLimit|0
-n|credit.creditBureau.creditData[38].creditSumOverdue|1824
-n|credit.creditBureau.creditData[38].creditSumType|1
-n|credit.creditBureau.creditData[38].creditType|4
-c|credit.creditBureau.creditData[38].creditTypeUni|4
-d|credit.creditBureau.creditData[38].creditUpdate|11.05.2020 00:00:00
-n|credit.creditBureau.creditData[38].cuid|60268391
-n|credit.creditBureau.creditData[38].delay30|0
-n|credit.creditBureau.creditData[38].delay5|10
-n|credit.creditBureau.creditData[38].delay60|0
-n|credit.creditBureau.creditData[38].delay90|0
-n|credit.creditBureau.creditData[38].delayMore|0
-n|credit.creditBureau.creditData[39].cbAnnuity|0
-c|credit.creditBureau.creditData[39].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC-00000
-c|credit.creditBureau.creditData[39].contractSource|cb
-n|credit.creditBureau.creditData[39].cred_ratio|0
-n|credit.creditBureau.creditData[39].creditActive|0
-n|credit.creditBureau.creditData[39].creditCollateral|0
-c|credit.creditBureau.creditData[39].creditCurrency|rur
-d|credit.creditBureau.creditData[39].creditDate|28.10.2014 00:00:00
-n|credit.creditBureau.creditData[39].creditDayOverdue|0
-d|credit.creditBureau.creditData[39].creditEndDate|28.04.2015 00:00:00
-d|credit.creditBureau.creditData[39].creditEndDateFact|29.04.2015 00:00:00
-n|credit.creditBureau.creditData[39].creditJoint|1
-n|credit.creditBureau.creditData[39].creditMaxOverdue|0
-c|credit.creditBureau.creditData[39].creditOwner|0
-n|credit.creditBureau.creditData[39].creditProlong|0
-n|credit.creditBureau.creditData[39].creditSum|4390
-n|credit.creditBureau.creditData[39].creditSumDebt|0
-n|credit.creditBureau.creditData[39].creditSumLimit|0
-n|credit.creditBureau.creditData[39].creditSumOverdue|0
-n|credit.creditBureau.creditData[39].creditSumType|1
-n|credit.creditBureau.creditData[39].creditType|5
-c|credit.creditBureau.creditData[39].creditTypeUni|5
-d|credit.creditBureau.creditData[39].creditUpdate|30.05.2015 00:00:00
-n|credit.creditBureau.creditData[39].cuid|60268391
-n|credit.creditBureau.creditData[39].delay30|0
-n|credit.creditBureau.creditData[39].delay5|0
-n|credit.creditBureau.creditData[39].delay60|0
-n|credit.creditBureau.creditData[39].delay90|0
-n|credit.creditBureau.creditData[39].delayMore|0
-n|credit.creditBureau.creditData[40].cbAnnuity|0
-c|credit.creditBureau.creditData[40].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC0000000001000
-c|credit.creditBureau.creditData[40].contractSource|cb
-n|credit.creditBureau.creditData[40].cred_ratio|0
-n|credit.creditBureau.creditData[40].creditActive|0
-n|credit.creditBureau.creditData[40].creditCollateral|0
-n|credit.creditBureau.creditData[40].creditCostRate|31.122
-c|credit.creditBureau.creditData[40].creditCurrency|rur
-d|credit.creditBureau.creditData[40].creditDate|14.07.2015 00:00:00
-n|credit.creditBureau.creditData[40].creditDayOverdue|0
-d|credit.creditBureau.creditData[40].creditEndDate|14.07.2016 00:00:00
-d|credit.creditBureau.creditData[40].creditEndDateFact|16.08.2016 00:00:00
-n|credit.creditBureau.creditData[40].creditJoint|1
-n|credit.creditBureau.creditData[40].creditMaxOverdue|1740
-c|credit.creditBureau.creditData[40].creditOwner|0
-n|credit.creditBureau.creditData[40].creditProlong|0
-n|credit.creditBureau.creditData[40].creditSum|15010
-n|credit.creditBureau.creditData[40].creditSumDebt|0
-n|credit.creditBureau.creditData[40].creditSumLimit|0
-n|credit.creditBureau.creditData[40].creditSumOverdue|0
-n|credit.creditBureau.creditData[40].creditSumType|1
-n|credit.creditBureau.creditData[40].creditType|5
-c|credit.creditBureau.creditData[40].creditTypeUni|5
-d|credit.creditBureau.creditData[40].creditUpdate|22.08.2016 00:00:00
-n|credit.creditBureau.creditData[40].cuid|60268391
-n|credit.creditBureau.creditData[40].delay30|0
-n|credit.creditBureau.creditData[40].delay5|1
-n|credit.creditBureau.creditData[40].delay60|0
-n|credit.creditBureau.creditData[40].delay90|0
-n|credit.creditBureau.creditData[40].delayMore|0
-n|credit.creditBureau.creditData[41].cbAnnuity|0
-c|credit.creditBureau.creditData[41].cbOverdueLine|CCCCCCCCCCCC000000001000000000000000
-c|credit.creditBureau.creditData[41].contractSource|cb
-n|credit.creditBureau.creditData[41].cred_ratio|0
-n|credit.creditBureau.creditData[41].creditActive|0
-n|credit.creditBureau.creditData[41].creditCollateral|0
-n|credit.creditBureau.creditData[41].creditCostRate|18.94
-c|credit.creditBureau.creditData[41].creditCurrency|rur
-d|credit.creditBureau.creditData[41].creditDate|29.05.2017 00:00:00
-n|credit.creditBureau.creditData[41].creditDayOverdue|0
-d|credit.creditBureau.creditData[41].creditEndDate|29.05.2019 00:00:00
-d|credit.creditBureau.creditData[41].creditEndDateFact|30.05.2019 00:00:00
-n|credit.creditBureau.creditData[41].creditJoint|1
-n|credit.creditBureau.creditData[41].creditMaxOverdue|5389
-c|credit.creditBureau.creditData[41].creditOwner|0
-n|credit.creditBureau.creditData[41].creditProlong|0
-n|credit.creditBureau.creditData[41].creditSum|106600
-n|credit.creditBureau.creditData[41].creditSumDebt|0
-n|credit.creditBureau.creditData[41].creditSumLimit|0
-n|credit.creditBureau.creditData[41].creditSumOverdue|0
-n|credit.creditBureau.creditData[41].creditSumType|1
-n|credit.creditBureau.creditData[41].creditType|5
-c|credit.creditBureau.creditData[41].creditTypeUni|5
-d|credit.creditBureau.creditData[41].creditUpdate|02.06.2019 00:00:00
-n|credit.creditBureau.creditData[41].cuid|60268391
-n|credit.creditBureau.creditData[41].delay30|0
-n|credit.creditBureau.creditData[41].delay5|1
-n|credit.creditBureau.creditData[41].delay60|0
-n|credit.creditBureau.creditData[41].delay90|0
-n|credit.creditBureau.creditData[41].delayMore|0
-n|credit.creditBureau.creditData[42].cbAnnuity|3018
-c|credit.creditBureau.creditData[42].cbOverdueLine|-00000000000
-c|credit.creditBureau.creditData[42].contractSource|cb
-n|credit.creditBureau.creditData[42].cred_ratio|0
-n|credit.creditBureau.creditData[42].creditActive|1
-n|credit.creditBureau.creditData[42].creditCollateral|0
-n|credit.creditBureau.creditData[42].creditCostRate|19.94
-c|credit.creditBureau.creditData[42].creditCurrency|rur
-d|credit.creditBureau.creditData[42].creditDate|13.05.2019 00:00:00
-n|credit.creditBureau.creditData[42].creditDayOverdue|30
-d|credit.creditBureau.creditData[42].creditEndDate|13.03.2022 00:00:00
-n|credit.creditBureau.creditData[42].creditJoint|1
-n|credit.creditBureau.creditData[42].creditMaxOverdue|3025
-c|credit.creditBureau.creditData[42].creditOwner|0
-n|credit.creditBureau.creditData[42].creditProlong|0
-n|credit.creditBureau.creditData[42].creditSum|77951
-n|credit.creditBureau.creditData[42].creditSumDebt|60929
-n|credit.creditBureau.creditData[42].creditSumLimit|0
-n|credit.creditBureau.creditData[42].creditSumOverdue|3025
-n|credit.creditBureau.creditData[42].creditSumType|1
-n|credit.creditBureau.creditData[42].creditType|5
-c|credit.creditBureau.creditData[42].creditTypeUni|5
-d|credit.creditBureau.creditData[42].creditUpdate|11.05.2020 00:00:00
-n|credit.creditBureau.creditData[42].cuid|60268391
-n|credit.creditBureau.creditData[42].delay30|0
-n|credit.creditBureau.creditData[42].delay5|0
-n|credit.creditBureau.creditData[42].delay60|0
-n|credit.creditBureau.creditData[42].delay90|0
-n|credit.creditBureau.creditData[42].delayMore|0
-n|credit.creditBureau.creditData[43].cbAnnuity|0
-c|credit.creditBureau.creditData[43].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC000000
-c|credit.creditBureau.creditData[43].contractSource|cb
-n|credit.creditBureau.creditData[43].cred_ratio|0
-n|credit.creditBureau.creditData[43].creditActive|0
-n|credit.creditBureau.creditData[43].creditCollateral|0
-c|credit.creditBureau.creditData[43].creditCurrency|rur
-d|credit.creditBureau.creditData[43].creditDate|03.10.2012 00:00:00
-n|credit.creditBureau.creditData[43].creditDayOverdue|0
-d|credit.creditBureau.creditData[43].creditEndDate|03.04.2013 00:00:00
-d|credit.creditBureau.creditData[43].creditEndDateFact|03.04.2013 00:00:00
-n|credit.creditBureau.creditData[43].creditJoint|1
-n|credit.creditBureau.creditData[43].creditMaxOverdue|0
-c|credit.creditBureau.creditData[43].creditOwner|0
-n|credit.creditBureau.creditData[43].creditProlong|0
-n|credit.creditBureau.creditData[43].creditSum|11912
-n|credit.creditBureau.creditData[43].creditSumDebt|0
-n|credit.creditBureau.creditData[43].creditSumLimit|0
-n|credit.creditBureau.creditData[43].creditSumOverdue|0
-n|credit.creditBureau.creditData[43].creditSumType|1
-n|credit.creditBureau.creditData[43].creditType|5
-c|credit.creditBureau.creditData[43].creditTypeUni|5
-d|credit.creditBureau.creditData[43].creditUpdate|10.04.2013 00:00:00
-n|credit.creditBureau.creditData[43].cuid|60268391
-n|credit.creditBureau.creditData[43].delay30|0
-n|credit.creditBureau.creditData[43].delay5|0
-n|credit.creditBureau.creditData[43].delay60|0
-n|credit.creditBureau.creditData[43].delay90|0
-n|credit.creditBureau.creditData[43].delayMore|0
-n|credit.creditBureau.creditData[44].cbAnnuity|0
-c|credit.creditBureau.creditData[44].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCC--0------000000-0000-0000000000000000-0000000000---00000000000000
-c|credit.creditBureau.creditData[44].contractSource|cb
-n|credit.creditBureau.creditData[44].cred_ratio|0
-n|credit.creditBureau.creditData[44].creditActive|0
-n|credit.creditBureau.creditData[44].creditCollateral|0
-n|credit.creditBureau.creditData[44].creditCostRate|51.1
-c|credit.creditBureau.creditData[44].creditCurrency|rur
-d|credit.creditBureau.creditData[44].creditDate|03.10.2012 00:00:00
-n|credit.creditBureau.creditData[44].creditDayOverdue|0
-d|credit.creditBureau.creditData[44].creditEndDate|31.12.2099 00:00:00
-d|credit.creditBureau.creditData[44].creditEndDateFact|15.03.2018 00:00:00
-n|credit.creditBureau.creditData[44].creditJoint|1
-n|credit.creditBureau.creditData[44].creditMaxOverdue|0
-c|credit.creditBureau.creditData[44].creditOwner|0
-n|credit.creditBureau.creditData[44].creditProlong|0
-n|credit.creditBureau.creditData[44].creditSum|0
-n|credit.creditBureau.creditData[44].creditSumDebt|0
-n|credit.creditBureau.creditData[44].creditSumLimit|0
-n|credit.creditBureau.creditData[44].creditSumOverdue|0
-n|credit.creditBureau.creditData[44].creditSumType|1
-n|credit.creditBureau.creditData[44].creditType|4
-c|credit.creditBureau.creditData[44].creditTypeUni|4
-d|credit.creditBureau.creditData[44].creditUpdate|16.03.2018 00:00:00
-n|credit.creditBureau.creditData[44].cuid|60268391
-n|credit.creditBureau.creditData[44].delay30|0
-n|credit.creditBureau.creditData[44].delay5|0
-n|credit.creditBureau.creditData[44].delay60|0
-n|credit.creditBureau.creditData[44].delay90|0
-n|credit.creditBureau.creditData[44].delayMore|0
-n|credit.creditBureau.creditData[45].cbAnnuity|0
-c|credit.creditBureau.creditData[45].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC-0--
-c|credit.creditBureau.creditData[45].contractSource|cb
-n|credit.creditBureau.creditData[45].cred_ratio|0
-n|credit.creditBureau.creditData[45].creditActive|0
-n|credit.creditBureau.creditData[45].creditCollateral|0
-c|credit.creditBureau.creditData[45].creditCurrency|rur
-d|credit.creditBureau.creditData[45].creditDate|29.12.2011 00:00:00
-n|credit.creditBureau.creditData[45].creditDayOverdue|0
-d|credit.creditBureau.creditData[45].creditEndDate|02.04.2012 00:00:00
-d|credit.creditBureau.creditData[45].creditEndDateFact|02.04.2012 00:00:00
-n|credit.creditBureau.creditData[45].creditJoint|1
-n|credit.creditBureau.creditData[45].creditMaxOverdue|0
-c|credit.creditBureau.creditData[45].creditOwner|0
-n|credit.creditBureau.creditData[45].creditProlong|0
-n|credit.creditBureau.creditData[45].creditSum|3640
-n|credit.creditBureau.creditData[45].creditSumDebt|0
-n|credit.creditBureau.creditData[45].creditSumLimit|0
-n|credit.creditBureau.creditData[45].creditSumOverdue|0
-n|credit.creditBureau.creditData[45].creditSumType|1
-n|credit.creditBureau.creditData[45].creditType|5
-c|credit.creditBureau.creditData[45].creditTypeUni|5
-d|credit.creditBureau.creditData[45].creditUpdate|31.07.2012 00:00:00
-n|credit.creditBureau.creditData[45].cuid|60268391
-n|credit.creditBureau.creditData[45].delay30|0
-n|credit.creditBureau.creditData[45].delay5|0
-n|credit.creditBureau.creditData[45].delay60|0
-n|credit.creditBureau.creditData[45].delay90|0
-n|credit.creditBureau.creditData[45].delayMore|0
-n|credit.creditBureau.creditData[46].cbAnnuity|2168
-c|credit.creditBureau.creditData[46].cbOverdueLine|-000000000100000100
-c|credit.creditBureau.creditData[46].contractSource|cb
-n|credit.creditBureau.creditData[46].cred_ratio|0
-n|credit.creditBureau.creditData[46].creditActive|1
-n|credit.creditBureau.creditData[46].creditCollateral|0
-n|credit.creditBureau.creditData[46].creditCostRate|19.9
-c|credit.creditBureau.creditData[46].creditCurrency|rur
-d|credit.creditBureau.creditData[46].creditDate|17.10.2018 00:00:00
-n|credit.creditBureau.creditData[46].creditDayOverdue|30
-d|credit.creditBureau.creditData[46].creditEndDate|17.10.2020 00:00:00
-n|credit.creditBureau.creditData[46].creditJoint|1
-n|credit.creditBureau.creditData[46].creditMaxOverdue|2173
-c|credit.creditBureau.creditData[46].creditOwner|0
-n|credit.creditBureau.creditData[46].creditProlong|0
-n|credit.creditBureau.creditData[46].creditSum|42635
-n|credit.creditBureau.creditData[46].creditSumDebt|16498
-n|credit.creditBureau.creditData[46].creditSumLimit|0
-n|credit.creditBureau.creditData[46].creditSumOverdue|2173
-n|credit.creditBureau.creditData[46].creditSumType|1
-n|credit.creditBureau.creditData[46].creditType|5
-c|credit.creditBureau.creditData[46].creditTypeUni|5
-d|credit.creditBureau.creditData[46].creditUpdate|11.05.2020 00:00:00
-n|credit.creditBureau.creditData[46].cuid|60268391
-n|credit.creditBureau.creditData[46].delay30|0
-n|credit.creditBureau.creditData[46].delay5|2
-n|credit.creditBureau.creditData[46].delay60|0
-n|credit.creditBureau.creditData[46].delay90|0
-n|credit.creditBureau.creditData[46].delayMore|0
-n|credit.creditBureau.creditData[47].cbAnnuity|0
-c|credit.creditBureau.creditData[47].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC00000000000
-c|credit.creditBureau.creditData[47].contractSource|cb
-n|credit.creditBureau.creditData[47].cred_ratio|0
-n|credit.creditBureau.creditData[47].creditActive|0
-n|credit.creditBureau.creditData[47].creditCollateral|0
-n|credit.creditBureau.creditData[47].creditCostRate|36.49
-c|credit.creditBureau.creditData[47].creditCurrency|rur
-d|credit.creditBureau.creditData[47].creditDate|12.12.2016 00:00:00
-n|credit.creditBureau.creditData[47].creditDayOverdue|0
-d|credit.creditBureau.creditData[47].creditEndDate|12.02.2018 00:00:00
-d|credit.creditBureau.creditData[47].creditEndDateFact|13.11.2017 00:00:00
-n|credit.creditBureau.creditData[47].creditJoint|1
-n|credit.creditBureau.creditData[47].creditMaxOverdue|0
-c|credit.creditBureau.creditData[47].creditOwner|0
-n|credit.creditBureau.creditData[47].creditProlong|0
-n|credit.creditBureau.creditData[47].creditSum|18289
-n|credit.creditBureau.creditData[47].creditSumDebt|0
-n|credit.creditBureau.creditData[47].creditSumLimit|0
-n|credit.creditBureau.creditData[47].creditSumOverdue|0
-n|credit.creditBureau.creditData[47].creditSumType|1
-n|credit.creditBureau.creditData[47].creditType|5
-c|credit.creditBureau.creditData[47].creditTypeUni|5
-d|credit.creditBureau.creditData[47].creditUpdate|14.11.2017 00:00:00
-n|credit.creditBureau.creditData[47].cuid|60268391
-n|credit.creditBureau.creditData[47].delay30|0
-n|credit.creditBureau.creditData[47].delay5|0
-n|credit.creditBureau.creditData[47].delay60|0
-n|credit.creditBureau.creditData[47].delay90|0
-n|credit.creditBureau.creditData[47].delayMore|0
-n|credit.creditBureau.creditData[48].cbAnnuity|0
-c|credit.creditBureau.creditData[48].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC00000000000000000
-c|credit.creditBureau.creditData[48].contractSource|cb
-n|credit.creditBureau.creditData[48].cred_ratio|0
-n|credit.creditBureau.creditData[48].creditActive|0
-n|credit.creditBureau.creditData[48].creditCollateral|0
-n|credit.creditBureau.creditData[48].creditCostRate|22.02
-c|credit.creditBureau.creditData[48].creditCurrency|rur
-d|credit.creditBureau.creditData[48].creditDate|03.05.2016 00:00:00
-n|credit.creditBureau.creditData[48].creditDayOverdue|0
-d|credit.creditBureau.creditData[48].creditEndDate|03.05.2018 00:00:00
-d|credit.creditBureau.creditData[48].creditEndDateFact|24.10.2017 00:00:00
-n|credit.creditBureau.creditData[48].creditJoint|1
-n|credit.creditBureau.creditData[48].creditMaxOverdue|0
-c|credit.creditBureau.creditData[48].creditOwner|0
-n|credit.creditBureau.creditData[48].creditProlong|0
-n|credit.creditBureau.creditData[48].creditSum|37717
-n|credit.creditBureau.creditData[48].creditSumDebt|0
-n|credit.creditBureau.creditData[48].creditSumLimit|0
-n|credit.creditBureau.creditData[48].creditSumOverdue|0
-n|credit.creditBureau.creditData[48].creditSumType|1
-n|credit.creditBureau.creditData[48].creditType|5
-c|credit.creditBureau.creditData[48].creditTypeUni|5
-d|credit.creditBureau.creditData[48].creditUpdate|15.05.2019 00:00:00
-n|credit.creditBureau.creditData[48].cuid|60268391
-n|credit.creditBureau.creditData[48].delay30|0
-n|credit.creditBureau.creditData[48].delay5|0
-n|credit.creditBureau.creditData[48].delay60|0
-n|credit.creditBureau.creditData[48].delay90|0
-n|credit.creditBureau.creditData[48].delayMore|0
-n|credit.creditBureau.creditData[49].cbAnnuity|0
-c|credit.creditBureau.creditData[49].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC111111111110101011101000
-c|credit.creditBureau.creditData[49].contractSource|cb
-n|credit.creditBureau.creditData[49].cred_ratio|0
-n|credit.creditBureau.creditData[49].creditActive|0
-n|credit.creditBureau.creditData[49].creditCollateral|0
-n|credit.creditBureau.creditData[49].creditCostRate|24.57
-c|credit.creditBureau.creditData[49].creditCurrency|rur
-d|credit.creditBureau.creditData[49].creditDate|07.05.2015 00:00:00
-n|credit.creditBureau.creditData[49].creditDayOverdue|0
-d|credit.creditBureau.creditData[49].creditEndDate|07.05.2017 00:00:00
-d|credit.creditBureau.creditData[49].creditEndDateFact|13.05.2017 00:00:00
-n|credit.creditBureau.creditData[49].creditJoint|1
-n|credit.creditBureau.creditData[49].creditMaxOverdue|5651
-c|credit.creditBureau.creditData[49].creditOwner|0
-n|credit.creditBureau.creditData[49].creditProlong|0
-n|credit.creditBureau.creditData[49].creditSum|106400
-n|credit.creditBureau.creditData[49].creditSumDebt|0
-n|credit.creditBureau.creditData[49].creditSumLimit|0
-n|credit.creditBureau.creditData[49].creditSumOverdue|0
-n|credit.creditBureau.creditData[49].creditSumType|1
-n|credit.creditBureau.creditData[49].creditType|5
-c|credit.creditBureau.creditData[49].creditTypeUni|5
-d|credit.creditBureau.creditData[49].creditUpdate|15.05.2019 00:00:00
-n|credit.creditBureau.creditData[49].cuid|60268391
-n|credit.creditBureau.creditData[49].delay30|0
-n|credit.creditBureau.creditData[49].delay5|17
-n|credit.creditBureau.creditData[49].delay60|0
-n|credit.creditBureau.creditData[49].delay90|0
-n|credit.creditBureau.creditData[49].delayMore|0
-n|credit.creditBureau.creditData[50].cbAnnuity|1128
-c|credit.creditBureau.creditData[50].cbOverdueLine|-001100000000000100010000
-c|credit.creditBureau.creditData[50].contractSource|cb
-n|credit.creditBureau.creditData[50].cred_ratio|0
-n|credit.creditBureau.creditData[50].creditActive|1
-n|credit.creditBureau.creditData[50].creditCollateral|0
-n|credit.creditBureau.creditData[50].creditCostRate|17.36
-c|credit.creditBureau.creditData[50].creditCurrency|rur
-d|credit.creditBureau.creditData[50].creditDate|05.04.2018 00:00:00
-n|credit.creditBureau.creditData[50].creditDayOverdue|30
-d|credit.creditBureau.creditData[50].creditEndDate|05.04.2021 00:00:00
-n|credit.creditBureau.creditData[50].creditJoint|1
-n|credit.creditBureau.creditData[50].creditMaxOverdue|1131
-c|credit.creditBureau.creditData[50].creditOwner|0
-n|credit.creditBureau.creditData[50].creditProlong|0
-n|credit.creditBureau.creditData[50].creditSum|31490
-n|credit.creditBureau.creditData[50].creditSumDebt|13577
-n|credit.creditBureau.creditData[50].creditSumLimit|0
-n|credit.creditBureau.creditData[50].creditSumOverdue|1131
-n|credit.creditBureau.creditData[50].creditSumType|1
-n|credit.creditBureau.creditData[50].creditType|5
-c|credit.creditBureau.creditData[50].creditTypeUni|5
-d|credit.creditBureau.creditData[50].creditUpdate|11.05.2020 00:00:00
-n|credit.creditBureau.creditData[50].cuid|60268391
-n|credit.creditBureau.creditData[50].delay30|0
-n|credit.creditBureau.creditData[50].delay5|4
-n|credit.creditBureau.creditData[50].delay60|0
-n|credit.creditBureau.creditData[50].delay90|0
-n|credit.creditBureau.creditData[50].delayMore|0
-c|credit.creditBureau.creditData[51].contractSource|cb
-n|credit.creditBureau.creditData[51].cred_ratio|0
-n|credit.creditBureau.creditData[51].creditActive|0
-n|credit.creditBureau.creditData[51].creditCollateral|0
-c|credit.creditBureau.creditData[51].creditCurrency|rur
-d|credit.creditBureau.creditData[51].creditDate|15.05.2009 00:00:00
-n|credit.creditBureau.creditData[51].creditDayOverdue|0
-d|credit.creditBureau.creditData[51].creditEndDate|16.11.2009 00:00:00
-d|credit.creditBureau.creditData[51].creditEndDateFact|17.08.2009 00:00:00
-n|credit.creditBureau.creditData[51].creditJoint|1
-n|credit.creditBureau.creditData[51].creditMaxOverdue|0
-c|credit.creditBureau.creditData[51].creditOwner|0
-n|credit.creditBureau.creditData[51].creditProlong|0
-n|credit.creditBureau.creditData[51].creditSum|12990
-n|credit.creditBureau.creditData[51].creditSumDebt|0
-n|credit.creditBureau.creditData[51].creditSumLimit|0
-n|credit.creditBureau.creditData[51].creditSumOverdue|0
-n|credit.creditBureau.creditData[51].creditSumType|1
-n|credit.creditBureau.creditData[51].creditType|5
-c|credit.creditBureau.creditData[51].creditTypeUni|5
-d|credit.creditBureau.creditData[51].creditUpdate|17.08.2009 00:00:00
-n|credit.creditBureau.creditData[51].cuid|60268391
-n|credit.creditBureau.creditData[51].delay30|0
-n|credit.creditBureau.creditData[51].delay5|0
-n|credit.creditBureau.creditData[51].delay60|0
-n|credit.creditBureau.creditData[51].delay90|0
-n|credit.creditBureau.creditData[51].delayMore|0
-n|credit.creditBureau.creditData[52].cbAnnuity|0
-c|credit.creditBureau.creditData[52].cbOverdueLine|0
-c|credit.creditBureau.creditData[52].contractSource|cb
-n|credit.creditBureau.creditData[52].cred_ratio|0
-n|credit.creditBureau.creditData[52].creditActive|1
-n|credit.creditBureau.creditData[52].creditCollateral|0
-n|credit.creditBureau.creditData[52].creditCostRate|28.75
-c|credit.creditBureau.creditData[52].creditCurrency|rur
-d|credit.creditBureau.creditData[52].creditDate|20.04.2020 00:00:00
-n|credit.creditBureau.creditData[52].creditDayOverdue|0
-d|credit.creditBureau.creditData[52].creditEndDate|28.02.2025 00:00:00
-n|credit.creditBureau.creditData[52].creditJoint|1
-n|credit.creditBureau.creditData[52].creditMaxOverdue|0
-c|credit.creditBureau.creditData[52].creditOwner|0
-n|credit.creditBureau.creditData[52].creditProlong|0
-n|credit.creditBureau.creditData[52].creditSum|5000
-n|credit.creditBureau.creditData[52].creditSumDebt|4953
-n|credit.creditBureau.creditData[52].creditSumLimit|47
-n|credit.creditBureau.creditData[52].creditSumOverdue|0
-n|credit.creditBureau.creditData[52].creditSumType|1
-n|credit.creditBureau.creditData[52].creditType|4
-c|credit.creditBureau.creditData[52].creditTypeUni|4
-d|credit.creditBureau.creditData[52].creditUpdate|05.05.2020 00:00:00
-n|credit.creditBureau.creditData[52].cuid|60268391
-n|credit.creditBureau.creditData[52].delay30|0
-n|credit.creditBureau.creditData[52].delay5|0
-n|credit.creditBureau.creditData[52].delay60|0
-n|credit.creditBureau.creditData[52].delay90|0
-n|credit.creditBureau.creditData[52].delayMore|0
-n|credit.creditBureau.creditData[53].cbAnnuity|1137
-c|credit.creditBureau.creditData[53].cbOverdueLine|-000000000000000000010000000000
-c|credit.creditBureau.creditData[53].contractSource|cb
-n|credit.creditBureau.creditData[53].cred_ratio|0
-n|credit.creditBureau.creditData[53].creditActive|1
-n|credit.creditBureau.creditData[53].creditCollateral|0
-n|credit.creditBureau.creditData[53].creditCostRate|19.9
-c|credit.creditBureau.creditData[53].creditCurrency|rur
-d|credit.creditBureau.creditData[53].creditDate|24.10.2017 00:00:00
-n|credit.creditBureau.creditData[53].creditDayOverdue|30
-d|credit.creditBureau.creditData[53].creditEndDate|24.10.2022 00:00:00
-n|credit.creditBureau.creditData[53].creditJoint|1
-n|credit.creditBureau.creditData[53].creditMaxOverdue|1141
-c|credit.creditBureau.creditData[53].creditOwner|0
-n|credit.creditBureau.creditData[53].creditProlong|0
-n|credit.creditBureau.creditData[53].creditSum|43000
-n|credit.creditBureau.creditData[53].creditSumDebt|28756
-n|credit.creditBureau.creditData[53].creditSumLimit|0
-n|credit.creditBureau.creditData[53].creditSumOverdue|1139
-n|credit.creditBureau.creditData[53].creditSumType|1
-n|credit.creditBureau.creditData[53].creditType|5
-c|credit.creditBureau.creditData[53].creditTypeUni|5
-d|credit.creditBureau.creditData[53].creditUpdate|11.05.2020 00:00:00
-n|credit.creditBureau.creditData[53].cuid|60268391
-n|credit.creditBureau.creditData[53].delay30|0
-n|credit.creditBureau.creditData[53].delay5|1
-n|credit.creditBureau.creditData[53].delay60|0
-n|credit.creditBureau.creditData[53].delay90|0
-n|credit.creditBureau.creditData[53].delayMore|0
-n|credit.creditBureau.creditData[54].cbAnnuity|4488
-c|credit.creditBureau.creditData[54].contractSource|cb
-n|credit.creditBureau.creditData[54].cred_ratio|0
-n|credit.creditBureau.creditData[54].creditActive|1
-n|credit.creditBureau.creditData[54].creditCollateral|0
-n|credit.creditBureau.creditData[54].creditCostRate|22.9
-c|credit.creditBureau.creditData[54].creditCurrency|rur
-d|credit.creditBureau.creditData[54].creditDate|14.09.2018 00:00:00
-n|credit.creditBureau.creditData[54].creditDayOverdue|0
-d|credit.creditBureau.creditData[54].creditEndDate|16.12.2021 00:00:00
-n|credit.creditBureau.creditData[54].creditJoint|1
-n|credit.creditBureau.creditData[54].creditMaxOverdue|1541.24
-c|credit.creditBureau.creditData[54].creditOwner|0
-n|credit.creditBureau.creditData[54].creditProlong|3
-n|credit.creditBureau.creditData[54].creditSum|58224
-n|credit.creditBureau.creditData[54].creditSumDebt|37685.46
-n|credit.creditBureau.creditData[54].creditSumLimit|0
-n|credit.creditBureau.creditData[54].creditSumOverdue|0
-n|credit.creditBureau.creditData[54].creditSumType|1
-n|credit.creditBureau.creditData[54].creditType|5
-c|credit.creditBureau.creditData[54].creditTypeUni|5
-d|credit.creditBureau.creditData[54].creditUpdate|09.05.2020 00:00:00
-n|credit.creditBureau.creditData[54].cuid|60268391
-n|credit.creditBureau.creditData[54].delay30|0
-n|credit.creditBureau.creditData[54].delay5|7
-n|credit.creditBureau.creditData[54].delay60|0
-n|credit.creditBureau.creditData[54].delay90|0
-n|credit.creditBureau.creditData[54].delayMore|0
 c|credit.creditBureau.scoring[0].cbId|equ
 n|credit.creditBureau.scoring[0].cuid|60268391
 n|credit.creditBureau.scoring[0].score|687
@@ -3031,197 +1363,1812 @@ n|workflow.stageCounters[20].WFSTAGE_INDEX|1
 n|workflow.stageCounters[60].WFSTAGE_INDEX|8509
 n|workflow.stageCounters[61].WFSTAGE_INDEX|3377
 n|workflow.stageCounters[62].WFSTAGE_INDEX|6799
-n|sourceData.behaviourData.persons[0].FlagNoInstNoPmt36M|0
-c|sourceData.behaviourData.persons[0].altContactType|Sister
-n|sourceData.behaviourData.persons[0].amtCreditDpd30|100000
-n|sourceData.behaviourData.persons[0].amtDpd|32128
-n|sourceData.behaviourData.persons[0].amtDpd0_24m|0
-n|sourceData.behaviourData.persons[0].amtDpd0_36m|4615
-n|sourceData.behaviourData.persons[0].amtDpd0_3m|0
-n|sourceData.behaviourData.persons[0].amtDpd0_9m|0
-n|sourceData.behaviourData.persons[0].amtDpd12m|0
-n|sourceData.behaviourData.persons[0].amtDpd30Ever|22957
-n|sourceData.behaviourData.persons[0].amtDpd30_12m|0
-n|sourceData.behaviourData.persons[0].amtDpd30_24m|0
-n|sourceData.behaviourData.persons[0].amtDpd30_36m|0
-n|sourceData.behaviourData.persons[0].amtDpd30_3m|0
-n|sourceData.behaviourData.persons[0].amtDpd30_6m|0
-n|sourceData.behaviourData.persons[0].amtDpd30_9m|0
-n|sourceData.behaviourData.persons[0].amtDpd6m|0
-n|sourceData.behaviourData.persons[0].amtFpd0|0
-n|sourceData.behaviourData.persons[0].amtFpd0_36m|0
-n|sourceData.behaviourData.persons[0].amtSpd0|0
-n|sourceData.behaviourData.persons[0].amtSpd0_36m|0
-n|sourceData.behaviourData.persons[0].amtTpd0|4556
-n|sourceData.behaviourData.persons[0].amtTpd0_36m|0
-n|sourceData.behaviourData.persons[0].averageFullEPToAnnuity|9.85539165549166231030903622216666287853
-n|sourceData.behaviourData.persons[0].avgDaysBetweenApplications|202
-n|sourceData.behaviourData.persons[0].avgDaysBetweenApplications24m|0
-n|sourceData.behaviourData.persons[0].avgDpd03m|0
-n|sourceData.behaviourData.persons[0].avgDpd0_12m|0
-n|sourceData.behaviourData.persons[0].avgDpd0_24m|0
-n|sourceData.behaviourData.persons[0].avgDpd0_36m|0.5945945945945945945945945945945945945946
-n|sourceData.behaviourData.persons[0].avgDpd0_6m|0
-n|sourceData.behaviourData.persons[0].avgDpd0_9m|0
-n|sourceData.behaviourData.persons[0].avgDpd0_ever|62.875
-n|sourceData.behaviourData.persons[0].avgDpd30|7.58333333333333333333333333333333333333
-n|sourceData.behaviourData.persons[0].avgDpd30_12m|0
-n|sourceData.behaviourData.persons[0].avgDpd30_24m|0
-n|sourceData.behaviourData.persons[0].avgDpd30_36m|0
-n|sourceData.behaviourData.persons[0].avgDpd30_3m|0
-n|sourceData.behaviourData.persons[0].avgDpd30_6m|0
-n|sourceData.behaviourData.persons[0].avgDpd30_9m|0
-n|sourceData.behaviourData.persons[0].avgDpdCurr_SC|0
-n|sourceData.behaviourData.persons[0].avgDpdCurr_SC_SS|0
-n|sourceData.behaviourData.persons[0].avgDpdTol|11
-n|sourceData.behaviourData.persons[0].avgRateLengthEP|0.58333
-c|sourceData.behaviourData.persons[0].clientType|Other
-n|sourceData.behaviourData.persons[0].cntApplication|4
-n|sourceData.behaviourData.persons[0].cntApplication24m|0
-n|sourceData.behaviourData.persons[0].cntApproved|3
-n|sourceData.behaviourData.persons[0].cntApproved24m|0
-n|sourceData.behaviourData.persons[0].cntClosed|2
-n|sourceData.behaviourData.persons[0].cntContractActiveRevolvingLinked|0
-n|sourceData.behaviourData.persons[0].cntContractActiveRevolvingPOSonCard|0
-n|sourceData.behaviourData.persons[0].cntDelay30days12m|0
-n|sourceData.behaviourData.persons[0].cntDelay30days24m|0
-n|sourceData.behaviourData.persons[0].cntDelay30days6m|0
-n|sourceData.behaviourData.persons[0].cntDelay5days12m|0
-n|sourceData.behaviourData.persons[0].cntDelay5days24m|0
-n|sourceData.behaviourData.persons[0].cntDelay5days6m|0
-n|sourceData.behaviourData.persons[0].cntDpd0|7
-n|sourceData.behaviourData.persons[0].cntDpd0_12m|0
-n|sourceData.behaviourData.persons[0].cntDpd0_24m|0
-n|sourceData.behaviourData.persons[0].cntDpd0_36m|1
-n|sourceData.behaviourData.persons[0].cntDpd0_9m|0
-n|sourceData.behaviourData.persons[0].cntDpd30Ever|5
-n|sourceData.behaviourData.persons[0].cntDpd30_3m|0
-n|sourceData.behaviourData.persons[0].cntDpd30_9m|0
-n|sourceData.behaviourData.persons[0].cntDpd3m|0
-n|sourceData.behaviourData.persons[0].cntDpd6Plus12m|0
-n|sourceData.behaviourData.persons[0].cntDpd6m|0
-n|sourceData.behaviourData.persons[0].cntDpd6to12m|0
-n|sourceData.behaviourData.persons[0].cntGoodPos|0
-n|sourceData.behaviourData.persons[0].cntInst12M|12
-n|sourceData.behaviourData.persons[0].cntInst24M|24
-n|sourceData.behaviourData.persons[0].cntInst6M|6
-n|sourceData.behaviourData.persons[0].cntRejected1m|0
-n|sourceData.behaviourData.persons[0].cntRejected24m|0
-n|sourceData.behaviourData.persons[0].cntUniquePhones|0
-n|sourceData.behaviourData.persons[0].cntUnsuccessfulWeeks24m|0
-n|sourceData.behaviourData.persons[0].cntdelay30days36m|1
-c|sourceData.behaviourData.persons[0].codePaidOffAfterDpd|2
-c|sourceData.behaviourData.persons[0].crmSegment|ACTIVE_CASH
-n|sourceData.behaviourData.persons[0].currentDebtRevolvingLinked|0
-n|sourceData.behaviourData.persons[0].currentDebtRevolvingPOSonCard|0
-d|sourceData.behaviourData.persons[0].dateIdPublish|11.06.2014 00:00:00
-d|sourceData.behaviourData.persons[0].dateLastDpd30|20.02.2017 00:00:00
-d|sourceData.behaviourData.persons[0].dateLastDpdTol|23.03.2017 00:00:00
-d|sourceData.behaviourData.persons[0].dateLastFullApplication|14.04.2017 12:50:54
-d|sourceData.behaviourData.persons[0].dateLastTpd0|18.09.2016 00:00:00
-n|sourceData.behaviourData.persons[0].difFinSituation|0
-n|sourceData.behaviourData.persons[0].dpdCurr_SC|0
-n|sourceData.behaviourData.persons[0].dpdCurr_SC_SS|0
-n|sourceData.behaviourData.persons[0].dpdCurr_SS|0
-d|sourceData.behaviourData.persons[0].employment.employedFrom|01.02.2012 00:00:00
-c|sourceData.behaviourData.persons[0].employmentAddress.region|63
-c|sourceData.behaviourData.persons[0].employmentAddress.town|сызрань
-c|sourceData.behaviourData.persons[0].familyState|5
-c|sourceData.behaviourData.persons[0].firstaGoodsCat|CT
-c|sourceData.behaviourData.persons[0].flagFriendDefault|friend
-n|sourceData.behaviourData.persons[0].flagVipSalaryClient|0
-n|sourceData.behaviourData.persons[0].floorsMaxMedi|10
-n|sourceData.behaviourData.persons[0].fullEPCount|1
-n|sourceData.behaviourData.persons[0].histDpd_1m|0
-n|sourceData.behaviourData.persons[0].histDpd_9m|0
-n|sourceData.behaviourData.persons[0].instalmentCntPaidInTime|40
-d|sourceData.behaviourData.persons[0].lastFullEPDate|16.07.2016 00:00:00
-n|sourceData.behaviourData.persons[0].lastFullEPPercent|0.923191512011639047585252475071856924879
-d|sourceData.behaviourData.persons[0].lastOfflineDate|24.03.2020 00:00:00
-d|sourceData.behaviourData.persons[0].lastPaidTotalDebtTolerance|14.04.2017 00:00:00
-n|sourceData.behaviourData.persons[0].lastPosDownpaymentRatio|0.19011
-n|sourceData.behaviourData.persons[0].maxAmtPd24m|0
-n|sourceData.behaviourData.persons[0].maxAmtPd36m|4615
-n|sourceData.behaviourData.persons[0].maxAmtPdEver|4615
-n|sourceData.behaviourData.persons[0].maxDbd_3m|18
-n|sourceData.behaviourData.persons[0].maxDpdTol|146
-n|sourceData.behaviourData.persons[0].maxDpdTol6M|0
-n|sourceData.behaviourData.persons[0].maxFpd|0
-n|sourceData.behaviourData.persons[0].maxFpd_36m|0
-n|sourceData.behaviourData.persons[0].maxRateLengthEP|0.1722222222222222222222222222222222222222
-n|sourceData.behaviourData.persons[0].maxSpd|0
-n|sourceData.behaviourData.persons[0].maxSpd_36m|0
-n|sourceData.behaviourData.persons[0].maxTpd|57
-n|sourceData.behaviourData.persons[0].maxTpd_36m|0
-n|sourceData.behaviourData.persons[0].maxannuity|85556.54
-n|sourceData.behaviourData.persons[0].maxdpd|146
-n|sourceData.behaviourData.persons[0].maxdpd12|0
-n|sourceData.behaviourData.persons[0].maxdpd24|0
-n|sourceData.behaviourData.persons[0].maxdpd36|22
-n|sourceData.behaviourData.persons[0].maxdpd48|146
-n|sourceData.behaviourData.persons[0].maxdpd6|0
-n|sourceData.behaviourData.persons[0].maxdpd60|146
-n|sourceData.behaviourData.persons[0].maxdpdLast4inst|0
-n|sourceData.behaviourData.persons[0].monthsTillFreedomO|12.70967741935483870967741935483870967742
-n|sourceData.behaviourData.persons[0].monthsannuity|45
-c|sourceData.behaviourData.persons[0].nameEmployerType|Школы
-n|sourceData.behaviourData.persons[0].numInstPaid|47
-n|sourceData.behaviourData.persons[0].numInstPaidTol|47
-n|sourceData.behaviourData.persons[0].numInstToPayGr|13
-c|sourceData.behaviourData.persons[0].occupation|Секретарь
-d|sourceData.behaviourData.persons[0].registeredAddress.dateRegistration|02.10.2003 00:00:00
-c|sourceData.behaviourData.persons[0].registeredAddress.region|73
-c|sourceData.behaviourData.persons[0].registeredAddress.town|Ульяновск
-c|sourceData.behaviourData.persons[0].sellerplaceLastPosSize|Каменные
-n|sourceData.behaviourData.persons[0].sumDpd24m|0
-n|sourceData.behaviourData.persons[0].sumDpd30Ever|455
-n|sourceData.behaviourData.persons[0].sumDpd30_12m|0
-n|sourceData.behaviourData.persons[0].sumDpd30_24m|0
-n|sourceData.behaviourData.persons[0].sumDpd30_36m|0
-n|sourceData.behaviourData.persons[0].sumDpd30_3m|0
-n|sourceData.behaviourData.persons[0].sumDpd30_6m|0
-n|sourceData.behaviourData.persons[0].sumDpd30_9m|0
-n|sourceData.behaviourData.persons[0].sumDpd6m|0
-n|sourceData.behaviourData.persons[0].sumDpdTol|503
-n|sourceData.behaviourData.persons[0].sumDpd_12m|0
-n|sourceData.behaviourData.persons[0].sumDpd_36m|22
-n|sourceData.behaviourData.persons[0].sumDpd_3m|0
-n|sourceData.behaviourData.persons[0].sumDpd_9m|0
-n|sourceData.behaviourData.persons[0].sumFpd|0
-n|sourceData.behaviourData.persons[0].sumFpd_36m|0
-n|sourceData.behaviourData.persons[0].sumPaidAmountEver|278038.23
-n|sourceData.behaviourData.persons[0].sumSpd|0
-n|sourceData.behaviourData.persons[0].sumSpd_36m|0
-n|sourceData.behaviourData.persons[0].sumTpd|57
-n|sourceData.behaviourData.persons[0].sumTpd_36m|0
-n|sourceData.behaviourData.persons[0].sumdpd|503
-n|sourceData.behaviourData.persons[0].sumloan|0.5
-c|sourceData.behaviourData.persons[0].textLastRiskProdCombination|Cash Street: low
-c|sourceData.behaviourData.persons[0].typeLastFullApplication|Cash loans
-n|sourceData.behaviourData.persons[0].uak3|3.42
-n|sourceData.behaviourData.persons[0].us3B|0
-n|ApprovalCharacteristics[0].realValue|10
-c|ApprovalCharacteristics[0].name|CNT_CLOSED_CASH_POS
-c|ApprovalCharacteristics[0].class|scoreCardPredictor
-c|ApprovalCharacteristics[0].variation|1
-n|ApprovalCharacteristics[1].realValue|88
-c|ApprovalCharacteristics[1].name|AGE_YEARS_REAL
-c|ApprovalCharacteristics[1].class|scoreCardPredictor
-c|ApprovalCharacteristics[1].variation|1
-c|ApprovalCharacteristics[2].charValue|random
-c|ApprovalCharacteristics[2].name|RANDOM
-c|ApprovalCharacteristics[2].class|scoreCardPredictor
-c|ApprovalCharacteristics[2].variation|1
-c|PredictorsList[0].name|CB_MAXAGRMNTHS_1_3
-c|PredictorsList[1].name|CB_MAXAGRMNTHS_2_3
-c|PredictorsList[2].name|CB_MAXAGRMNTHS_3_3
+c|predictorsList[0].name|MAX_DATE_OPEN_CARD
+c|predictorsList[1].name|CNT_CLOSED_CASH_POS
+c|predictorsList[2].name|AGE_YEARS_REAL
+c|predictorsList[3].name|EDUCATION
+c|predictorsList[4].name|ALL_CASH_POS
+c|predictorsList[5].name|CB_MAXAGRMNTHS_1_3
+c|predictorsList[6].name|CB_MAXAGRMNTHS_2_3
+c|predictorsList[7].name|CB_MAXAGRMNTHS_3_3
 '''
 
-#с|Predictors[0].predictorCode|score_mts_comp
-'''
-v_dict = parse_vct_str(test_str,df_dict,rx_dict)
-#print(v_dict['APPROVALCHARACTERISTIC'])
-df = get_df_txt('PREDICTORSCASH',v_dict)
-print(tabulate(df, headers='keys',tablefmt='psql',disable_numparse=True))
-#print(tabulate(df))
-'''
+# n|sourceData.behaviourData.persons[0].FlagNoInstNoPmt36M|0
+# c|sourceData.behaviourData.persons[0].altContactType|Sister
+# n|sourceData.behaviourData.persons[0].amtCreditDpd30|100000
+# n|sourceData.behaviourData.persons[0].amtDpd|32128
+# n|sourceData.behaviourData.persons[0].amtDpd0_24m|0
+# n|sourceData.behaviourData.persons[0].amtDpd0_36m|4615
+# n|sourceData.behaviourData.persons[0].amtDpd0_3m|0
+# n|sourceData.behaviourData.persons[0].amtDpd0_9m|0
+# n|sourceData.behaviourData.persons[0].amtDpd12m|0
+# n|sourceData.behaviourData.persons[0].amtDpd30Ever|22957
+# n|sourceData.behaviourData.persons[0].amtDpd30_12m|0
+# n|sourceData.behaviourData.persons[0].amtDpd30_24m|0
+# n|sourceData.behaviourData.persons[0].amtDpd30_36m|0
+# n|sourceData.behaviourData.persons[0].amtDpd30_3m|0
+# n|sourceData.behaviourData.persons[0].amtDpd30_6m|0
+# n|sourceData.behaviourData.persons[0].amtDpd30_9m|0
+# n|sourceData.behaviourData.persons[0].amtDpd6m|0
+# n|sourceData.behaviourData.persons[0].amtFpd0|0
+# n|sourceData.behaviourData.persons[0].amtFpd0_36m|0
+# n|sourceData.behaviourData.persons[0].amtSpd0|0
+# n|sourceData.behaviourData.persons[0].amtSpd0_36m|0
+# n|sourceData.behaviourData.persons[0].amtTpd0|4556
+# n|sourceData.behaviourData.persons[0].amtTpd0_36m|0
+# n|sourceData.behaviourData.persons[0].averageFullEPToAnnuity|9.85539165549166231030903622216666287853
+# n|sourceData.behaviourData.persons[0].avgDaysBetweenApplications|202
+# n|sourceData.behaviourData.persons[0].avgDaysBetweenApplications24m|0
+# n|sourceData.behaviourData.persons[0].avgDpd03m|0
+# n|sourceData.behaviourData.persons[0].avgDpd0_12m|0
+# n|sourceData.behaviourData.persons[0].avgDpd0_24m|0
+# n|sourceData.behaviourData.persons[0].avgDpd0_36m|0.5945945945945945945945945945945945945946
+# n|sourceData.behaviourData.persons[0].avgDpd0_6m|0
+# n|sourceData.behaviourData.persons[0].avgDpd0_9m|0
+# n|sourceData.behaviourData.persons[0].avgDpd0_ever|62.875
+# n|sourceData.behaviourData.persons[0].avgDpd30|7.58333333333333333333333333333333333333
+# n|sourceData.behaviourData.persons[0].avgDpd30_12m|0
+# n|sourceData.behaviourData.persons[0].avgDpd30_24m|0
+# n|sourceData.behaviourData.persons[0].avgDpd30_36m|0
+# n|sourceData.behaviourData.persons[0].avgDpd30_3m|0
+# n|sourceData.behaviourData.persons[0].avgDpd30_6m|0
+# n|sourceData.behaviourData.persons[0].avgDpd30_9m|0
+# n|sourceData.behaviourData.persons[0].avgDpdCurr_SC|0
+# n|sourceData.behaviourData.persons[0].avgDpdCurr_SC_SS|0
+# n|sourceData.behaviourData.persons[0].avgDpdTol|11
+# n|sourceData.behaviourData.persons[0].avgRateLengthEP|0.58333
+# c|sourceData.behaviourData.persons[0].clientType|Other
+# n|sourceData.behaviourData.persons[0].cntApplication|4
+# n|sourceData.behaviourData.persons[0].cntApplication24m|0
+# n|sourceData.behaviourData.persons[0].cntApproved|3
+# n|sourceData.behaviourData.persons[0].cntApproved24m|0
+# n|sourceData.behaviourData.persons[0].cntClosed|2
+# n|sourceData.behaviourData.persons[0].cntContractActiveRevolvingLinked|0
+# n|sourceData.behaviourData.persons[0].cntContractActiveRevolvingPOSonCard|0
+# n|sourceData.behaviourData.persons[0].cntDelay30days12m|0
+# n|sourceData.behaviourData.persons[0].cntDelay30days24m|0
+# n|sourceData.behaviourData.persons[0].cntDelay30days6m|0
+# n|sourceData.behaviourData.persons[0].cntDelay5days12m|0
+# n|sourceData.behaviourData.persons[0].cntDelay5days24m|0
+# n|sourceData.behaviourData.persons[0].cntDelay5days6m|0
+# n|sourceData.behaviourData.persons[0].cntDpd0|7
+# n|sourceData.behaviourData.persons[0].cntDpd0_12m|0
+# n|sourceData.behaviourData.persons[0].cntDpd0_24m|0
+# n|sourceData.behaviourData.persons[0].cntDpd0_36m|1
+# n|sourceData.behaviourData.persons[0].cntDpd0_9m|0
+# n|sourceData.behaviourData.persons[0].cntDpd30Ever|5
+# n|sourceData.behaviourData.persons[0].cntDpd30_3m|0
+# n|sourceData.behaviourData.persons[0].cntDpd30_9m|0
+# n|sourceData.behaviourData.persons[0].cntDpd3m|0
+# n|sourceData.behaviourData.persons[0].cntDpd6Plus12m|0
+# n|sourceData.behaviourData.persons[0].cntDpd6m|0
+# n|sourceData.behaviourData.persons[0].cntDpd6to12m|0
+# n|sourceData.behaviourData.persons[0].cntGoodPos|0
+# n|sourceData.behaviourData.persons[0].cntInst12M|12
+# n|sourceData.behaviourData.persons[0].cntInst24M|24
+# n|sourceData.behaviourData.persons[0].cntInst6M|6
+# n|sourceData.behaviourData.persons[0].cntRejected1m|0
+# n|sourceData.behaviourData.persons[0].cntRejected24m|0
+# n|sourceData.behaviourData.persons[0].cntUniquePhones|0
+# n|sourceData.behaviourData.persons[0].cntUnsuccessfulWeeks24m|0
+# n|sourceData.behaviourData.persons[0].cntdelay30days36m|1
+# c|sourceData.behaviourData.persons[0].codePaidOffAfterDpd|2
+# c|sourceData.behaviourData.persons[0].crmSegment|ACTIVE_CASH
+# n|sourceData.behaviourData.persons[0].currentDebtRevolvingLinked|0
+# n|sourceData.behaviourData.persons[0].currentDebtRevolvingPOSonCard|0
+# d|sourceData.behaviourData.persons[0].dateIdPublish|11.06.2014 00:00:00
+# d|sourceData.behaviourData.persons[0].dateLastDpd30|20.02.2017 00:00:00
+# d|sourceData.behaviourData.persons[0].dateLastDpdTol|23.03.2017 00:00:00
+# d|sourceData.behaviourData.persons[0].dateLastFullApplication|14.04.2017 12:50:54
+# d|sourceData.behaviourData.persons[0].dateLastTpd0|18.09.2016 00:00:00
+# n|sourceData.behaviourData.persons[0].difFinSituation|0
+# n|sourceData.behaviourData.persons[0].dpdCurr_SC|0
+# n|sourceData.behaviourData.persons[0].dpdCurr_SC_SS|0
+# n|sourceData.behaviourData.persons[0].dpdCurr_SS|0
+# d|sourceData.behaviourData.persons[0].employment.employedFrom|01.02.2012 00:00:00
+# c|sourceData.behaviourData.persons[0].employmentAddress.region|63
+# c|sourceData.behaviourData.persons[0].employmentAddress.town|сызрань
+# c|sourceData.behaviourData.persons[0].familyState|5
+# c|sourceData.behaviourData.persons[0].firstaGoodsCat|CT
+# c|sourceData.behaviourData.persons[0].flagFriendDefault|friend
+# n|sourceData.behaviourData.persons[0].flagVipSalaryClient|0
+# n|sourceData.behaviourData.persons[0].floorsMaxMedi|10
+# n|sourceData.behaviourData.persons[0].fullEPCount|1
+# n|sourceData.behaviourData.persons[0].histDpd_1m|0
+# n|sourceData.behaviourData.persons[0].histDpd_9m|0
+# n|sourceData.behaviourData.persons[0].instalmentCntPaidInTime|40
+# d|sourceData.behaviourData.persons[0].lastFullEPDate|16.07.2016 00:00:00
+# n|sourceData.behaviourData.persons[0].lastFullEPPercent|0.923191512011639047585252475071856924879
+# d|sourceData.behaviourData.persons[0].lastOfflineDate|24.03.2020 00:00:00
+# d|sourceData.behaviourData.persons[0].lastPaidTotalDebtTolerance|14.04.2017 00:00:00
+# n|sourceData.behaviourData.persons[0].lastPosDownpaymentRatio|0.19011
+# n|sourceData.behaviourData.persons[0].maxAmtPd24m|0
+# n|sourceData.behaviourData.persons[0].maxAmtPd36m|4615
+# n|sourceData.behaviourData.persons[0].maxAmtPdEver|4615
+# n|sourceData.behaviourData.persons[0].maxDbd_3m|18
+# n|sourceData.behaviourData.persons[0].maxDpdTol|146
+# n|sourceData.behaviourData.persons[0].maxDpdTol6M|0
+# n|sourceData.behaviourData.persons[0].maxFpd|0
+# n|sourceData.behaviourData.persons[0].maxFpd_36m|0
+# n|sourceData.behaviourData.persons[0].maxRateLengthEP|0.1722222222222222222222222222222222222222
+# n|sourceData.behaviourData.persons[0].maxSpd|0
+# n|sourceData.behaviourData.persons[0].maxSpd_36m|0
+# n|sourceData.behaviourData.persons[0].maxTpd|57
+# n|sourceData.behaviourData.persons[0].maxTpd_36m|0
+# n|sourceData.behaviourData.persons[0].maxannuity|85556.54
+# n|sourceData.behaviourData.persons[0].maxdpd|146
+# n|sourceData.behaviourData.persons[0].maxdpd12|0
+# n|sourceData.behaviourData.persons[0].maxdpd24|0
+# n|sourceData.behaviourData.persons[0].maxdpd36|22
+# n|sourceData.behaviourData.persons[0].maxdpd48|146
+# n|sourceData.behaviourData.persons[0].maxdpd6|0
+# n|sourceData.behaviourData.persons[0].maxdpd60|146
+# n|sourceData.behaviourData.persons[0].maxdpdLast4inst|0
+# n|sourceData.behaviourData.persons[0].monthsTillFreedomO|12.70967741935483870967741935483870967742
+# n|sourceData.behaviourData.persons[0].monthsannuity|45
+# c|sourceData.behaviourData.persons[0].nameEmployerType|Школы
+# n|sourceData.behaviourData.persons[0].numInstPaid|47
+# n|sourceData.behaviourData.persons[0].numInstPaidTol|47
+# n|sourceData.behaviourData.persons[0].numInstToPayGr|13
+# c|sourceData.behaviourData.persons[0].occupation|Секретарь
+# d|sourceData.behaviourData.persons[0].registeredAddress.dateRegistration|02.10.2003 00:00:00
+# c|sourceData.behaviourData.persons[0].registeredAddress.region|73
+# c|sourceData.behaviourData.persons[0].registeredAddress.town|Ульяновск
+# c|sourceData.behaviourData.persons[0].sellerplaceLastPosSize|Каменные
+# n|sourceData.behaviourData.persons[0].sumDpd24m|0
+# n|sourceData.behaviourData.persons[0].sumDpd30Ever|455
+# n|sourceData.behaviourData.persons[0].sumDpd30_12m|0
+# n|sourceData.behaviourData.persons[0].sumDpd30_24m|0
+# n|sourceData.behaviourData.persons[0].sumDpd30_36m|0
+# n|sourceData.behaviourData.persons[0].sumDpd30_3m|0
+# n|sourceData.behaviourData.persons[0].sumDpd30_6m|0
+# n|sourceData.behaviourData.persons[0].sumDpd30_9m|0
+# n|sourceData.behaviourData.persons[0].sumDpd6m|0
+# n|sourceData.behaviourData.persons[0].sumDpdTol|503
+# n|sourceData.behaviourData.persons[0].sumDpd_12m|0
+# n|sourceData.behaviourData.persons[0].sumDpd_36m|22
+# n|sourceData.behaviourData.persons[0].sumDpd_3m|0
+# n|sourceData.behaviourData.persons[0].sumDpd_9m|0
+# n|sourceData.behaviourData.persons[0].sumFpd|0
+# n|sourceData.behaviourData.persons[0].sumFpd_36m|0
+# n|sourceData.behaviourData.persons[0].sumPaidAmountEver|278038.23
+# n|sourceData.behaviourData.persons[0].sumSpd|0
+# n|sourceData.behaviourData.persons[0].sumSpd_36m|0
+# n|sourceData.behaviourData.persons[0].sumTpd|57
+# n|sourceData.behaviourData.persons[0].sumTpd_36m|0
+# n|sourceData.behaviourData.persons[0].sumdpd|503
+# n|sourceData.behaviourData.persons[0].sumloan|0.5
+# c|sourceData.behaviourData.persons[0].textLastRiskProdCombination|Cash Street: low
+# c|sourceData.behaviourData.persons[0].typeLastFullApplication|Cash loans
+# n|sourceData.behaviourData.persons[0].uak3|3.42
+# n|sourceData.behaviourData.persons[0].us3B|0
+# n|sourceData.behaviourData.persons[0].cuid|60268391
+# n|approvalCharacteristics[0].realValue|10
+# c|approvalCharacteristics[0].name|CNT_CLOSED_CASH_POS
+# c|approvalCharacteristics[0].class|scoreCardPredictor
+# c|approvalCharacteristics[0].variation|1
+# n|approvalCharacteristics[1].realValue|88
+# c|approvalCharacteristics[1].name|AGE_YEARS_REAL
+# c|approvalCharacteristics[1].class|scoreCardPredictor
+# c|approvalCharacteristics[1].variation|1
+# c|approvalCharacteristics[2].charValue|random
+# c|approvalCharacteristics[2].name|RANDOM
+# c|approvalCharacteristics[2].class|scoreCardPredictor
+# c|approvalCharacteristics[2].variation|1
+# n|credit.creditBureau.creditData[0].cbAnnuity|0
+# c|credit.creditBureau.creditData[0].cbId|exp
+# c|credit.creditBureau.creditData[0].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC-0--
+# c|credit.creditBureau.creditData[0].contractSource|cb
+# n|credit.creditBureau.creditData[0].cred_ratio|0
+# n|credit.creditBureau.creditData[0].creditActive|0
+# n|credit.creditBureau.creditData[0].creditCollateral|0
+# c|credit.creditBureau.creditData[0].creditCurrency|rur
+# d|credit.creditBureau.creditData[0].creditDate|29.12.2011 00:00:00
+# n|credit.creditBureau.creditData[0].creditDayOverdue|0
+# d|credit.creditBureau.creditData[0].creditEndDate|02.04.2012 00:00:00
+# d|credit.creditBureau.creditData[0].creditEndDateFact|02.04.2012 00:00:00
+# n|credit.creditBureau.creditData[0].creditJoint|0
+# n|credit.creditBureau.creditData[0].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[0].creditOwner|0
+# n|credit.creditBureau.creditData[0].creditProlong|0
+# n|credit.creditBureau.creditData[0].creditSum|3640
+# n|credit.creditBureau.creditData[0].creditSumDebt|0
+# n|credit.creditBureau.creditData[0].creditSumLimit|0
+# n|credit.creditBureau.creditData[0].creditSumOverdue|0
+# n|credit.creditBureau.creditData[0].creditSumType|1
+# n|credit.creditBureau.creditData[0].creditType|5
+# c|credit.creditBureau.creditData[0].creditTypeUni|5
+# d|credit.creditBureau.creditData[0].creditUpdate|31.07.2012 00:00:00
+# n|credit.creditBureau.creditData[0].cuid|60268391
+# n|credit.creditBureau.creditData[0].delay30|0
+# n|credit.creditBureau.creditData[0].delay5|0
+# n|credit.creditBureau.creditData[0].delay60|0
+# n|credit.creditBureau.creditData[0].delay90|0
+# n|credit.creditBureau.creditData[0].delayMore|0
+# c|credit.creditBureau.creditData[1].cbId|equ
+# c|credit.creditBureau.creditData[1].contractSource|cb
+# n|credit.creditBureau.creditData[1].cred_ratio|0
+# n|credit.creditBureau.creditData[1].creditActive|0
+# n|credit.creditBureau.creditData[1].creditCollateral|0
+# c|credit.creditBureau.creditData[1].creditCurrency|rur
+# d|credit.creditBureau.creditData[1].creditDate|29.12.2011 00:00:00
+# n|credit.creditBureau.creditData[1].creditDayOverdue|0
+# d|credit.creditBureau.creditData[1].creditEndDate|02.04.2012 00:00:00
+# d|credit.creditBureau.creditData[1].creditEndDateFact|02.04.2012 00:00:00
+# n|credit.creditBureau.creditData[1].creditJoint|0
+# n|credit.creditBureau.creditData[1].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[1].creditOwner|0
+# n|credit.creditBureau.creditData[1].creditProlong|0
+# n|credit.creditBureau.creditData[1].creditSum|3640
+# n|credit.creditBureau.creditData[1].creditSumDebt|0
+# n|credit.creditBureau.creditData[1].creditSumLimit|0
+# n|credit.creditBureau.creditData[1].creditSumOverdue|0
+# n|credit.creditBureau.creditData[1].creditSumType|1
+# n|credit.creditBureau.creditData[1].creditType|5
+# c|credit.creditBureau.creditData[1].creditTypeUni|5
+# d|credit.creditBureau.creditData[1].creditUpdate|05.04.2012 00:00:00
+# n|credit.creditBureau.creditData[1].cuid|60268391
+# n|credit.creditBureau.creditData[1].delay30|0
+# n|credit.creditBureau.creditData[1].delay5|0
+# n|credit.creditBureau.creditData[1].delay60|0
+# n|credit.creditBureau.creditData[1].delay90|0
+# n|credit.creditBureau.creditData[1].delayMore|0
+# n|credit.creditBureau.creditData[2].cbAnnuity|2168
+# c|credit.creditBureau.creditData[2].cbId|exp
+# c|credit.creditBureau.creditData[2].cbOverdueLine|-000000000100000100
+# c|credit.creditBureau.creditData[2].contractSource|cb
+# n|credit.creditBureau.creditData[2].cred_ratio|0
+# n|credit.creditBureau.creditData[2].creditActive|1
+# n|credit.creditBureau.creditData[2].creditCollateral|0
+# n|credit.creditBureau.creditData[2].creditCostRate|19.9
+# c|credit.creditBureau.creditData[2].creditCurrency|rur
+# d|credit.creditBureau.creditData[2].creditDate|17.10.2018 00:00:00
+# n|credit.creditBureau.creditData[2].creditDayOverdue|30
+# d|credit.creditBureau.creditData[2].creditEndDate|17.10.2020 00:00:00
+# n|credit.creditBureau.creditData[2].creditJoint|0
+# n|credit.creditBureau.creditData[2].creditMaxOverdue|2173
+# c|credit.creditBureau.creditData[2].creditOwner|0
+# n|credit.creditBureau.creditData[2].creditProlong|0
+# n|credit.creditBureau.creditData[2].creditSum|42635
+# n|credit.creditBureau.creditData[2].creditSumDebt|16498
+# n|credit.creditBureau.creditData[2].creditSumLimit|0
+# n|credit.creditBureau.creditData[2].creditSumOverdue|2173
+# n|credit.creditBureau.creditData[2].creditSumType|1
+# n|credit.creditBureau.creditData[2].creditType|5
+# c|credit.creditBureau.creditData[2].creditTypeUni|5
+# d|credit.creditBureau.creditData[2].creditUpdate|11.05.2020 00:00:00
+# n|credit.creditBureau.creditData[2].cuid|60268391
+# n|credit.creditBureau.creditData[2].delay30|0
+# n|credit.creditBureau.creditData[2].delay5|2
+# n|credit.creditBureau.creditData[2].delay60|0
+# n|credit.creditBureau.creditData[2].delay90|0
+# n|credit.creditBureau.creditData[2].delayMore|0
+# n|credit.creditBureau.creditData[3].cbAnnuity|1137
+# c|credit.creditBureau.creditData[3].cbId|exp
+# c|credit.creditBureau.creditData[3].cbOverdueLine|-000000000000000000010000000000
+# c|credit.creditBureau.creditData[3].contractSource|cb
+# n|credit.creditBureau.creditData[3].cred_ratio|0
+# n|credit.creditBureau.creditData[3].creditActive|1
+# n|credit.creditBureau.creditData[3].creditCollateral|0
+# n|credit.creditBureau.creditData[3].creditCostRate|19.9
+# c|credit.creditBureau.creditData[3].creditCurrency|rur
+# d|credit.creditBureau.creditData[3].creditDate|24.10.2017 00:00:00
+# n|credit.creditBureau.creditData[3].creditDayOverdue|30
+# d|credit.creditBureau.creditData[3].creditEndDate|24.10.2022 00:00:00
+# n|credit.creditBureau.creditData[3].creditJoint|0
+# n|credit.creditBureau.creditData[3].creditMaxOverdue|1141
+# c|credit.creditBureau.creditData[3].creditOwner|0
+# n|credit.creditBureau.creditData[3].creditProlong|0
+# n|credit.creditBureau.creditData[3].creditSum|43000
+# n|credit.creditBureau.creditData[3].creditSumDebt|28756
+# n|credit.creditBureau.creditData[3].creditSumLimit|0
+# n|credit.creditBureau.creditData[3].creditSumOverdue|1139
+# n|credit.creditBureau.creditData[3].creditSumType|1
+# n|credit.creditBureau.creditData[3].creditType|5
+# c|credit.creditBureau.creditData[3].creditTypeUni|5
+# d|credit.creditBureau.creditData[3].creditUpdate|11.05.2020 00:00:00
+# n|credit.creditBureau.creditData[3].cuid|60268391
+# n|credit.creditBureau.creditData[3].delay30|0
+# n|credit.creditBureau.creditData[3].delay5|1
+# n|credit.creditBureau.creditData[3].delay60|0
+# n|credit.creditBureau.creditData[3].delay90|0
+# n|credit.creditBureau.creditData[3].delayMore|0
+# c|credit.creditBureau.creditData[4].cbId|exp
+# c|credit.creditBureau.creditData[4].cbOverdueLine|10110011000011000001111000000000000000000000000000000-0-----
+# c|credit.creditBureau.creditData[4].contractSource|cb
+# n|credit.creditBureau.creditData[4].cred_ratio|0
+# n|credit.creditBureau.creditData[4].creditActive|1
+# n|credit.creditBureau.creditData[4].creditCollateral|0
+# n|credit.creditBureau.creditData[4].creditCostRate|26.03
+# c|credit.creditBureau.creditData[4].creditCurrency|rur
+# d|credit.creditBureau.creditData[4].creditDate|07.05.2015 00:00:00
+# n|credit.creditBureau.creditData[4].creditDayOverdue|30
+# n|credit.creditBureau.creditData[4].creditJoint|0
+# n|credit.creditBureau.creditData[4].creditMaxOverdue|1824
+# c|credit.creditBureau.creditData[4].creditOwner|0
+# n|credit.creditBureau.creditData[4].creditProlong|0
+# n|credit.creditBureau.creditData[4].creditSum|30000
+# n|credit.creditBureau.creditData[4].creditSumDebt|31254
+# n|credit.creditBureau.creditData[4].creditSumLimit|0
+# n|credit.creditBureau.creditData[4].creditSumOverdue|1824
+# n|credit.creditBureau.creditData[4].creditSumType|1
+# n|credit.creditBureau.creditData[4].creditType|4
+# c|credit.creditBureau.creditData[4].creditTypeUni|4
+# d|credit.creditBureau.creditData[4].creditUpdate|11.05.2020 00:00:00
+# n|credit.creditBureau.creditData[4].cuid|60268391
+# n|credit.creditBureau.creditData[4].delay30|0
+# n|credit.creditBureau.creditData[4].delay5|10
+# n|credit.creditBureau.creditData[4].delay60|0
+# n|credit.creditBureau.creditData[4].delay90|0
+# n|credit.creditBureau.creditData[4].delayMore|0
+# c|credit.creditBureau.creditData[5].cbId|equ
+# c|credit.creditBureau.creditData[5].contractSource|cb
+# n|credit.creditBureau.creditData[5].cred_ratio|0
+# n|credit.creditBureau.creditData[5].creditActive|0
+# n|credit.creditBureau.creditData[5].creditCollateral|0
+# c|credit.creditBureau.creditData[5].creditCurrency|rur
+# d|credit.creditBureau.creditData[5].creditDate|15.05.2009 00:00:00
+# n|credit.creditBureau.creditData[5].creditDayOverdue|0
+# d|credit.creditBureau.creditData[5].creditEndDate|16.11.2009 00:00:00
+# d|credit.creditBureau.creditData[5].creditEndDateFact|17.08.2009 00:00:00
+# n|credit.creditBureau.creditData[5].creditJoint|0
+# n|credit.creditBureau.creditData[5].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[5].creditOwner|0
+# n|credit.creditBureau.creditData[5].creditProlong|0
+# n|credit.creditBureau.creditData[5].creditSum|12990
+# n|credit.creditBureau.creditData[5].creditSumDebt|0
+# n|credit.creditBureau.creditData[5].creditSumLimit|0
+# n|credit.creditBureau.creditData[5].creditSumOverdue|0
+# n|credit.creditBureau.creditData[5].creditSumType|1
+# n|credit.creditBureau.creditData[5].creditType|5
+# c|credit.creditBureau.creditData[5].creditTypeUni|5
+# d|credit.creditBureau.creditData[5].creditUpdate|17.08.2009 00:00:00
+# n|credit.creditBureau.creditData[5].cuid|60268391
+# n|credit.creditBureau.creditData[5].delay30|0
+# n|credit.creditBureau.creditData[5].delay5|0
+# n|credit.creditBureau.creditData[5].delay60|0
+# n|credit.creditBureau.creditData[5].delay90|0
+# n|credit.creditBureau.creditData[5].delayMore|0
+# n|credit.creditBureau.creditData[6].cbAnnuity|0
+# c|credit.creditBureau.creditData[6].cbId|nbk
+# c|credit.creditBureau.creditData[6].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC0000--
+# c|credit.creditBureau.creditData[6].contractSource|cb
+# n|credit.creditBureau.creditData[6].cred_ratio|0
+# n|credit.creditBureau.creditData[6].creditActive|0
+# n|credit.creditBureau.creditData[6].creditCollateral|0
+# c|credit.creditBureau.creditData[6].creditCurrency|rur
+# d|credit.creditBureau.creditData[6].creditDate|03.10.2012 00:00:00
+# n|credit.creditBureau.creditData[6].creditDayOverdue|0
+# d|credit.creditBureau.creditData[6].creditEndDate|03.04.2013 00:00:00
+# d|credit.creditBureau.creditData[6].creditEndDateFact|03.04.2013 00:00:00
+# n|credit.creditBureau.creditData[6].creditJoint|0
+# n|credit.creditBureau.creditData[6].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[6].creditOwner|0
+# n|credit.creditBureau.creditData[6].creditProlong|0
+# n|credit.creditBureau.creditData[6].creditSum|11912
+# n|credit.creditBureau.creditData[6].creditSumDebt|0
+# n|credit.creditBureau.creditData[6].creditSumLimit|0
+# n|credit.creditBureau.creditData[6].creditSumOverdue|0
+# n|credit.creditBureau.creditData[6].creditSumType|1
+# n|credit.creditBureau.creditData[6].creditType|5
+# c|credit.creditBureau.creditData[6].creditTypeUni|5
+# d|credit.creditBureau.creditData[6].creditUpdate|06.04.2013 00:00:00
+# n|credit.creditBureau.creditData[6].cuid|60268391
+# n|credit.creditBureau.creditData[6].delay30|0
+# n|credit.creditBureau.creditData[6].delay5|0
+# n|credit.creditBureau.creditData[6].delay60|0
+# n|credit.creditBureau.creditData[6].delay90|0
+# n|credit.creditBureau.creditData[6].delayMore|0
+# n|credit.creditBureau.creditData[7].cbAnnuity|0
+# c|credit.creditBureau.creditData[7].cbId|nbk
+# c|credit.creditBureau.creditData[7].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC0-0000000000-
+# c|credit.creditBureau.creditData[7].contractSource|cb
+# n|credit.creditBureau.creditData[7].cred_ratio|0
+# n|credit.creditBureau.creditData[7].creditActive|0
+# n|credit.creditBureau.creditData[7].creditCollateral|0
+# n|credit.creditBureau.creditData[7].creditCostRate|31.122
+# c|credit.creditBureau.creditData[7].creditCurrency|rur
+# d|credit.creditBureau.creditData[7].creditDate|14.07.2015 00:00:00
+# n|credit.creditBureau.creditData[7].creditDayOverdue|0
+# d|credit.creditBureau.creditData[7].creditEndDate|14.07.2016 00:00:00
+# d|credit.creditBureau.creditData[7].creditEndDateFact|16.08.2016 00:00:00
+# n|credit.creditBureau.creditData[7].creditJoint|0
+# n|credit.creditBureau.creditData[7].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[7].creditOwner|0
+# n|credit.creditBureau.creditData[7].creditProlong|0
+# n|credit.creditBureau.creditData[7].creditSum|15010
+# n|credit.creditBureau.creditData[7].creditSumDebt|0
+# n|credit.creditBureau.creditData[7].creditSumLimit|0
+# n|credit.creditBureau.creditData[7].creditSumOverdue|0
+# n|credit.creditBureau.creditData[7].creditSumType|1
+# n|credit.creditBureau.creditData[7].creditType|5
+# c|credit.creditBureau.creditData[7].creditTypeUni|5
+# d|credit.creditBureau.creditData[7].creditUpdate|16.08.2016 00:00:00
+# n|credit.creditBureau.creditData[7].cuid|60268391
+# n|credit.creditBureau.creditData[7].delay30|0
+# n|credit.creditBureau.creditData[7].delay5|0
+# n|credit.creditBureau.creditData[7].delay60|0
+# n|credit.creditBureau.creditData[7].delay90|0
+# n|credit.creditBureau.creditData[7].delayMore|0
+# n|credit.creditBureau.creditData[8].cbAnnuity|0
+# c|credit.creditBureau.creditData[8].cbId|nbk
+# c|credit.creditBureau.creditData[8].contractSource|cb
+# n|credit.creditBureau.creditData[8].cred_ratio|0
+# n|credit.creditBureau.creditData[8].creditActive|1
+# n|credit.creditBureau.creditData[8].creditCollateral|0
+# n|credit.creditBureau.creditData[8].creditCostRate|28.75
+# c|credit.creditBureau.creditData[8].creditCurrency|rur
+# d|credit.creditBureau.creditData[8].creditDate|20.04.2020 00:00:00
+# n|credit.creditBureau.creditData[8].creditDayOverdue|0
+# d|credit.creditBureau.creditData[8].creditEndDate|28.02.2025 00:00:00
+# n|credit.creditBureau.creditData[8].creditJoint|0
+# n|credit.creditBureau.creditData[8].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[8].creditOwner|0
+# n|credit.creditBureau.creditData[8].creditProlong|0
+# n|credit.creditBureau.creditData[8].creditSum|5000
+# n|credit.creditBureau.creditData[8].creditSumDebt|4953
+# n|credit.creditBureau.creditData[8].creditSumLimit|47
+# n|credit.creditBureau.creditData[8].creditSumOverdue|0
+# n|credit.creditBureau.creditData[8].creditSumType|1
+# n|credit.creditBureau.creditData[8].creditType|4
+# c|credit.creditBureau.creditData[8].creditTypeUni|4
+# d|credit.creditBureau.creditData[8].creditUpdate|03.05.2020 00:00:00
+# n|credit.creditBureau.creditData[8].cuid|60268391
+# n|credit.creditBureau.creditData[8].delay30|0
+# n|credit.creditBureau.creditData[8].delay5|0
+# n|credit.creditBureau.creditData[8].delay60|0
+# n|credit.creditBureau.creditData[8].delay90|0
+# n|credit.creditBureau.creditData[8].delayMore|0
+# n|credit.creditBureau.creditData[9].cbAnnuity|4488
+# c|credit.creditBureau.creditData[9].cbId|nbk
+# c|credit.creditBureau.creditData[9].cbOverdueLine|0000000000020000000-
+# c|credit.creditBureau.creditData[9].contractSource|cb
+# n|credit.creditBureau.creditData[9].cred_ratio|0
+# n|credit.creditBureau.creditData[9].creditActive|1
+# n|credit.creditBureau.creditData[9].creditCollateral|0
+# n|credit.creditBureau.creditData[9].creditCostRate|22.9
+# c|credit.creditBureau.creditData[9].creditCurrency|rur
+# d|credit.creditBureau.creditData[9].creditDate|14.09.2018 00:00:00
+# n|credit.creditBureau.creditData[9].creditDayOverdue|0
+# d|credit.creditBureau.creditData[9].creditEndDate|16.12.2021 00:00:00
+# n|credit.creditBureau.creditData[9].creditJoint|0
+# n|credit.creditBureau.creditData[9].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[9].creditOwner|0
+# n|credit.creditBureau.creditData[9].creditProlong|0
+# n|credit.creditBureau.creditData[9].creditSum|58224
+# n|credit.creditBureau.creditData[9].creditSumDebt|38747
+# n|credit.creditBureau.creditData[9].creditSumLimit|0
+# n|credit.creditBureau.creditData[9].creditSumOverdue|0
+# n|credit.creditBureau.creditData[9].creditSumType|1
+# n|credit.creditBureau.creditData[9].creditType|5
+# c|credit.creditBureau.creditData[9].creditTypeUni|5
+# d|credit.creditBureau.creditData[9].creditUpdate|09.05.2020 00:00:00
+# n|credit.creditBureau.creditData[9].cuid|60268391
+# n|credit.creditBureau.creditData[9].delay30|1
+# n|credit.creditBureau.creditData[9].delay5|0
+# n|credit.creditBureau.creditData[9].delay60|0
+# n|credit.creditBureau.creditData[9].delay90|0
+# n|credit.creditBureau.creditData[9].delayMore|0
+# n|credit.creditBureau.creditData[10].cbAnnuity|3018
+# c|credit.creditBureau.creditData[10].cbId|exp
+# c|credit.creditBureau.creditData[10].cbOverdueLine|-00000000000
+# c|credit.creditBureau.creditData[10].contractSource|cb
+# n|credit.creditBureau.creditData[10].cred_ratio|0
+# n|credit.creditBureau.creditData[10].creditActive|1
+# n|credit.creditBureau.creditData[10].creditCollateral|0
+# n|credit.creditBureau.creditData[10].creditCostRate|19.94
+# c|credit.creditBureau.creditData[10].creditCurrency|rur
+# d|credit.creditBureau.creditData[10].creditDate|13.05.2019 00:00:00
+# n|credit.creditBureau.creditData[10].creditDayOverdue|30
+# d|credit.creditBureau.creditData[10].creditEndDate|13.03.2022 00:00:00
+# n|credit.creditBureau.creditData[10].creditJoint|0
+# n|credit.creditBureau.creditData[10].creditMaxOverdue|3025
+# c|credit.creditBureau.creditData[10].creditOwner|0
+# n|credit.creditBureau.creditData[10].creditProlong|0
+# n|credit.creditBureau.creditData[10].creditSum|77951
+# n|credit.creditBureau.creditData[10].creditSumDebt|60929
+# n|credit.creditBureau.creditData[10].creditSumLimit|0
+# n|credit.creditBureau.creditData[10].creditSumOverdue|3025
+# n|credit.creditBureau.creditData[10].creditSumType|1
+# n|credit.creditBureau.creditData[10].creditType|5
+# c|credit.creditBureau.creditData[10].creditTypeUni|5
+# d|credit.creditBureau.creditData[10].creditUpdate|11.05.2020 00:00:00
+# n|credit.creditBureau.creditData[10].cuid|60268391
+# n|credit.creditBureau.creditData[10].delay30|0
+# n|credit.creditBureau.creditData[10].delay5|0
+# n|credit.creditBureau.creditData[10].delay60|0
+# n|credit.creditBureau.creditData[10].delay90|0
+# n|credit.creditBureau.creditData[10].delayMore|0
+# c|credit.creditBureau.creditData[11].cbId|equ
+# c|credit.creditBureau.creditData[11].contractSource|cb
+# n|credit.creditBureau.creditData[11].cred_ratio|0
+# n|credit.creditBureau.creditData[11].creditActive|1
+# n|credit.creditBureau.creditData[11].creditCollateral|0
+# n|credit.creditBureau.creditData[11].creditCostRate|28.75
+# c|credit.creditBureau.creditData[11].creditCurrency|rur
+# d|credit.creditBureau.creditData[11].creditDate|20.04.2020 00:00:00
+# n|credit.creditBureau.creditData[11].creditDayOverdue|0
+# d|credit.creditBureau.creditData[11].creditEndDate|28.02.2025 00:00:00
+# n|credit.creditBureau.creditData[11].creditJoint|0
+# n|credit.creditBureau.creditData[11].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[11].creditOwner|0
+# n|credit.creditBureau.creditData[11].creditProlong|0
+# n|credit.creditBureau.creditData[11].creditSum|5000
+# n|credit.creditBureau.creditData[11].creditSumDebt|4953.29
+# n|credit.creditBureau.creditData[11].creditSumLimit|46.71
+# n|credit.creditBureau.creditData[11].creditSumOverdue|0
+# n|credit.creditBureau.creditData[11].creditSumType|1
+# n|credit.creditBureau.creditData[11].creditType|4
+# c|credit.creditBureau.creditData[11].creditTypeUni|4
+# d|credit.creditBureau.creditData[11].creditUpdate|03.05.2020 00:00:00
+# n|credit.creditBureau.creditData[11].cuid|60268391
+# n|credit.creditBureau.creditData[11].delay30|0
+# n|credit.creditBureau.creditData[11].delay5|0
+# n|credit.creditBureau.creditData[11].delay60|0
+# n|credit.creditBureau.creditData[11].delay90|0
+# n|credit.creditBureau.creditData[11].delayMore|0
+# n|credit.creditBureau.creditData[12].cbAnnuity|0
+# c|credit.creditBureau.creditData[12].cbId|exp
+# c|credit.creditBureau.creditData[12].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC00000000000000000
+# c|credit.creditBureau.creditData[12].contractSource|cb
+# n|credit.creditBureau.creditData[12].cred_ratio|0
+# n|credit.creditBureau.creditData[12].creditActive|0
+# n|credit.creditBureau.creditData[12].creditCollateral|0
+# n|credit.creditBureau.creditData[12].creditCostRate|22.02
+# c|credit.creditBureau.creditData[12].creditCurrency|rur
+# d|credit.creditBureau.creditData[12].creditDate|03.05.2016 00:00:00
+# n|credit.creditBureau.creditData[12].creditDayOverdue|0
+# d|credit.creditBureau.creditData[12].creditEndDate|03.05.2018 00:00:00
+# d|credit.creditBureau.creditData[12].creditEndDateFact|24.10.2017 00:00:00
+# n|credit.creditBureau.creditData[12].creditJoint|0
+# n|credit.creditBureau.creditData[12].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[12].creditOwner|0
+# n|credit.creditBureau.creditData[12].creditProlong|0
+# n|credit.creditBureau.creditData[12].creditSum|37717
+# n|credit.creditBureau.creditData[12].creditSumDebt|0
+# n|credit.creditBureau.creditData[12].creditSumLimit|0
+# n|credit.creditBureau.creditData[12].creditSumOverdue|0
+# n|credit.creditBureau.creditData[12].creditSumType|1
+# n|credit.creditBureau.creditData[12].creditType|5
+# c|credit.creditBureau.creditData[12].creditTypeUni|5
+# d|credit.creditBureau.creditData[12].creditUpdate|15.05.2019 00:00:00
+# n|credit.creditBureau.creditData[12].cuid|60268391
+# n|credit.creditBureau.creditData[12].delay30|0
+# n|credit.creditBureau.creditData[12].delay5|0
+# n|credit.creditBureau.creditData[12].delay60|0
+# n|credit.creditBureau.creditData[12].delay90|0
+# n|credit.creditBureau.creditData[12].delayMore|0
+# n|credit.creditBureau.creditData[13].cbAnnuity|0
+# c|credit.creditBureau.creditData[13].cbId|exp
+# c|credit.creditBureau.creditData[13].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC111111111110101011101000
+# c|credit.creditBureau.creditData[13].contractSource|cb
+# n|credit.creditBureau.creditData[13].cred_ratio|0
+# n|credit.creditBureau.creditData[13].creditActive|0
+# n|credit.creditBureau.creditData[13].creditCollateral|0
+# n|credit.creditBureau.creditData[13].creditCostRate|24.57
+# c|credit.creditBureau.creditData[13].creditCurrency|rur
+# d|credit.creditBureau.creditData[13].creditDate|07.05.2015 00:00:00
+# n|credit.creditBureau.creditData[13].creditDayOverdue|0
+# d|credit.creditBureau.creditData[13].creditEndDate|07.05.2017 00:00:00
+# d|credit.creditBureau.creditData[13].creditEndDateFact|13.05.2017 00:00:00
+# n|credit.creditBureau.creditData[13].creditJoint|0
+# n|credit.creditBureau.creditData[13].creditMaxOverdue|5651
+# c|credit.creditBureau.creditData[13].creditOwner|0
+# n|credit.creditBureau.creditData[13].creditProlong|0
+# n|credit.creditBureau.creditData[13].creditSum|106400
+# n|credit.creditBureau.creditData[13].creditSumDebt|0
+# n|credit.creditBureau.creditData[13].creditSumLimit|0
+# n|credit.creditBureau.creditData[13].creditSumOverdue|0
+# n|credit.creditBureau.creditData[13].creditSumType|1
+# n|credit.creditBureau.creditData[13].creditType|5
+# c|credit.creditBureau.creditData[13].creditTypeUni|5
+# d|credit.creditBureau.creditData[13].creditUpdate|15.05.2019 00:00:00
+# n|credit.creditBureau.creditData[13].cuid|60268391
+# n|credit.creditBureau.creditData[13].delay30|0
+# n|credit.creditBureau.creditData[13].delay5|17
+# n|credit.creditBureau.creditData[13].delay60|0
+# n|credit.creditBureau.creditData[13].delay90|0
+# n|credit.creditBureau.creditData[13].delayMore|0
+# c|credit.creditBureau.creditData[14].cbId|equ
+# c|credit.creditBureau.creditData[14].contractSource|cb
+# n|credit.creditBureau.creditData[14].cred_ratio|0
+# n|credit.creditBureau.creditData[14].creditActive|0
+# n|credit.creditBureau.creditData[14].creditCollateral|0
+# n|credit.creditBureau.creditData[14].creditCostRate|39.96
+# c|credit.creditBureau.creditData[14].creditCurrency|rur
+# d|credit.creditBureau.creditData[14].creditDate|28.10.2014 00:00:00
+# n|credit.creditBureau.creditData[14].creditDayOverdue|0
+# d|credit.creditBureau.creditData[14].creditEndDate|28.04.2015 00:00:00
+# d|credit.creditBureau.creditData[14].creditEndDateFact|29.04.2015 00:00:00
+# n|credit.creditBureau.creditData[14].creditJoint|0
+# n|credit.creditBureau.creditData[14].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[14].creditOwner|0
+# n|credit.creditBureau.creditData[14].creditProlong|0
+# n|credit.creditBureau.creditData[14].creditSum|4390
+# n|credit.creditBureau.creditData[14].creditSumDebt|0
+# n|credit.creditBureau.creditData[14].creditSumLimit|0
+# n|credit.creditBureau.creditData[14].creditSumOverdue|0
+# n|credit.creditBureau.creditData[14].creditSumType|1
+# n|credit.creditBureau.creditData[14].creditType|5
+# c|credit.creditBureau.creditData[14].creditTypeUni|5
+# d|credit.creditBureau.creditData[14].creditUpdate|29.04.2015 00:00:00
+# n|credit.creditBureau.creditData[14].cuid|60268391
+# n|credit.creditBureau.creditData[14].delay30|0
+# n|credit.creditBureau.creditData[14].delay5|0
+# n|credit.creditBureau.creditData[14].delay60|0
+# n|credit.creditBureau.creditData[14].delay90|0
+# n|credit.creditBureau.creditData[14].delayMore|0
+# c|credit.creditBureau.creditData[15].cbId|equ
+# c|credit.creditBureau.creditData[15].contractSource|cb
+# n|credit.creditBureau.creditData[15].cred_ratio|0
+# n|credit.creditBureau.creditData[15].creditActive|0
+# n|credit.creditBureau.creditData[15].creditCollateral|0
+# c|credit.creditBureau.creditData[15].creditCurrency|rur
+# d|credit.creditBureau.creditData[15].creditDate|15.02.2014 00:00:00
+# n|credit.creditBureau.creditData[15].creditDayOverdue|0
+# d|credit.creditBureau.creditData[15].creditEndDate|16.02.2015 00:00:00
+# d|credit.creditBureau.creditData[15].creditEndDateFact|15.01.2015 00:00:00
+# n|credit.creditBureau.creditData[15].creditJoint|0
+# n|credit.creditBureau.creditData[15].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[15].creditOwner|0
+# n|credit.creditBureau.creditData[15].creditProlong|0
+# n|credit.creditBureau.creditData[15].creditSum|15950
+# n|credit.creditBureau.creditData[15].creditSumDebt|0
+# n|credit.creditBureau.creditData[15].creditSumLimit|0
+# n|credit.creditBureau.creditData[15].creditSumOverdue|0
+# n|credit.creditBureau.creditData[15].creditSumType|1
+# n|credit.creditBureau.creditData[15].creditType|5
+# c|credit.creditBureau.creditData[15].creditTypeUni|5
+# d|credit.creditBureau.creditData[15].creditUpdate|15.01.2015 00:00:00
+# n|credit.creditBureau.creditData[15].cuid|60268391
+# n|credit.creditBureau.creditData[15].delay30|0
+# n|credit.creditBureau.creditData[15].delay5|0
+# n|credit.creditBureau.creditData[15].delay60|0
+# n|credit.creditBureau.creditData[15].delay90|0
+# n|credit.creditBureau.creditData[15].delayMore|0
+# c|credit.creditBureau.creditData[16].cbId|equ
+# c|credit.creditBureau.creditData[16].contractSource|cb
+# n|credit.creditBureau.creditData[16].cred_ratio|0
+# n|credit.creditBureau.creditData[16].creditActive|0
+# n|credit.creditBureau.creditData[16].creditCollateral|0
+# n|credit.creditBureau.creditData[16].creditCostRate|51.1
+# c|credit.creditBureau.creditData[16].creditCurrency|rur
+# d|credit.creditBureau.creditData[16].creditDate|03.10.2012 00:00:00
+# n|credit.creditBureau.creditData[16].creditDayOverdue|0
+# d|credit.creditBureau.creditData[16].creditEndDate|31.12.2099 00:00:00
+# d|credit.creditBureau.creditData[16].creditEndDateFact|15.03.2018 00:00:00
+# n|credit.creditBureau.creditData[16].creditJoint|0
+# n|credit.creditBureau.creditData[16].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[16].creditOwner|0
+# n|credit.creditBureau.creditData[16].creditProlong|0
+# n|credit.creditBureau.creditData[16].creditSum|0
+# n|credit.creditBureau.creditData[16].creditSumDebt|0
+# n|credit.creditBureau.creditData[16].creditSumLimit|0
+# n|credit.creditBureau.creditData[16].creditSumOverdue|0
+# n|credit.creditBureau.creditData[16].creditSumType|1
+# n|credit.creditBureau.creditData[16].creditType|4
+# c|credit.creditBureau.creditData[16].creditTypeUni|4
+# d|credit.creditBureau.creditData[16].creditUpdate|15.03.2018 00:00:00
+# n|credit.creditBureau.creditData[16].cuid|60268391
+# n|credit.creditBureau.creditData[16].delay30|0
+# n|credit.creditBureau.creditData[16].delay5|0
+# n|credit.creditBureau.creditData[16].delay60|0
+# n|credit.creditBureau.creditData[16].delay90|0
+# n|credit.creditBureau.creditData[16].delayMore|0
+# n|credit.creditBureau.creditData[17].cbAnnuity|0
+# c|credit.creditBureau.creditData[17].cbId|nbk
+# c|credit.creditBureau.creditData[17].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC-0--
+# c|credit.creditBureau.creditData[17].contractSource|cb
+# n|credit.creditBureau.creditData[17].cred_ratio|0
+# n|credit.creditBureau.creditData[17].creditActive|0
+# n|credit.creditBureau.creditData[17].creditCollateral|0
+# c|credit.creditBureau.creditData[17].creditCurrency|rur
+# d|credit.creditBureau.creditData[17].creditDate|29.12.2011 00:00:00
+# n|credit.creditBureau.creditData[17].creditDayOverdue|0
+# d|credit.creditBureau.creditData[17].creditEndDate|02.04.2012 00:00:00
+# d|credit.creditBureau.creditData[17].creditEndDateFact|02.04.2012 00:00:00
+# n|credit.creditBureau.creditData[17].creditJoint|0
+# n|credit.creditBureau.creditData[17].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[17].creditOwner|0
+# n|credit.creditBureau.creditData[17].creditProlong|0
+# n|credit.creditBureau.creditData[17].creditSum|3640
+# n|credit.creditBureau.creditData[17].creditSumDebt|0
+# n|credit.creditBureau.creditData[17].creditSumLimit|0
+# n|credit.creditBureau.creditData[17].creditSumOverdue|0
+# n|credit.creditBureau.creditData[17].creditSumType|1
+# n|credit.creditBureau.creditData[17].creditType|5
+# c|credit.creditBureau.creditData[17].creditTypeUni|5
+# d|credit.creditBureau.creditData[17].creditUpdate|05.04.2012 00:00:00
+# n|credit.creditBureau.creditData[17].cuid|60268391
+# n|credit.creditBureau.creditData[17].delay30|0
+# n|credit.creditBureau.creditData[17].delay5|0
+# n|credit.creditBureau.creditData[17].delay60|0
+# n|credit.creditBureau.creditData[17].delay90|0
+# n|credit.creditBureau.creditData[17].delayMore|0
+# c|credit.creditBureau.creditData[18].cbId|equ
+# c|credit.creditBureau.creditData[18].contractSource|cb
+# n|credit.creditBureau.creditData[18].cred_ratio|0
+# n|credit.creditBureau.creditData[18].creditActive|0
+# n|credit.creditBureau.creditData[18].creditCollateral|0
+# n|credit.creditBureau.creditData[18].creditCostRate|36.49
+# c|credit.creditBureau.creditData[18].creditCurrency|rur
+# d|credit.creditBureau.creditData[18].creditDate|12.12.2016 00:00:00
+# n|credit.creditBureau.creditData[18].creditDayOverdue|0
+# d|credit.creditBureau.creditData[18].creditEndDate|12.02.2018 00:00:00
+# d|credit.creditBureau.creditData[18].creditEndDateFact|13.11.2017 00:00:00
+# n|credit.creditBureau.creditData[18].creditJoint|0
+# n|credit.creditBureau.creditData[18].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[18].creditOwner|0
+# n|credit.creditBureau.creditData[18].creditProlong|0
+# n|credit.creditBureau.creditData[18].creditSum|18289
+# n|credit.creditBureau.creditData[18].creditSumDebt|0
+# n|credit.creditBureau.creditData[18].creditSumLimit|0
+# n|credit.creditBureau.creditData[18].creditSumOverdue|0
+# n|credit.creditBureau.creditData[18].creditSumType|1
+# n|credit.creditBureau.creditData[18].creditType|5
+# c|credit.creditBureau.creditData[18].creditTypeUni|5
+# d|credit.creditBureau.creditData[18].creditUpdate|13.11.2017 00:00:00
+# n|credit.creditBureau.creditData[18].cuid|60268391
+# n|credit.creditBureau.creditData[18].delay30|0
+# n|credit.creditBureau.creditData[18].delay5|0
+# n|credit.creditBureau.creditData[18].delay60|0
+# n|credit.creditBureau.creditData[18].delay90|0
+# n|credit.creditBureau.creditData[18].delayMore|0
+# c|credit.creditBureau.creditData[19].cbId|equ
+# c|credit.creditBureau.creditData[19].contractSource|cb
+# n|credit.creditBureau.creditData[19].cred_ratio|0
+# n|credit.creditBureau.creditData[19].creditActive|1
+# n|credit.creditBureau.creditData[19].creditCollateral|0
+# n|credit.creditBureau.creditData[19].creditCostRate|22.9
+# c|credit.creditBureau.creditData[19].creditCurrency|rur
+# d|credit.creditBureau.creditData[19].creditDate|14.09.2018 00:00:00
+# n|credit.creditBureau.creditData[19].creditDayOverdue|0
+# d|credit.creditBureau.creditData[19].creditEndDate|16.12.2021 00:00:00
+# n|credit.creditBureau.creditData[19].creditJoint|0
+# n|credit.creditBureau.creditData[19].creditMaxOverdue|1541.24
+# c|credit.creditBureau.creditData[19].creditOwner|0
+# n|credit.creditBureau.creditData[19].creditProlong|3
+# n|credit.creditBureau.creditData[19].creditSum|58224
+# n|credit.creditBureau.creditData[19].creditSumDebt|37685.46
+# n|credit.creditBureau.creditData[19].creditSumLimit|0
+# n|credit.creditBureau.creditData[19].creditSumOverdue|0
+# n|credit.creditBureau.creditData[19].creditSumType|1
+# n|credit.creditBureau.creditData[19].creditType|5
+# c|credit.creditBureau.creditData[19].creditTypeUni|5
+# d|credit.creditBureau.creditData[19].creditUpdate|16.04.2020 00:00:00
+# n|credit.creditBureau.creditData[19].cuid|60268391
+# n|credit.creditBureau.creditData[19].delay30|0
+# n|credit.creditBureau.creditData[19].delay5|7
+# n|credit.creditBureau.creditData[19].delay60|0
+# n|credit.creditBureau.creditData[19].delay90|0
+# n|credit.creditBureau.creditData[19].delayMore|0
+# n|credit.creditBureau.creditData[20].cbAnnuity|0
+# c|credit.creditBureau.creditData[20].cbId|exp
+# c|credit.creditBureau.creditData[20].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC0000000001000
+# c|credit.creditBureau.creditData[20].contractSource|cb
+# n|credit.creditBureau.creditData[20].cred_ratio|0
+# n|credit.creditBureau.creditData[20].creditActive|0
+# n|credit.creditBureau.creditData[20].creditCollateral|0
+# n|credit.creditBureau.creditData[20].creditCostRate|31.122
+# c|credit.creditBureau.creditData[20].creditCurrency|rur
+# d|credit.creditBureau.creditData[20].creditDate|14.07.2015 00:00:00
+# n|credit.creditBureau.creditData[20].creditDayOverdue|0
+# d|credit.creditBureau.creditData[20].creditEndDate|14.07.2016 00:00:00
+# d|credit.creditBureau.creditData[20].creditEndDateFact|16.08.2016 00:00:00
+# n|credit.creditBureau.creditData[20].creditJoint|0
+# n|credit.creditBureau.creditData[20].creditMaxOverdue|1740
+# c|credit.creditBureau.creditData[20].creditOwner|0
+# n|credit.creditBureau.creditData[20].creditProlong|0
+# n|credit.creditBureau.creditData[20].creditSum|15010
+# n|credit.creditBureau.creditData[20].creditSumDebt|0
+# n|credit.creditBureau.creditData[20].creditSumLimit|0
+# n|credit.creditBureau.creditData[20].creditSumOverdue|0
+# n|credit.creditBureau.creditData[20].creditSumType|1
+# n|credit.creditBureau.creditData[20].creditType|5
+# c|credit.creditBureau.creditData[20].creditTypeUni|5
+# d|credit.creditBureau.creditData[20].creditUpdate|22.08.2016 00:00:00
+# n|credit.creditBureau.creditData[20].cuid|60268391
+# n|credit.creditBureau.creditData[20].delay30|0
+# n|credit.creditBureau.creditData[20].delay5|1
+# n|credit.creditBureau.creditData[20].delay60|0
+# n|credit.creditBureau.creditData[20].delay90|0
+# n|credit.creditBureau.creditData[20].delayMore|0
+# n|credit.creditBureau.creditData[21].cbAnnuity|0
+# c|credit.creditBureau.creditData[21].cbId|exp
+# c|credit.creditBureau.creditData[21].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC00000000000
+# c|credit.creditBureau.creditData[21].contractSource|cb
+# n|credit.creditBureau.creditData[21].cred_ratio|0
+# n|credit.creditBureau.creditData[21].creditActive|0
+# n|credit.creditBureau.creditData[21].creditCollateral|0
+# n|credit.creditBureau.creditData[21].creditCostRate|36.49
+# c|credit.creditBureau.creditData[21].creditCurrency|rur
+# d|credit.creditBureau.creditData[21].creditDate|12.12.2016 00:00:00
+# n|credit.creditBureau.creditData[21].creditDayOverdue|0
+# d|credit.creditBureau.creditData[21].creditEndDate|12.02.2018 00:00:00
+# d|credit.creditBureau.creditData[21].creditEndDateFact|13.11.2017 00:00:00
+# n|credit.creditBureau.creditData[21].creditJoint|0
+# n|credit.creditBureau.creditData[21].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[21].creditOwner|0
+# n|credit.creditBureau.creditData[21].creditProlong|0
+# n|credit.creditBureau.creditData[21].creditSum|18289
+# n|credit.creditBureau.creditData[21].creditSumDebt|0
+# n|credit.creditBureau.creditData[21].creditSumLimit|0
+# n|credit.creditBureau.creditData[21].creditSumOverdue|0
+# n|credit.creditBureau.creditData[21].creditSumType|1
+# n|credit.creditBureau.creditData[21].creditType|5
+# c|credit.creditBureau.creditData[21].creditTypeUni|5
+# d|credit.creditBureau.creditData[21].creditUpdate|14.11.2017 00:00:00
+# n|credit.creditBureau.creditData[21].cuid|60268391
+# n|credit.creditBureau.creditData[21].delay30|0
+# n|credit.creditBureau.creditData[21].delay5|0
+# n|credit.creditBureau.creditData[21].delay60|0
+# n|credit.creditBureau.creditData[21].delay90|0
+# n|credit.creditBureau.creditData[21].delayMore|0
+# n|credit.creditBureau.creditData[22].cbAnnuity|0
+# c|credit.creditBureau.creditData[22].cbId|exp
+# c|credit.creditBureau.creditData[22].cbOverdueLine|CCCCCCCCCCCC000000001000000000000000
+# c|credit.creditBureau.creditData[22].contractSource|cb
+# n|credit.creditBureau.creditData[22].cred_ratio|0
+# n|credit.creditBureau.creditData[22].creditActive|0
+# n|credit.creditBureau.creditData[22].creditCollateral|0
+# n|credit.creditBureau.creditData[22].creditCostRate|18.94
+# c|credit.creditBureau.creditData[22].creditCurrency|rur
+# d|credit.creditBureau.creditData[22].creditDate|29.05.2017 00:00:00
+# n|credit.creditBureau.creditData[22].creditDayOverdue|0
+# d|credit.creditBureau.creditData[22].creditEndDate|29.05.2019 00:00:00
+# d|credit.creditBureau.creditData[22].creditEndDateFact|30.05.2019 00:00:00
+# n|credit.creditBureau.creditData[22].creditJoint|0
+# n|credit.creditBureau.creditData[22].creditMaxOverdue|5389
+# c|credit.creditBureau.creditData[22].creditOwner|0
+# n|credit.creditBureau.creditData[22].creditProlong|0
+# n|credit.creditBureau.creditData[22].creditSum|106600
+# n|credit.creditBureau.creditData[22].creditSumDebt|0
+# n|credit.creditBureau.creditData[22].creditSumLimit|0
+# n|credit.creditBureau.creditData[22].creditSumOverdue|0
+# n|credit.creditBureau.creditData[22].creditSumType|1
+# n|credit.creditBureau.creditData[22].creditType|5
+# c|credit.creditBureau.creditData[22].creditTypeUni|5
+# d|credit.creditBureau.creditData[22].creditUpdate|02.06.2019 00:00:00
+# n|credit.creditBureau.creditData[22].cuid|60268391
+# n|credit.creditBureau.creditData[22].delay30|0
+# n|credit.creditBureau.creditData[22].delay5|1
+# n|credit.creditBureau.creditData[22].delay60|0
+# n|credit.creditBureau.creditData[22].delay90|0
+# n|credit.creditBureau.creditData[22].delayMore|0
+# n|credit.creditBureau.creditData[23].cbAnnuity|0
+# c|credit.creditBureau.creditData[23].cbId|exp
+# c|credit.creditBureau.creditData[23].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC-00000
+# c|credit.creditBureau.creditData[23].contractSource|cb
+# n|credit.creditBureau.creditData[23].cred_ratio|0
+# n|credit.creditBureau.creditData[23].creditActive|0
+# n|credit.creditBureau.creditData[23].creditCollateral|0
+# c|credit.creditBureau.creditData[23].creditCurrency|rur
+# d|credit.creditBureau.creditData[23].creditDate|28.10.2014 00:00:00
+# n|credit.creditBureau.creditData[23].creditDayOverdue|0
+# d|credit.creditBureau.creditData[23].creditEndDate|28.04.2015 00:00:00
+# d|credit.creditBureau.creditData[23].creditEndDateFact|29.04.2015 00:00:00
+# n|credit.creditBureau.creditData[23].creditJoint|0
+# n|credit.creditBureau.creditData[23].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[23].creditOwner|0
+# n|credit.creditBureau.creditData[23].creditProlong|0
+# n|credit.creditBureau.creditData[23].creditSum|4390
+# n|credit.creditBureau.creditData[23].creditSumDebt|0
+# n|credit.creditBureau.creditData[23].creditSumLimit|0
+# n|credit.creditBureau.creditData[23].creditSumOverdue|0
+# n|credit.creditBureau.creditData[23].creditSumType|1
+# n|credit.creditBureau.creditData[23].creditType|5
+# c|credit.creditBureau.creditData[23].creditTypeUni|5
+# d|credit.creditBureau.creditData[23].creditUpdate|30.05.2015 00:00:00
+# n|credit.creditBureau.creditData[23].cuid|60268391
+# n|credit.creditBureau.creditData[23].delay30|0
+# n|credit.creditBureau.creditData[23].delay5|0
+# n|credit.creditBureau.creditData[23].delay60|0
+# n|credit.creditBureau.creditData[23].delay90|0
+# n|credit.creditBureau.creditData[23].delayMore|0
+# n|credit.creditBureau.creditData[24].cbAnnuity|2219
+# c|credit.creditBureau.creditData[24].cbId|exp
+# c|credit.creditBureau.creditData[24].cbOverdueLine|0000110100001000000110
+# c|credit.creditBureau.creditData[24].contractSource|cb
+# n|credit.creditBureau.creditData[24].cred_ratio|0
+# n|credit.creditBureau.creditData[24].creditActive|1
+# n|credit.creditBureau.creditData[24].creditCollateral|0
+# n|credit.creditBureau.creditData[24].creditCostRate|19.9
+# c|credit.creditBureau.creditData[24].creditCurrency|rur
+# d|credit.creditBureau.creditData[24].creditDate|11.07.2018 00:00:00
+# n|credit.creditBureau.creditData[24].creditDayOverdue|30
+# d|credit.creditBureau.creditData[24].creditEndDate|11.07.2020 00:00:00
+# n|credit.creditBureau.creditData[24].creditJoint|0
+# n|credit.creditBureau.creditData[24].creditMaxOverdue|2220
+# c|credit.creditBureau.creditData[24].creditOwner|0
+# n|credit.creditBureau.creditData[24].creditProlong|0
+# n|credit.creditBureau.creditData[24].creditSum|43500
+# n|credit.creditBureau.creditData[24].creditSumDebt|7868
+# n|credit.creditBureau.creditData[24].creditSumLimit|0
+# n|credit.creditBureau.creditData[24].creditSumOverdue|1373
+# n|credit.creditBureau.creditData[24].creditSumType|1
+# n|credit.creditBureau.creditData[24].creditType|5
+# c|credit.creditBureau.creditData[24].creditTypeUni|5
+# d|credit.creditBureau.creditData[24].creditUpdate|11.05.2020 00:00:00
+# n|credit.creditBureau.creditData[24].cuid|60268391
+# n|credit.creditBureau.creditData[24].delay30|0
+# n|credit.creditBureau.creditData[24].delay5|6
+# n|credit.creditBureau.creditData[24].delay60|0
+# n|credit.creditBureau.creditData[24].delay90|0
+# n|credit.creditBureau.creditData[24].delayMore|0
+# n|credit.creditBureau.creditData[25].cbAnnuity|0
+# c|credit.creditBureau.creditData[25].cbId|nbk
+# c|credit.creditBureau.creditData[25].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCC--0------0000000000000000000000000000-0000000000---000-0000000000
+# c|credit.creditBureau.creditData[25].contractSource|cb
+# n|credit.creditBureau.creditData[25].cred_ratio|0
+# n|credit.creditBureau.creditData[25].creditActive|0
+# n|credit.creditBureau.creditData[25].creditCollateral|0
+# n|credit.creditBureau.creditData[25].creditCostRate|51.1
+# c|credit.creditBureau.creditData[25].creditCurrency|rur
+# d|credit.creditBureau.creditData[25].creditDate|03.10.2012 00:00:00
+# n|credit.creditBureau.creditData[25].creditDayOverdue|0
+# d|credit.creditBureau.creditData[25].creditEndDate|31.12.2099 00:00:00
+# d|credit.creditBureau.creditData[25].creditEndDateFact|15.03.2018 00:00:00
+# n|credit.creditBureau.creditData[25].creditJoint|0
+# n|credit.creditBureau.creditData[25].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[25].creditOwner|0
+# n|credit.creditBureau.creditData[25].creditProlong|0
+# n|credit.creditBureau.creditData[25].creditSum|0
+# n|credit.creditBureau.creditData[25].creditSumDebt|0
+# n|credit.creditBureau.creditData[25].creditSumLimit|0
+# n|credit.creditBureau.creditData[25].creditSumOverdue|0
+# n|credit.creditBureau.creditData[25].creditSumType|1
+# n|credit.creditBureau.creditData[25].creditType|4
+# c|credit.creditBureau.creditData[25].creditTypeUni|4
+# d|credit.creditBureau.creditData[25].creditUpdate|15.03.2018 00:00:00
+# n|credit.creditBureau.creditData[25].cuid|60268391
+# n|credit.creditBureau.creditData[25].delay30|0
+# n|credit.creditBureau.creditData[25].delay5|0
+# n|credit.creditBureau.creditData[25].delay60|0
+# n|credit.creditBureau.creditData[25].delay90|0
+# n|credit.creditBureau.creditData[25].delayMore|0
+# n|credit.creditBureau.creditData[26].cbAnnuity|0
+# c|credit.creditBureau.creditData[26].cbId|exp
+# c|credit.creditBureau.creditData[26].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCC--0------000000-0000-0000000000000000-0000000000---00000000000000
+# c|credit.creditBureau.creditData[26].contractSource|cb
+# n|credit.creditBureau.creditData[26].cred_ratio|0
+# n|credit.creditBureau.creditData[26].creditActive|0
+# n|credit.creditBureau.creditData[26].creditCollateral|0
+# n|credit.creditBureau.creditData[26].creditCostRate|51.1
+# c|credit.creditBureau.creditData[26].creditCurrency|rur
+# d|credit.creditBureau.creditData[26].creditDate|03.10.2012 00:00:00
+# n|credit.creditBureau.creditData[26].creditDayOverdue|0
+# d|credit.creditBureau.creditData[26].creditEndDate|31.12.2099 00:00:00
+# d|credit.creditBureau.creditData[26].creditEndDateFact|15.03.2018 00:00:00
+# n|credit.creditBureau.creditData[26].creditJoint|0
+# n|credit.creditBureau.creditData[26].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[26].creditOwner|0
+# n|credit.creditBureau.creditData[26].creditProlong|0
+# n|credit.creditBureau.creditData[26].creditSum|0
+# n|credit.creditBureau.creditData[26].creditSumDebt|0
+# n|credit.creditBureau.creditData[26].creditSumLimit|0
+# n|credit.creditBureau.creditData[26].creditSumOverdue|0
+# n|credit.creditBureau.creditData[26].creditSumType|1
+# n|credit.creditBureau.creditData[26].creditType|4
+# c|credit.creditBureau.creditData[26].creditTypeUni|4
+# d|credit.creditBureau.creditData[26].creditUpdate|16.03.2018 00:00:00
+# n|credit.creditBureau.creditData[26].cuid|60268391
+# n|credit.creditBureau.creditData[26].delay30|0
+# n|credit.creditBureau.creditData[26].delay5|0
+# n|credit.creditBureau.creditData[26].delay60|0
+# n|credit.creditBureau.creditData[26].delay90|0
+# n|credit.creditBureau.creditData[26].delayMore|0
+# n|credit.creditBureau.creditData[27].cbAnnuity|0
+# c|credit.creditBureau.creditData[27].cbId|exp
+# c|credit.creditBureau.creditData[27].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC000000
+# c|credit.creditBureau.creditData[27].contractSource|cb
+# n|credit.creditBureau.creditData[27].cred_ratio|0
+# n|credit.creditBureau.creditData[27].creditActive|0
+# n|credit.creditBureau.creditData[27].creditCollateral|0
+# c|credit.creditBureau.creditData[27].creditCurrency|rur
+# d|credit.creditBureau.creditData[27].creditDate|03.10.2012 00:00:00
+# n|credit.creditBureau.creditData[27].creditDayOverdue|0
+# d|credit.creditBureau.creditData[27].creditEndDate|03.04.2013 00:00:00
+# d|credit.creditBureau.creditData[27].creditEndDateFact|03.04.2013 00:00:00
+# n|credit.creditBureau.creditData[27].creditJoint|0
+# n|credit.creditBureau.creditData[27].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[27].creditOwner|0
+# n|credit.creditBureau.creditData[27].creditProlong|0
+# n|credit.creditBureau.creditData[27].creditSum|11912
+# n|credit.creditBureau.creditData[27].creditSumDebt|0
+# n|credit.creditBureau.creditData[27].creditSumLimit|0
+# n|credit.creditBureau.creditData[27].creditSumOverdue|0
+# n|credit.creditBureau.creditData[27].creditSumType|1
+# n|credit.creditBureau.creditData[27].creditType|5
+# c|credit.creditBureau.creditData[27].creditTypeUni|5
+# d|credit.creditBureau.creditData[27].creditUpdate|10.04.2013 00:00:00
+# n|credit.creditBureau.creditData[27].cuid|60268391
+# n|credit.creditBureau.creditData[27].delay30|0
+# n|credit.creditBureau.creditData[27].delay5|0
+# n|credit.creditBureau.creditData[27].delay60|0
+# n|credit.creditBureau.creditData[27].delay90|0
+# n|credit.creditBureau.creditData[27].delayMore|0
+# n|credit.creditBureau.creditData[28].cbAnnuity|0
+# c|credit.creditBureau.creditData[28].cbId|nbk
+# c|credit.creditBureau.creditData[28].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC000-00
+# c|credit.creditBureau.creditData[28].contractSource|cb
+# n|credit.creditBureau.creditData[28].cred_ratio|0
+# n|credit.creditBureau.creditData[28].creditActive|0
+# n|credit.creditBureau.creditData[28].creditCollateral|0
+# n|credit.creditBureau.creditData[28].creditCostRate|39.96
+# c|credit.creditBureau.creditData[28].creditCurrency|rur
+# d|credit.creditBureau.creditData[28].creditDate|28.10.2014 00:00:00
+# n|credit.creditBureau.creditData[28].creditDayOverdue|0
+# d|credit.creditBureau.creditData[28].creditEndDate|28.04.2015 00:00:00
+# d|credit.creditBureau.creditData[28].creditEndDateFact|29.04.2015 00:00:00
+# n|credit.creditBureau.creditData[28].creditJoint|0
+# n|credit.creditBureau.creditData[28].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[28].creditOwner|0
+# n|credit.creditBureau.creditData[28].creditProlong|0
+# n|credit.creditBureau.creditData[28].creditSum|4390
+# n|credit.creditBureau.creditData[28].creditSumDebt|0
+# n|credit.creditBureau.creditData[28].creditSumLimit|0
+# n|credit.creditBureau.creditData[28].creditSumOverdue|0
+# n|credit.creditBureau.creditData[28].creditSumType|1
+# n|credit.creditBureau.creditData[28].creditType|5
+# c|credit.creditBureau.creditData[28].creditTypeUni|5
+# d|credit.creditBureau.creditData[28].creditUpdate|29.04.2015 00:00:00
+# n|credit.creditBureau.creditData[28].cuid|60268391
+# n|credit.creditBureau.creditData[28].delay30|0
+# n|credit.creditBureau.creditData[28].delay5|0
+# n|credit.creditBureau.creditData[28].delay60|0
+# n|credit.creditBureau.creditData[28].delay90|0
+# n|credit.creditBureau.creditData[28].delayMore|0
+# n|credit.creditBureau.creditData[29].cbAnnuity|0
+# c|credit.creditBureau.creditData[29].cbId|nbk
+# c|credit.creditBureau.creditData[29].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC00-
+# c|credit.creditBureau.creditData[29].contractSource|cb
+# n|credit.creditBureau.creditData[29].cred_ratio|0
+# n|credit.creditBureau.creditData[29].creditActive|0
+# n|credit.creditBureau.creditData[29].creditCollateral|0
+# c|credit.creditBureau.creditData[29].creditCurrency|rur
+# d|credit.creditBureau.creditData[29].creditDate|15.05.2009 00:00:00
+# n|credit.creditBureau.creditData[29].creditDayOverdue|0
+# d|credit.creditBureau.creditData[29].creditEndDate|16.11.2009 00:00:00
+# d|credit.creditBureau.creditData[29].creditEndDateFact|17.08.2009 00:00:00
+# n|credit.creditBureau.creditData[29].creditJoint|0
+# n|credit.creditBureau.creditData[29].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[29].creditOwner|0
+# n|credit.creditBureau.creditData[29].creditProlong|0
+# n|credit.creditBureau.creditData[29].creditSum|12990
+# n|credit.creditBureau.creditData[29].creditSumDebt|0
+# n|credit.creditBureau.creditData[29].creditSumLimit|0
+# n|credit.creditBureau.creditData[29].creditSumOverdue|0
+# n|credit.creditBureau.creditData[29].creditSumType|1
+# n|credit.creditBureau.creditData[29].creditType|5
+# c|credit.creditBureau.creditData[29].creditTypeUni|5
+# d|credit.creditBureau.creditData[29].creditUpdate|17.08.2009 00:00:00
+# n|credit.creditBureau.creditData[29].cuid|60268391
+# n|credit.creditBureau.creditData[29].delay30|0
+# n|credit.creditBureau.creditData[29].delay5|0
+# n|credit.creditBureau.creditData[29].delay60|0
+# n|credit.creditBureau.creditData[29].delay90|0
+# n|credit.creditBureau.creditData[29].delayMore|0
+# c|credit.creditBureau.creditData[30].cbId|equ
+# c|credit.creditBureau.creditData[30].contractSource|cb
+# n|credit.creditBureau.creditData[30].cred_ratio|0
+# n|credit.creditBureau.creditData[30].creditActive|0
+# n|credit.creditBureau.creditData[30].creditCollateral|0
+# c|credit.creditBureau.creditData[30].creditCurrency|rur
+# d|credit.creditBureau.creditData[30].creditDate|03.10.2012 00:00:00
+# n|credit.creditBureau.creditData[30].creditDayOverdue|0
+# d|credit.creditBureau.creditData[30].creditEndDate|03.04.2013 00:00:00
+# d|credit.creditBureau.creditData[30].creditEndDateFact|03.04.2013 00:00:00
+# n|credit.creditBureau.creditData[30].creditJoint|0
+# n|credit.creditBureau.creditData[30].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[30].creditOwner|0
+# n|credit.creditBureau.creditData[30].creditProlong|0
+# n|credit.creditBureau.creditData[30].creditSum|11911.92
+# n|credit.creditBureau.creditData[30].creditSumDebt|0
+# n|credit.creditBureau.creditData[30].creditSumLimit|0
+# n|credit.creditBureau.creditData[30].creditSumOverdue|0
+# n|credit.creditBureau.creditData[30].creditSumType|1
+# n|credit.creditBureau.creditData[30].creditType|5
+# c|credit.creditBureau.creditData[30].creditTypeUni|5
+# d|credit.creditBureau.creditData[30].creditUpdate|06.04.2013 00:00:00
+# n|credit.creditBureau.creditData[30].cuid|60268391
+# n|credit.creditBureau.creditData[30].delay30|0
+# n|credit.creditBureau.creditData[30].delay5|0
+# n|credit.creditBureau.creditData[30].delay60|0
+# n|credit.creditBureau.creditData[30].delay90|0
+# n|credit.creditBureau.creditData[30].delayMore|0
+# c|credit.creditBureau.creditData[31].cbId|equ
+# c|credit.creditBureau.creditData[31].contractSource|cb
+# n|credit.creditBureau.creditData[31].cred_ratio|0
+# n|credit.creditBureau.creditData[31].creditActive|0
+# n|credit.creditBureau.creditData[31].creditCollateral|0
+# n|credit.creditBureau.creditData[31].creditCostRate|31.122
+# c|credit.creditBureau.creditData[31].creditCurrency|rur
+# d|credit.creditBureau.creditData[31].creditDate|14.07.2015 00:00:00
+# n|credit.creditBureau.creditData[31].creditDayOverdue|0
+# d|credit.creditBureau.creditData[31].creditEndDate|14.07.2016 00:00:00
+# d|credit.creditBureau.creditData[31].creditEndDateFact|16.08.2016 00:00:00
+# n|credit.creditBureau.creditData[31].creditJoint|0
+# n|credit.creditBureau.creditData[31].creditMaxOverdue|1146.12
+# c|credit.creditBureau.creditData[31].creditOwner|0
+# n|credit.creditBureau.creditData[31].creditProlong|0
+# n|credit.creditBureau.creditData[31].creditSum|15010
+# n|credit.creditBureau.creditData[31].creditSumDebt|0
+# n|credit.creditBureau.creditData[31].creditSumLimit|0
+# n|credit.creditBureau.creditData[31].creditSumOverdue|0
+# n|credit.creditBureau.creditData[31].creditSumType|1
+# n|credit.creditBureau.creditData[31].creditType|5
+# c|credit.creditBureau.creditData[31].creditTypeUni|5
+# d|credit.creditBureau.creditData[31].creditUpdate|16.08.2016 00:00:00
+# n|credit.creditBureau.creditData[31].cuid|60268391
+# n|credit.creditBureau.creditData[31].delay30|1
+# n|credit.creditBureau.creditData[31].delay5|0
+# n|credit.creditBureau.creditData[31].delay60|0
+# n|credit.creditBureau.creditData[31].delay90|0
+# n|credit.creditBureau.creditData[31].delayMore|0
+# n|credit.creditBureau.creditData[32].cbAnnuity|1128
+# c|credit.creditBureau.creditData[32].cbId|exp
+# c|credit.creditBureau.creditData[32].cbOverdueLine|-001100000000000100010000
+# c|credit.creditBureau.creditData[32].contractSource|cb
+# n|credit.creditBureau.creditData[32].cred_ratio|0
+# n|credit.creditBureau.creditData[32].creditActive|1
+# n|credit.creditBureau.creditData[32].creditCollateral|0
+# n|credit.creditBureau.creditData[32].creditCostRate|17.36
+# c|credit.creditBureau.creditData[32].creditCurrency|rur
+# d|credit.creditBureau.creditData[32].creditDate|05.04.2018 00:00:00
+# n|credit.creditBureau.creditData[32].creditDayOverdue|30
+# d|credit.creditBureau.creditData[32].creditEndDate|05.04.2021 00:00:00
+# n|credit.creditBureau.creditData[32].creditJoint|0
+# n|credit.creditBureau.creditData[32].creditMaxOverdue|1131
+# c|credit.creditBureau.creditData[32].creditOwner|0
+# n|credit.creditBureau.creditData[32].creditProlong|0
+# n|credit.creditBureau.creditData[32].creditSum|31490
+# n|credit.creditBureau.creditData[32].creditSumDebt|13577
+# n|credit.creditBureau.creditData[32].creditSumLimit|0
+# n|credit.creditBureau.creditData[32].creditSumOverdue|1131
+# n|credit.creditBureau.creditData[32].creditSumType|1
+# n|credit.creditBureau.creditData[32].creditType|5
+# c|credit.creditBureau.creditData[32].creditTypeUni|5
+# d|credit.creditBureau.creditData[32].creditUpdate|11.05.2020 00:00:00
+# n|credit.creditBureau.creditData[32].cuid|60268391
+# n|credit.creditBureau.creditData[32].delay30|0
+# n|credit.creditBureau.creditData[32].delay5|4
+# n|credit.creditBureau.creditData[32].delay60|0
+# n|credit.creditBureau.creditData[32].delay90|0
+# n|credit.creditBureau.creditData[32].delayMore|0
+# n|credit.creditBureau.creditData[33].cbAnnuity|0
+# c|credit.creditBureau.creditData[33].cbId|exp
+# c|credit.creditBureau.creditData[33].cbOverdueLine|0
+# c|credit.creditBureau.creditData[33].contractSource|cb
+# n|credit.creditBureau.creditData[33].cred_ratio|0
+# n|credit.creditBureau.creditData[33].creditActive|1
+# n|credit.creditBureau.creditData[33].creditCollateral|0
+# n|credit.creditBureau.creditData[33].creditCostRate|28.75
+# c|credit.creditBureau.creditData[33].creditCurrency|rur
+# d|credit.creditBureau.creditData[33].creditDate|20.04.2020 00:00:00
+# n|credit.creditBureau.creditData[33].creditDayOverdue|0
+# d|credit.creditBureau.creditData[33].creditEndDate|28.02.2025 00:00:00
+# n|credit.creditBureau.creditData[33].creditJoint|0
+# n|credit.creditBureau.creditData[33].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[33].creditOwner|0
+# n|credit.creditBureau.creditData[33].creditProlong|0
+# n|credit.creditBureau.creditData[33].creditSum|5000
+# n|credit.creditBureau.creditData[33].creditSumDebt|4953
+# n|credit.creditBureau.creditData[33].creditSumLimit|47
+# n|credit.creditBureau.creditData[33].creditSumOverdue|0
+# n|credit.creditBureau.creditData[33].creditSumType|1
+# n|credit.creditBureau.creditData[33].creditType|4
+# c|credit.creditBureau.creditData[33].creditTypeUni|4
+# d|credit.creditBureau.creditData[33].creditUpdate|05.05.2020 00:00:00
+# n|credit.creditBureau.creditData[33].cuid|60268391
+# n|credit.creditBureau.creditData[33].delay30|0
+# n|credit.creditBureau.creditData[33].delay5|0
+# n|credit.creditBureau.creditData[33].delay60|0
+# n|credit.creditBureau.creditData[33].delay90|0
+# n|credit.creditBureau.creditData[33].delayMore|0
+# n|credit.creditBureau.creditData[34].cbAnnuity|4488
+# c|credit.creditBureau.creditData[34].cbId|exp
+# c|credit.creditBureau.creditData[34].cbOverdueLine|01000001000011011000
+# c|credit.creditBureau.creditData[34].contractSource|cb
+# n|credit.creditBureau.creditData[34].cred_ratio|0
+# n|credit.creditBureau.creditData[34].creditActive|1
+# n|credit.creditBureau.creditData[34].creditCollateral|0
+# n|credit.creditBureau.creditData[34].creditCostRate|22.9
+# c|credit.creditBureau.creditData[34].creditCurrency|rur
+# d|credit.creditBureau.creditData[34].creditDate|14.09.2018 00:00:00
+# n|credit.creditBureau.creditData[34].creditDayOverdue|0
+# d|credit.creditBureau.creditData[34].creditEndDate|16.12.2021 00:00:00
+# n|credit.creditBureau.creditData[34].creditJoint|0
+# n|credit.creditBureau.creditData[34].creditMaxOverdue|3287
+# c|credit.creditBureau.creditData[34].creditOwner|0
+# n|credit.creditBureau.creditData[34].creditProlong|0
+# n|credit.creditBureau.creditData[34].creditSum|58224
+# n|credit.creditBureau.creditData[34].creditSumDebt|38747
+# n|credit.creditBureau.creditData[34].creditSumLimit|0
+# n|credit.creditBureau.creditData[34].creditSumOverdue|0
+# n|credit.creditBureau.creditData[34].creditSumType|1
+# n|credit.creditBureau.creditData[34].creditType|5
+# c|credit.creditBureau.creditData[34].creditTypeUni|5
+# d|credit.creditBureau.creditData[34].creditUpdate|07.05.2020 00:00:00
+# n|credit.creditBureau.creditData[34].cuid|60268391
+# n|credit.creditBureau.creditData[34].delay30|0
+# n|credit.creditBureau.creditData[34].delay5|6
+# n|credit.creditBureau.creditData[34].delay60|0
+# n|credit.creditBureau.creditData[34].delay90|0
+# n|credit.creditBureau.creditData[34].delayMore|0
+# n|credit.creditBureau.creditData[35].cbAnnuity|0
+# c|credit.creditBureau.creditData[35].cbId|exp
+# c|credit.creditBureau.creditData[35].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC00000000000
+# c|credit.creditBureau.creditData[35].contractSource|cb
+# n|credit.creditBureau.creditData[35].cred_ratio|0
+# n|credit.creditBureau.creditData[35].creditActive|0
+# n|credit.creditBureau.creditData[35].creditCollateral|0
+# c|credit.creditBureau.creditData[35].creditCurrency|rur
+# d|credit.creditBureau.creditData[35].creditDate|15.03.2020 00:00:00
+# n|credit.creditBureau.creditData[35].creditDayOverdue|0
+# n|credit.creditBureau.creditData[35].creditJoint|1
+# n|credit.creditBureau.creditData[35].creditMaxOverdue|0
+# n|credit.creditBureau.creditData[35].creditProlong|0
+# n|credit.creditBureau.creditData[35].creditSum|50000
+# n|credit.creditBureau.creditData[35].creditSumLimit|0
+# n|credit.creditBureau.creditData[35].creditSumOverdue|0
+# n|credit.creditBureau.creditData[35].creditSumType|1
+# n|credit.creditBureau.creditData[35].creditType|5
+# c|credit.creditBureau.creditData[35].creditTypeUni|5
+# d|credit.creditBureau.creditData[35].creditUpdate|15.01.2015 00:00:00
+# n|credit.creditBureau.creditData[35].cuid|60268391
+# n|credit.creditBureau.creditData[35].delay30|0
+# n|credit.creditBureau.creditData[35].delay5|0
+# n|credit.creditBureau.creditData[35].delay60|0
+# n|credit.creditBureau.creditData[35].delay90|0
+# n|credit.creditBureau.creditData[35].delayMore|0
+# n|credit.creditBureau.creditData[36].cbAnnuity|0
+# c|credit.creditBureau.creditData[36].contractSource|cb
+# n|credit.creditBureau.creditData[36].cred_ratio|0
+# n|credit.creditBureau.creditData[36].creditActive|0
+# n|credit.creditBureau.creditData[36].creditCollateral|0
+# c|credit.creditBureau.creditData[36].creditCurrency|rur
+# d|credit.creditBureau.creditData[36].creditDate|15.02.2014 00:00:00
+# n|credit.creditBureau.creditData[36].creditDayOverdue|0
+# d|credit.creditBureau.creditData[36].creditEndDate|16.02.2015 00:00:00
+# d|credit.creditBureau.creditData[36].creditEndDateFact|15.01.2015 00:00:00
+# n|credit.creditBureau.creditData[36].creditJoint|1
+# n|credit.creditBureau.creditData[36].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[36].creditOwner|0
+# n|credit.creditBureau.creditData[36].creditProlong|0
+# n|credit.creditBureau.creditData[36].creditSum|15950
+# n|credit.creditBureau.creditData[36].creditSumDebt|0
+# n|credit.creditBureau.creditData[36].creditSumLimit|0
+# n|credit.creditBureau.creditData[36].creditSumOverdue|0
+# n|credit.creditBureau.creditData[36].creditSumType|1
+# n|credit.creditBureau.creditData[36].creditType|5
+# c|credit.creditBureau.creditData[36].creditTypeUni|5
+# d|credit.creditBureau.creditData[36].creditUpdate|15.01.2015 00:00:00
+# n|credit.creditBureau.creditData[36].cuid|60268391
+# n|credit.creditBureau.creditData[36].delay30|0
+# n|credit.creditBureau.creditData[36].delay5|0
+# n|credit.creditBureau.creditData[36].delay60|0
+# n|credit.creditBureau.creditData[36].delay90|0
+# n|credit.creditBureau.creditData[36].delayMore|0
+# n|credit.creditBureau.creditData[37].cbAnnuity|2219
+# c|credit.creditBureau.creditData[37].cbOverdueLine|0000110100001000000110
+# c|credit.creditBureau.creditData[37].contractSource|cb
+# n|credit.creditBureau.creditData[37].cred_ratio|0
+# n|credit.creditBureau.creditData[37].creditActive|1
+# n|credit.creditBureau.creditData[37].creditCollateral|0
+# n|credit.creditBureau.creditData[37].creditCostRate|19.9
+# c|credit.creditBureau.creditData[37].creditCurrency|rur
+# d|credit.creditBureau.creditData[37].creditDate|11.07.2018 00:00:00
+# n|credit.creditBureau.creditData[37].creditDayOverdue|30
+# d|credit.creditBureau.creditData[37].creditEndDate|11.07.2020 00:00:00
+# n|credit.creditBureau.creditData[37].creditJoint|1
+# n|credit.creditBureau.creditData[37].creditMaxOverdue|2220
+# c|credit.creditBureau.creditData[37].creditOwner|0
+# n|credit.creditBureau.creditData[37].creditProlong|0
+# n|credit.creditBureau.creditData[37].creditSum|43500
+# n|credit.creditBureau.creditData[37].creditSumDebt|7868
+# n|credit.creditBureau.creditData[37].creditSumLimit|0
+# n|credit.creditBureau.creditData[37].creditSumOverdue|1373
+# n|credit.creditBureau.creditData[37].creditSumType|1
+# n|credit.creditBureau.creditData[37].creditType|5
+# c|credit.creditBureau.creditData[37].creditTypeUni|5
+# d|credit.creditBureau.creditData[37].creditUpdate|11.05.2020 00:00:00
+# n|credit.creditBureau.creditData[37].cuid|60268391
+# n|credit.creditBureau.creditData[37].delay30|0
+# n|credit.creditBureau.creditData[37].delay5|6
+# n|credit.creditBureau.creditData[37].delay60|0
+# n|credit.creditBureau.creditData[37].delay90|0
+# n|credit.creditBureau.creditData[37].delayMore|0
+# c|credit.creditBureau.creditData[38].cbOverdueLine|10110011000011000001111000000000000000000000000000000-0-----
+# c|credit.creditBureau.creditData[38].contractSource|cb
+# n|credit.creditBureau.creditData[38].cred_ratio|0
+# n|credit.creditBureau.creditData[38].creditActive|1
+# n|credit.creditBureau.creditData[38].creditCollateral|0
+# n|credit.creditBureau.creditData[38].creditCostRate|26.03
+# c|credit.creditBureau.creditData[38].creditCurrency|rur
+# d|credit.creditBureau.creditData[38].creditDate|07.05.2015 00:00:00
+# n|credit.creditBureau.creditData[38].creditDayOverdue|30
+# n|credit.creditBureau.creditData[38].creditJoint|1
+# n|credit.creditBureau.creditData[38].creditMaxOverdue|1824
+# c|credit.creditBureau.creditData[38].creditOwner|0
+# n|credit.creditBureau.creditData[38].creditProlong|0
+# n|credit.creditBureau.creditData[38].creditSum|30000
+# n|credit.creditBureau.creditData[38].creditSumDebt|31254
+# n|credit.creditBureau.creditData[38].creditSumLimit|0
+# n|credit.creditBureau.creditData[38].creditSumOverdue|1824
+# n|credit.creditBureau.creditData[38].creditSumType|1
+# n|credit.creditBureau.creditData[38].creditType|4
+# c|credit.creditBureau.creditData[38].creditTypeUni|4
+# d|credit.creditBureau.creditData[38].creditUpdate|11.05.2020 00:00:00
+# n|credit.creditBureau.creditData[38].cuid|60268391
+# n|credit.creditBureau.creditData[38].delay30|0
+# n|credit.creditBureau.creditData[38].delay5|10
+# n|credit.creditBureau.creditData[38].delay60|0
+# n|credit.creditBureau.creditData[38].delay90|0
+# n|credit.creditBureau.creditData[38].delayMore|0
+# n|credit.creditBureau.creditData[39].cbAnnuity|0
+# c|credit.creditBureau.creditData[39].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC-00000
+# c|credit.creditBureau.creditData[39].contractSource|cb
+# n|credit.creditBureau.creditData[39].cred_ratio|0
+# n|credit.creditBureau.creditData[39].creditActive|0
+# n|credit.creditBureau.creditData[39].creditCollateral|0
+# c|credit.creditBureau.creditData[39].creditCurrency|rur
+# d|credit.creditBureau.creditData[39].creditDate|28.10.2014 00:00:00
+# n|credit.creditBureau.creditData[39].creditDayOverdue|0
+# d|credit.creditBureau.creditData[39].creditEndDate|28.04.2015 00:00:00
+# d|credit.creditBureau.creditData[39].creditEndDateFact|29.04.2015 00:00:00
+# n|credit.creditBureau.creditData[39].creditJoint|1
+# n|credit.creditBureau.creditData[39].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[39].creditOwner|0
+# n|credit.creditBureau.creditData[39].creditProlong|0
+# n|credit.creditBureau.creditData[39].creditSum|4390
+# n|credit.creditBureau.creditData[39].creditSumDebt|0
+# n|credit.creditBureau.creditData[39].creditSumLimit|0
+# n|credit.creditBureau.creditData[39].creditSumOverdue|0
+# n|credit.creditBureau.creditData[39].creditSumType|1
+# n|credit.creditBureau.creditData[39].creditType|5
+# c|credit.creditBureau.creditData[39].creditTypeUni|5
+# d|credit.creditBureau.creditData[39].creditUpdate|30.05.2015 00:00:00
+# n|credit.creditBureau.creditData[39].cuid|60268391
+# n|credit.creditBureau.creditData[39].delay30|0
+# n|credit.creditBureau.creditData[39].delay5|0
+# n|credit.creditBureau.creditData[39].delay60|0
+# n|credit.creditBureau.creditData[39].delay90|0
+# n|credit.creditBureau.creditData[39].delayMore|0
+# n|credit.creditBureau.creditData[40].cbAnnuity|0
+# c|credit.creditBureau.creditData[40].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC0000000001000
+# c|credit.creditBureau.creditData[40].contractSource|cb
+# n|credit.creditBureau.creditData[40].cred_ratio|0
+# n|credit.creditBureau.creditData[40].creditActive|0
+# n|credit.creditBureau.creditData[40].creditCollateral|0
+# n|credit.creditBureau.creditData[40].creditCostRate|31.122
+# c|credit.creditBureau.creditData[40].creditCurrency|rur
+# d|credit.creditBureau.creditData[40].creditDate|14.07.2015 00:00:00
+# n|credit.creditBureau.creditData[40].creditDayOverdue|0
+# d|credit.creditBureau.creditData[40].creditEndDate|14.07.2016 00:00:00
+# d|credit.creditBureau.creditData[40].creditEndDateFact|16.08.2016 00:00:00
+# n|credit.creditBureau.creditData[40].creditJoint|1
+# n|credit.creditBureau.creditData[40].creditMaxOverdue|1740
+# c|credit.creditBureau.creditData[40].creditOwner|0
+# n|credit.creditBureau.creditData[40].creditProlong|0
+# n|credit.creditBureau.creditData[40].creditSum|15010
+# n|credit.creditBureau.creditData[40].creditSumDebt|0
+# n|credit.creditBureau.creditData[40].creditSumLimit|0
+# n|credit.creditBureau.creditData[40].creditSumOverdue|0
+# n|credit.creditBureau.creditData[40].creditSumType|1
+# n|credit.creditBureau.creditData[40].creditType|5
+# c|credit.creditBureau.creditData[40].creditTypeUni|5
+# d|credit.creditBureau.creditData[40].creditUpdate|22.08.2016 00:00:00
+# n|credit.creditBureau.creditData[40].cuid|60268391
+# n|credit.creditBureau.creditData[40].delay30|0
+# n|credit.creditBureau.creditData[40].delay5|1
+# n|credit.creditBureau.creditData[40].delay60|0
+# n|credit.creditBureau.creditData[40].delay90|0
+# n|credit.creditBureau.creditData[40].delayMore|0
+# n|credit.creditBureau.creditData[41].cbAnnuity|0
+# c|credit.creditBureau.creditData[41].cbOverdueLine|CCCCCCCCCCCC000000001000000000000000
+# c|credit.creditBureau.creditData[41].contractSource|cb
+# n|credit.creditBureau.creditData[41].cred_ratio|0
+# n|credit.creditBureau.creditData[41].creditActive|0
+# n|credit.creditBureau.creditData[41].creditCollateral|0
+# n|credit.creditBureau.creditData[41].creditCostRate|18.94
+# c|credit.creditBureau.creditData[41].creditCurrency|rur
+# d|credit.creditBureau.creditData[41].creditDate|29.05.2017 00:00:00
+# n|credit.creditBureau.creditData[41].creditDayOverdue|0
+# d|credit.creditBureau.creditData[41].creditEndDate|29.05.2019 00:00:00
+# d|credit.creditBureau.creditData[41].creditEndDateFact|30.05.2019 00:00:00
+# n|credit.creditBureau.creditData[41].creditJoint|1
+# n|credit.creditBureau.creditData[41].creditMaxOverdue|5389
+# c|credit.creditBureau.creditData[41].creditOwner|0
+# n|credit.creditBureau.creditData[41].creditProlong|0
+# n|credit.creditBureau.creditData[41].creditSum|106600
+# n|credit.creditBureau.creditData[41].creditSumDebt|0
+# n|credit.creditBureau.creditData[41].creditSumLimit|0
+# n|credit.creditBureau.creditData[41].creditSumOverdue|0
+# n|credit.creditBureau.creditData[41].creditSumType|1
+# n|credit.creditBureau.creditData[41].creditType|5
+# c|credit.creditBureau.creditData[41].creditTypeUni|5
+# d|credit.creditBureau.creditData[41].creditUpdate|02.06.2019 00:00:00
+# n|credit.creditBureau.creditData[41].cuid|60268391
+# n|credit.creditBureau.creditData[41].delay30|0
+# n|credit.creditBureau.creditData[41].delay5|1
+# n|credit.creditBureau.creditData[41].delay60|0
+# n|credit.creditBureau.creditData[41].delay90|0
+# n|credit.creditBureau.creditData[41].delayMore|0
+# n|credit.creditBureau.creditData[42].cbAnnuity|3018
+# c|credit.creditBureau.creditData[42].cbOverdueLine|-00000000000
+# c|credit.creditBureau.creditData[42].contractSource|cb
+# n|credit.creditBureau.creditData[42].cred_ratio|0
+# n|credit.creditBureau.creditData[42].creditActive|1
+# n|credit.creditBureau.creditData[42].creditCollateral|0
+# n|credit.creditBureau.creditData[42].creditCostRate|19.94
+# c|credit.creditBureau.creditData[42].creditCurrency|rur
+# d|credit.creditBureau.creditData[42].creditDate|13.05.2019 00:00:00
+# n|credit.creditBureau.creditData[42].creditDayOverdue|30
+# d|credit.creditBureau.creditData[42].creditEndDate|13.03.2022 00:00:00
+# n|credit.creditBureau.creditData[42].creditJoint|1
+# n|credit.creditBureau.creditData[42].creditMaxOverdue|3025
+# c|credit.creditBureau.creditData[42].creditOwner|0
+# n|credit.creditBureau.creditData[42].creditProlong|0
+# n|credit.creditBureau.creditData[42].creditSum|77951
+# n|credit.creditBureau.creditData[42].creditSumDebt|60929
+# n|credit.creditBureau.creditData[42].creditSumLimit|0
+# n|credit.creditBureau.creditData[42].creditSumOverdue|3025
+# n|credit.creditBureau.creditData[42].creditSumType|1
+# n|credit.creditBureau.creditData[42].creditType|5
+# c|credit.creditBureau.creditData[42].creditTypeUni|5
+# d|credit.creditBureau.creditData[42].creditUpdate|11.05.2020 00:00:00
+# n|credit.creditBureau.creditData[42].cuid|60268391
+# n|credit.creditBureau.creditData[42].delay30|0
+# n|credit.creditBureau.creditData[42].delay5|0
+# n|credit.creditBureau.creditData[42].delay60|0
+# n|credit.creditBureau.creditData[42].delay90|0
+# n|credit.creditBureau.creditData[42].delayMore|0
+# n|credit.creditBureau.creditData[43].cbAnnuity|0
+# c|credit.creditBureau.creditData[43].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC000000
+# c|credit.creditBureau.creditData[43].contractSource|cb
+# n|credit.creditBureau.creditData[43].cred_ratio|0
+# n|credit.creditBureau.creditData[43].creditActive|0
+# n|credit.creditBureau.creditData[43].creditCollateral|0
+# c|credit.creditBureau.creditData[43].creditCurrency|rur
+# d|credit.creditBureau.creditData[43].creditDate|03.10.2012 00:00:00
+# n|credit.creditBureau.creditData[43].creditDayOverdue|0
+# d|credit.creditBureau.creditData[43].creditEndDate|03.04.2013 00:00:00
+# d|credit.creditBureau.creditData[43].creditEndDateFact|03.04.2013 00:00:00
+# n|credit.creditBureau.creditData[43].creditJoint|1
+# n|credit.creditBureau.creditData[43].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[43].creditOwner|0
+# n|credit.creditBureau.creditData[43].creditProlong|0
+# n|credit.creditBureau.creditData[43].creditSum|11912
+# n|credit.creditBureau.creditData[43].creditSumDebt|0
+# n|credit.creditBureau.creditData[43].creditSumLimit|0
+# n|credit.creditBureau.creditData[43].creditSumOverdue|0
+# n|credit.creditBureau.creditData[43].creditSumType|1
+# n|credit.creditBureau.creditData[43].creditType|5
+# c|credit.creditBureau.creditData[43].creditTypeUni|5
+# d|credit.creditBureau.creditData[43].creditUpdate|10.04.2013 00:00:00
+# n|credit.creditBureau.creditData[43].cuid|60268391
+# n|credit.creditBureau.creditData[43].delay30|0
+# n|credit.creditBureau.creditData[43].delay5|0
+# n|credit.creditBureau.creditData[43].delay60|0
+# n|credit.creditBureau.creditData[43].delay90|0
+# n|credit.creditBureau.creditData[43].delayMore|0
+# n|credit.creditBureau.creditData[44].cbAnnuity|0
+# c|credit.creditBureau.creditData[44].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCC--0------000000-0000-0000000000000000-0000000000---00000000000000
+# c|credit.creditBureau.creditData[44].contractSource|cb
+# n|credit.creditBureau.creditData[44].cred_ratio|0
+# n|credit.creditBureau.creditData[44].creditActive|0
+# n|credit.creditBureau.creditData[44].creditCollateral|0
+# n|credit.creditBureau.creditData[44].creditCostRate|51.1
+# c|credit.creditBureau.creditData[44].creditCurrency|rur
+# d|credit.creditBureau.creditData[44].creditDate|03.10.2012 00:00:00
+# n|credit.creditBureau.creditData[44].creditDayOverdue|0
+# d|credit.creditBureau.creditData[44].creditEndDate|31.12.2099 00:00:00
+# d|credit.creditBureau.creditData[44].creditEndDateFact|15.03.2018 00:00:00
+# n|credit.creditBureau.creditData[44].creditJoint|1
+# n|credit.creditBureau.creditData[44].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[44].creditOwner|0
+# n|credit.creditBureau.creditData[44].creditProlong|0
+# n|credit.creditBureau.creditData[44].creditSum|0
+# n|credit.creditBureau.creditData[44].creditSumDebt|0
+# n|credit.creditBureau.creditData[44].creditSumLimit|0
+# n|credit.creditBureau.creditData[44].creditSumOverdue|0
+# n|credit.creditBureau.creditData[44].creditSumType|1
+# n|credit.creditBureau.creditData[44].creditType|4
+# c|credit.creditBureau.creditData[44].creditTypeUni|4
+# d|credit.creditBureau.creditData[44].creditUpdate|16.03.2018 00:00:00
+# n|credit.creditBureau.creditData[44].cuid|60268391
+# n|credit.creditBureau.creditData[44].delay30|0
+# n|credit.creditBureau.creditData[44].delay5|0
+# n|credit.creditBureau.creditData[44].delay60|0
+# n|credit.creditBureau.creditData[44].delay90|0
+# n|credit.creditBureau.creditData[44].delayMore|0
+# n|credit.creditBureau.creditData[45].cbAnnuity|0
+# c|credit.creditBureau.creditData[45].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC-0--
+# c|credit.creditBureau.creditData[45].contractSource|cb
+# n|credit.creditBureau.creditData[45].cred_ratio|0
+# n|credit.creditBureau.creditData[45].creditActive|0
+# n|credit.creditBureau.creditData[45].creditCollateral|0
+# c|credit.creditBureau.creditData[45].creditCurrency|rur
+# d|credit.creditBureau.creditData[45].creditDate|29.12.2011 00:00:00
+# n|credit.creditBureau.creditData[45].creditDayOverdue|0
+# d|credit.creditBureau.creditData[45].creditEndDate|02.04.2012 00:00:00
+# d|credit.creditBureau.creditData[45].creditEndDateFact|02.04.2012 00:00:00
+# n|credit.creditBureau.creditData[45].creditJoint|1
+# n|credit.creditBureau.creditData[45].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[45].creditOwner|0
+# n|credit.creditBureau.creditData[45].creditProlong|0
+# n|credit.creditBureau.creditData[45].creditSum|3640
+# n|credit.creditBureau.creditData[45].creditSumDebt|0
+# n|credit.creditBureau.creditData[45].creditSumLimit|0
+# n|credit.creditBureau.creditData[45].creditSumOverdue|0
+# n|credit.creditBureau.creditData[45].creditSumType|1
+# n|credit.creditBureau.creditData[45].creditType|5
+# c|credit.creditBureau.creditData[45].creditTypeUni|5
+# d|credit.creditBureau.creditData[45].creditUpdate|31.07.2012 00:00:00
+# n|credit.creditBureau.creditData[45].cuid|60268391
+# n|credit.creditBureau.creditData[45].delay30|0
+# n|credit.creditBureau.creditData[45].delay5|0
+# n|credit.creditBureau.creditData[45].delay60|0
+# n|credit.creditBureau.creditData[45].delay90|0
+# n|credit.creditBureau.creditData[45].delayMore|0
+# n|credit.creditBureau.creditData[46].cbAnnuity|2168
+# c|credit.creditBureau.creditData[46].cbOverdueLine|-000000000100000100
+# c|credit.creditBureau.creditData[46].contractSource|cb
+# n|credit.creditBureau.creditData[46].cred_ratio|0
+# n|credit.creditBureau.creditData[46].creditActive|1
+# n|credit.creditBureau.creditData[46].creditCollateral|0
+# n|credit.creditBureau.creditData[46].creditCostRate|19.9
+# c|credit.creditBureau.creditData[46].creditCurrency|rur
+# d|credit.creditBureau.creditData[46].creditDate|17.10.2018 00:00:00
+# n|credit.creditBureau.creditData[46].creditDayOverdue|30
+# d|credit.creditBureau.creditData[46].creditEndDate|17.10.2020 00:00:00
+# n|credit.creditBureau.creditData[46].creditJoint|1
+# n|credit.creditBureau.creditData[46].creditMaxOverdue|2173
+# c|credit.creditBureau.creditData[46].creditOwner|0
+# n|credit.creditBureau.creditData[46].creditProlong|0
+# n|credit.creditBureau.creditData[46].creditSum|42635
+# n|credit.creditBureau.creditData[46].creditSumDebt|16498
+# n|credit.creditBureau.creditData[46].creditSumLimit|0
+# n|credit.creditBureau.creditData[46].creditSumOverdue|2173
+# n|credit.creditBureau.creditData[46].creditSumType|1
+# n|credit.creditBureau.creditData[46].creditType|5
+# c|credit.creditBureau.creditData[46].creditTypeUni|5
+# d|credit.creditBureau.creditData[46].creditUpdate|11.05.2020 00:00:00
+# n|credit.creditBureau.creditData[46].cuid|60268391
+# n|credit.creditBureau.creditData[46].delay30|0
+# n|credit.creditBureau.creditData[46].delay5|2
+# n|credit.creditBureau.creditData[46].delay60|0
+# n|credit.creditBureau.creditData[46].delay90|0
+# n|credit.creditBureau.creditData[46].delayMore|0
+# n|credit.creditBureau.creditData[47].cbAnnuity|0
+# c|credit.creditBureau.creditData[47].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC00000000000
+# c|credit.creditBureau.creditData[47].contractSource|cb
+# n|credit.creditBureau.creditData[47].cred_ratio|0
+# n|credit.creditBureau.creditData[47].creditActive|0
+# n|credit.creditBureau.creditData[47].creditCollateral|0
+# n|credit.creditBureau.creditData[47].creditCostRate|36.49
+# c|credit.creditBureau.creditData[47].creditCurrency|rur
+# d|credit.creditBureau.creditData[47].creditDate|12.12.2016 00:00:00
+# n|credit.creditBureau.creditData[47].creditDayOverdue|0
+# d|credit.creditBureau.creditData[47].creditEndDate|12.02.2018 00:00:00
+# d|credit.creditBureau.creditData[47].creditEndDateFact|13.11.2017 00:00:00
+# n|credit.creditBureau.creditData[47].creditJoint|1
+# n|credit.creditBureau.creditData[47].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[47].creditOwner|0
+# n|credit.creditBureau.creditData[47].creditProlong|0
+# n|credit.creditBureau.creditData[47].creditSum|18289
+# n|credit.creditBureau.creditData[47].creditSumDebt|0
+# n|credit.creditBureau.creditData[47].creditSumLimit|0
+# n|credit.creditBureau.creditData[47].creditSumOverdue|0
+# n|credit.creditBureau.creditData[47].creditSumType|1
+# n|credit.creditBureau.creditData[47].creditType|5
+# c|credit.creditBureau.creditData[47].creditTypeUni|5
+# d|credit.creditBureau.creditData[47].creditUpdate|14.11.2017 00:00:00
+# n|credit.creditBureau.creditData[47].cuid|60268391
+# n|credit.creditBureau.creditData[47].delay30|0
+# n|credit.creditBureau.creditData[47].delay5|0
+# n|credit.creditBureau.creditData[47].delay60|0
+# n|credit.creditBureau.creditData[47].delay90|0
+# n|credit.creditBureau.creditData[47].delayMore|0
+# n|credit.creditBureau.creditData[48].cbAnnuity|0
+# c|credit.creditBureau.creditData[48].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC00000000000000000
+# c|credit.creditBureau.creditData[48].contractSource|cb
+# n|credit.creditBureau.creditData[48].cred_ratio|0
+# n|credit.creditBureau.creditData[48].creditActive|0
+# n|credit.creditBureau.creditData[48].creditCollateral|0
+# n|credit.creditBureau.creditData[48].creditCostRate|22.02
+# c|credit.creditBureau.creditData[48].creditCurrency|rur
+# d|credit.creditBureau.creditData[48].creditDate|03.05.2016 00:00:00
+# n|credit.creditBureau.creditData[48].creditDayOverdue|0
+# d|credit.creditBureau.creditData[48].creditEndDate|03.05.2018 00:00:00
+# d|credit.creditBureau.creditData[48].creditEndDateFact|24.10.2017 00:00:00
+# n|credit.creditBureau.creditData[48].creditJoint|1
+# n|credit.creditBureau.creditData[48].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[48].creditOwner|0
+# n|credit.creditBureau.creditData[48].creditProlong|0
+# n|credit.creditBureau.creditData[48].creditSum|37717
+# n|credit.creditBureau.creditData[48].creditSumDebt|0
+# n|credit.creditBureau.creditData[48].creditSumLimit|0
+# n|credit.creditBureau.creditData[48].creditSumOverdue|0
+# n|credit.creditBureau.creditData[48].creditSumType|1
+# n|credit.creditBureau.creditData[48].creditType|5
+# c|credit.creditBureau.creditData[48].creditTypeUni|5
+# d|credit.creditBureau.creditData[48].creditUpdate|15.05.2019 00:00:00
+# n|credit.creditBureau.creditData[48].cuid|60268391
+# n|credit.creditBureau.creditData[48].delay30|0
+# n|credit.creditBureau.creditData[48].delay5|0
+# n|credit.creditBureau.creditData[48].delay60|0
+# n|credit.creditBureau.creditData[48].delay90|0
+# n|credit.creditBureau.creditData[48].delayMore|0
+# n|credit.creditBureau.creditData[49].cbAnnuity|0
+# c|credit.creditBureau.creditData[49].cbOverdueLine|CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC111111111110101011101000
+# c|credit.creditBureau.creditData[49].contractSource|cb
+# n|credit.creditBureau.creditData[49].cred_ratio|0
+# n|credit.creditBureau.creditData[49].creditActive|0
+# n|credit.creditBureau.creditData[49].creditCollateral|0
+# n|credit.creditBureau.creditData[49].creditCostRate|24.57
+# c|credit.creditBureau.creditData[49].creditCurrency|rur
+# d|credit.creditBureau.creditData[49].creditDate|07.05.2015 00:00:00
+# n|credit.creditBureau.creditData[49].creditDayOverdue|0
+# d|credit.creditBureau.creditData[49].creditEndDate|07.05.2017 00:00:00
+# d|credit.creditBureau.creditData[49].creditEndDateFact|13.05.2017 00:00:00
+# n|credit.creditBureau.creditData[49].creditJoint|1
+# n|credit.creditBureau.creditData[49].creditMaxOverdue|5651
+# c|credit.creditBureau.creditData[49].creditOwner|0
+# n|credit.creditBureau.creditData[49].creditProlong|0
+# n|credit.creditBureau.creditData[49].creditSum|106400
+# n|credit.creditBureau.creditData[49].creditSumDebt|0
+# n|credit.creditBureau.creditData[49].creditSumLimit|0
+# n|credit.creditBureau.creditData[49].creditSumOverdue|0
+# n|credit.creditBureau.creditData[49].creditSumType|1
+# n|credit.creditBureau.creditData[49].creditType|5
+# c|credit.creditBureau.creditData[49].creditTypeUni|5
+# d|credit.creditBureau.creditData[49].creditUpdate|15.05.2019 00:00:00
+# n|credit.creditBureau.creditData[49].cuid|60268391
+# n|credit.creditBureau.creditData[49].delay30|0
+# n|credit.creditBureau.creditData[49].delay5|17
+# n|credit.creditBureau.creditData[49].delay60|0
+# n|credit.creditBureau.creditData[49].delay90|0
+# n|credit.creditBureau.creditData[49].delayMore|0
+# n|credit.creditBureau.creditData[50].cbAnnuity|1128
+# c|credit.creditBureau.creditData[50].cbOverdueLine|-001100000000000100010000
+# c|credit.creditBureau.creditData[50].contractSource|cb
+# n|credit.creditBureau.creditData[50].cred_ratio|0
+# n|credit.creditBureau.creditData[50].creditActive|1
+# n|credit.creditBureau.creditData[50].creditCollateral|0
+# n|credit.creditBureau.creditData[50].creditCostRate|17.36
+# c|credit.creditBureau.creditData[50].creditCurrency|rur
+# d|credit.creditBureau.creditData[50].creditDate|05.04.2018 00:00:00
+# n|credit.creditBureau.creditData[50].creditDayOverdue|30
+# d|credit.creditBureau.creditData[50].creditEndDate|05.04.2021 00:00:00
+# n|credit.creditBureau.creditData[50].creditJoint|1
+# n|credit.creditBureau.creditData[50].creditMaxOverdue|1131
+# c|credit.creditBureau.creditData[50].creditOwner|0
+# n|credit.creditBureau.creditData[50].creditProlong|0
+# n|credit.creditBureau.creditData[50].creditSum|31490
+# n|credit.creditBureau.creditData[50].creditSumDebt|13577
+# n|credit.creditBureau.creditData[50].creditSumLimit|0
+# n|credit.creditBureau.creditData[50].creditSumOverdue|1131
+# n|credit.creditBureau.creditData[50].creditSumType|1
+# n|credit.creditBureau.creditData[50].creditType|5
+# c|credit.creditBureau.creditData[50].creditTypeUni|5
+# d|credit.creditBureau.creditData[50].creditUpdate|11.05.2020 00:00:00
+# n|credit.creditBureau.creditData[50].cuid|60268391
+# n|credit.creditBureau.creditData[50].delay30|0
+# n|credit.creditBureau.creditData[50].delay5|4
+# n|credit.creditBureau.creditData[50].delay60|0
+# n|credit.creditBureau.creditData[50].delay90|0
+# n|credit.creditBureau.creditData[50].delayMore|0
+# c|credit.creditBureau.creditData[51].contractSource|cb
+# n|credit.creditBureau.creditData[51].cred_ratio|0
+# n|credit.creditBureau.creditData[51].creditActive|0
+# n|credit.creditBureau.creditData[51].creditCollateral|0
+# c|credit.creditBureau.creditData[51].creditCurrency|rur
+# d|credit.creditBureau.creditData[51].creditDate|15.05.2009 00:00:00
+# n|credit.creditBureau.creditData[51].creditDayOverdue|0
+# d|credit.creditBureau.creditData[51].creditEndDate|16.11.2009 00:00:00
+# d|credit.creditBureau.creditData[51].creditEndDateFact|17.08.2009 00:00:00
+# n|credit.creditBureau.creditData[51].creditJoint|1
+# n|credit.creditBureau.creditData[51].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[51].creditOwner|0
+# n|credit.creditBureau.creditData[51].creditProlong|0
+# n|credit.creditBureau.creditData[51].creditSum|12990
+# n|credit.creditBureau.creditData[51].creditSumDebt|0
+# n|credit.creditBureau.creditData[51].creditSumLimit|0
+# n|credit.creditBureau.creditData[51].creditSumOverdue|0
+# n|credit.creditBureau.creditData[51].creditSumType|1
+# n|credit.creditBureau.creditData[51].creditType|5
+# c|credit.creditBureau.creditData[51].creditTypeUni|5
+# d|credit.creditBureau.creditData[51].creditUpdate|17.08.2009 00:00:00
+# n|credit.creditBureau.creditData[51].cuid|60268391
+# n|credit.creditBureau.creditData[51].delay30|0
+# n|credit.creditBureau.creditData[51].delay5|0
+# n|credit.creditBureau.creditData[51].delay60|0
+# n|credit.creditBureau.creditData[51].delay90|0
+# n|credit.creditBureau.creditData[51].delayMore|0
+# n|credit.creditBureau.creditData[52].cbAnnuity|0
+# c|credit.creditBureau.creditData[52].cbOverdueLine|0
+# c|credit.creditBureau.creditData[52].contractSource|cb
+# n|credit.creditBureau.creditData[52].cred_ratio|0
+# n|credit.creditBureau.creditData[52].creditActive|1
+# n|credit.creditBureau.creditData[52].creditCollateral|0
+# n|credit.creditBureau.creditData[52].creditCostRate|28.75
+# c|credit.creditBureau.creditData[52].creditCurrency|rur
+# d|credit.creditBureau.creditData[52].creditDate|20.04.2020 00:00:00
+# n|credit.creditBureau.creditData[52].creditDayOverdue|0
+# d|credit.creditBureau.creditData[52].creditEndDate|28.02.2025 00:00:00
+# n|credit.creditBureau.creditData[52].creditJoint|1
+# n|credit.creditBureau.creditData[52].creditMaxOverdue|0
+# c|credit.creditBureau.creditData[52].creditOwner|0
+# n|credit.creditBureau.creditData[52].creditProlong|0
+# n|credit.creditBureau.creditData[52].creditSum|5000
+# n|credit.creditBureau.creditData[52].creditSumDebt|4953
+# n|credit.creditBureau.creditData[52].creditSumLimit|47
+# n|credit.creditBureau.creditData[52].creditSumOverdue|0
+# n|credit.creditBureau.creditData[52].creditSumType|1
+# n|credit.creditBureau.creditData[52].creditType|4
+# c|credit.creditBureau.creditData[52].creditTypeUni|4
+# d|credit.creditBureau.creditData[52].creditUpdate|05.05.2020 00:00:00
+# n|credit.creditBureau.creditData[52].cuid|60268391
+# n|credit.creditBureau.creditData[52].delay30|0
+# n|credit.creditBureau.creditData[52].delay5|0
+# n|credit.creditBureau.creditData[52].delay60|0
+# n|credit.creditBureau.creditData[52].delay90|0
+# n|credit.creditBureau.creditData[52].delayMore|0
+# n|credit.creditBureau.creditData[53].cbAnnuity|1137
+# c|credit.creditBureau.creditData[53].cbOverdueLine|-000000000000000000010000000000
+# c|credit.creditBureau.creditData[53].contractSource|cb
+# n|credit.creditBureau.creditData[53].cred_ratio|0
+# n|credit.creditBureau.creditData[53].creditActive|1
+# n|credit.creditBureau.creditData[53].creditCollateral|0
+# n|credit.creditBureau.creditData[53].creditCostRate|19.9
+# c|credit.creditBureau.creditData[53].creditCurrency|rur
+# d|credit.creditBureau.creditData[53].creditDate|24.10.2017 00:00:00
+# n|credit.creditBureau.creditData[53].creditDayOverdue|30
+# d|credit.creditBureau.creditData[53].creditEndDate|24.10.2022 00:00:00
+# n|credit.creditBureau.creditData[53].creditJoint|1
+# n|credit.creditBureau.creditData[53].creditMaxOverdue|1141
+# c|credit.creditBureau.creditData[53].creditOwner|0
+# n|credit.creditBureau.creditData[53].creditProlong|0
+# n|credit.creditBureau.creditData[53].creditSum|43000
+# n|credit.creditBureau.creditData[53].creditSumDebt|28756
+# n|credit.creditBureau.creditData[53].creditSumLimit|0
+# n|credit.creditBureau.creditData[53].creditSumOverdue|1139
+# n|credit.creditBureau.creditData[53].creditSumType|1
+# n|credit.creditBureau.creditData[53].creditType|5
+# c|credit.creditBureau.creditData[53].creditTypeUni|5
+# d|credit.creditBureau.creditData[53].creditUpdate|11.05.2020 00:00:00
+# n|credit.creditBureau.creditData[53].cuid|60268391
+# n|credit.creditBureau.creditData[53].delay30|0
+# n|credit.creditBureau.creditData[53].delay5|1
+# n|credit.creditBureau.creditData[53].delay60|0
+# n|credit.creditBureau.creditData[53].delay90|0
+# n|credit.creditBureau.creditData[53].delayMore|0
+# n|credit.creditBureau.creditData[54].cbAnnuity|4488
+# c|credit.creditBureau.creditData[54].contractSource|cb
+# n|credit.creditBureau.creditData[54].cred_ratio|0
+# n|credit.creditBureau.creditData[54].creditActive|1
+# n|credit.creditBureau.creditData[54].creditCollateral|0
+# n|credit.creditBureau.creditData[54].creditCostRate|22.9
+# c|credit.creditBureau.creditData[54].creditCurrency|rur
+# d|credit.creditBureau.creditData[54].creditDate|14.09.2018 00:00:00
+# n|credit.creditBureau.creditData[54].creditDayOverdue|0
+# d|credit.creditBureau.creditData[54].creditEndDate|16.12.2021 00:00:00
+# n|credit.creditBureau.creditData[54].creditJoint|1
+# n|credit.creditBureau.creditData[54].creditMaxOverdue|1541.24
+# c|credit.creditBureau.creditData[54].creditOwner|0
+# n|credit.creditBureau.creditData[54].creditProlong|3
+# n|credit.creditBureau.creditData[54].creditSum|58224
+# n|credit.creditBureau.creditData[54].creditSumDebt|37685.46
+# n|credit.creditBureau.creditData[54].creditSumLimit|0
+# n|credit.creditBureau.creditData[54].creditSumOverdue|0
+# n|credit.creditBureau.creditData[54].creditSumType|1
+# n|credit.creditBureau.creditData[54].creditType|5
+# c|credit.creditBureau.creditData[54].creditTypeUni|5
+# d|credit.creditBureau.creditData[54].creditUpdate|09.05.2020 00:00:00
+# n|credit.creditBureau.creditData[54].cuid|60268391
+# n|credit.creditBureau.creditData[54].delay30|0
+# n|credit.creditBureau.creditData[54].delay5|7
+# n|credit.creditBureau.creditData[54].delay60|0
+# n|credit.creditBureau.creditData[54].delay90|0
+# n|credit.creditBureau.creditData[54].delayMore|0
