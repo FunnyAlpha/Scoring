@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from dateutil import parser
 from tabulate import tabulate
+import json
 
 
 _rx_dict = {
@@ -126,14 +127,10 @@ def get_datatype_df_blaze(p_datatype):
 
 def parse_df_objArr(p_df):
 
-    print(p_df)
-
     arrayOfPredictors = []
 
     for column in p_df:
-        print(str(column))
-        print(str(p_df[column].values[0]))
-        print(get_datatype_df_blaze(str(p_df[column].dtypes)))
+
         arrayOfPredictors.append(
             PredictorsBlaze(
                 str(column),
@@ -143,6 +140,22 @@ def parse_df_objArr(p_df):
         )
     return arrayOfPredictors
 
+
+def parse_df_json(p_df):
+
+    listOfPredictors = []
+
+    for column in p_df:
+            listOfPredictors.append(
+            
+                {
+                "key":str(column),
+                "value":str(p_df[column].values[0]),
+                "typeVal":get_datatype_df_blaze(str(p_df[column].dtypes))
+                }
+            
+        )
+    return json.dumps({"blazeResponseList":listOfPredictors})
 
 test_str = '''
 c|applicantData.bankAccountBankCode|2291

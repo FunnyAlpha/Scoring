@@ -73,4 +73,42 @@ def parse_df_objArr(p_df):
             )
         )
     return arrayOfPredictors
-        
+
+import json  
+
+def parse_df_json(p_df):
+
+    listOfPredictors = []
+
+    for column in p_df:
+            listOfPredictors.append(
+            
+                {
+                "key":str(column),
+                "value":str(p_df[column].values[0]),
+                "typeVal":get_datatype_df_blaze(str(p_df[column].dtypes))
+                }
+            
+        )
+    return json.dumps({"blazeResponseList":listOfPredictors})
+
+print(parse_df_json(df))
+
+# import json
+
+# Predictorlist = [
+#         {
+#         "key":"MAXAGRMNTHS1_3",
+#         "value":"1",
+#         "typeVal":"n"
+#         },
+#         {
+#         "key":"MAXAGRMNTHS1_3",
+#         "value":"1",
+#         "typeVal":"n"
+#         }
+#     ]
+
+# data = json.dumps({"blazeResponseList":Predictorlist})
+
+# print(data)
