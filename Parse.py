@@ -109,6 +109,39 @@ def get_df_vct_blaze(p_type,p_dict):
 
     return df
 
+class PredictorsBlaze():
+    def __init__(self,key,value,typeVal):
+        self.key = key
+        self.value = value
+        self.typeVal = typeVal
+
+def get_datatype_df_blaze(p_datatype):
+
+    if p_datatype == 'object':
+        return 'n'
+    elif 'datetime' in p_datatype.lower():
+        return 'd'
+    else:
+        return 'n'
+
+def parse_df_objArr(p_df):
+
+    print(p_df)
+
+    arrayOfPredictors = []
+
+    for column in p_df:
+        print(str(column))
+        print(str(p_df[column].values[0]))
+        print(get_datatype_df_blaze(str(p_df[column].dtypes)))
+        arrayOfPredictors.append(
+            PredictorsBlaze(
+                str(column),
+                str(p_df[column].values[0]),
+                get_datatype_df_blaze(str(p_df[column].dtypes))
+            )
+        )
+    return arrayOfPredictors
 
 
 test_str = '''

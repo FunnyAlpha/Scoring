@@ -367,3 +367,4 @@ class Predictors():
                 #print(row['NAME'])
                 v_df = self.predictors_fun[p_name]()
         return v_df
+

@@ -3,7 +3,7 @@ from Predictors import Predictors
 import numpy as np
 from tabulate import tabulate
 from sklearn.preprocessing import MinMaxScaler
-from Parse import test_str
+from Parse import test_str,parse_df_objArr
 
 if __name__ == "__main__":   
 
@@ -34,20 +34,29 @@ if __name__ == "__main__":
         controller.builder = builder
         controller.buildVctForBlaze()
         # GET OUTPUT DATA
-        predictors_dwh  = Predictors(builder.product.Application_df,
-                                    builder.product.CreditBureau_df,
-                                    builder.product.Behavioral_df,
-                                    builder.product.predictors_list_df,
-                                    builder.product.predictor_cash_df
-                                    )
-        predictors_dwh.get_predictors_blaze_df()
-        return predictors_dwh.rez_df
+        predictors_blaze_df  = Predictors(builder.product.Application_df,
+                                        builder.product.CreditBureau_df,
+                                        builder.product.Behavioral_df,
+                                        builder.product.predictors_list_df,
+                                        builder.product.predictor_cash_df
+                                        )
+        predictors_blaze_df.get_predictors_blaze_df()
+        predictors_blaze = parse_df_objArr(predictors_blaze_df.rez_df)
+        return predictors_blaze
 
-    print(tabulate(get_predictors_blaze(test_str), headers='keys',tablefmt='psql',disable_numparse=True))
+    # print(tabulate(get_predictors_blaze(test_str), headers='keys',tablefmt='psql',disable_numparse=True))
 
+    # predObjArrVar = get_predictors_blaze(test_str)
+    # for x in predObjArrVar:
+
+    #     print("key: ",x.key)
+    #     print("value: ",x.value)
+    #     print("typeVal: ",x.typeVal)
 
     # from pycallgraph import PyCallGraph
     # from pycallgraph.output import GraphvizOutput
     
     # with PyCallGraph(output=GraphvizOutput()):
     #     df=load_data_frame_blaze_str(test_str)
+
+    
