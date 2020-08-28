@@ -65,7 +65,7 @@ if __name__ == "__main__":
         return predictors_blaze
     # print(tabulate(get_predictors_blaze(test_str), headers='keys',tablefmt='psql',disable_numparse=True))
 
-    # print(get_predictors_blaze_json(test_str))
+    print(get_predictors_blaze_json(test_str))
 
 
     # predObjArrVar = get_predictors_blaze(test_str)
