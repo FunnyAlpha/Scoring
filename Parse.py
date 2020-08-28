@@ -131,13 +131,16 @@ def parse_df_objArr(p_df):
 
     for column in p_df:
 
-        arrayOfPredictors.append(
-            PredictorsBlaze(
-                str(column),
-                str(p_df[column].values[0]),
-                get_datatype_df_blaze(str(p_df[column].dtypes))
+        if str(column)!='SK_APPLICATION':
+
+            arrayOfPredictors.append(
+                PredictorsBlaze(
+                    str(column),
+                    str(p_df[column].values[0]),
+                    get_datatype_df_blaze(str(p_df[column].dtypes))
+                )
             )
-        )
+            
     return arrayOfPredictors
 
 
@@ -158,7 +161,7 @@ def parse_df_json(p_df):
                     }
                 
                 )
-                
+
     return json.dumps({"blazeResponseList":listOfPredictors})
 
 test_str = '''
