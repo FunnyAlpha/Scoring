@@ -146,15 +146,19 @@ def parse_df_json(p_df):
     listOfPredictors = []
 
     for column in p_df:
-            listOfPredictors.append(
-            
-                {
-                "key":str(column),
-                "value":str(p_df[column].values[0]),
-                "typeVal":get_datatype_df_blaze(str(p_df[column].dtypes))
-                }
-            
-        )
+
+            if str(column)!='SK_APPLICATION':
+
+                listOfPredictors.append(
+                
+                    {
+                    "key":str(column),
+                    "value":str(p_df[column].values[0]),
+                    "typeVal":get_datatype_df_blaze(str(p_df[column].dtypes))
+                    }
+                
+                )
+                
     return json.dumps({"blazeResponseList":listOfPredictors})
 
 test_str = '''
@@ -1409,6 +1413,18 @@ n|workflow.stageCounters[20].WFSTAGE_INDEX|1
 n|workflow.stageCounters[60].WFSTAGE_INDEX|8509
 n|workflow.stageCounters[61].WFSTAGE_INDEX|3377
 n|workflow.stageCounters[62].WFSTAGE_INDEX|6799
+n|approvalCharacteristics[0].realValue|10
+c|approvalCharacteristics[0].name|CNT_CLOSED_CASH_POS
+c|approvalCharacteristics[0].class|scoreCardPredictor
+c|approvalCharacteristics[0].variation|1
+n|approvalCharacteristics[1].realValue|88
+c|approvalCharacteristics[1].name|AGE_YEARS_REAL
+c|approvalCharacteristics[1].class|scoreCardPredictor
+c|approvalCharacteristics[1].variation|1
+c|approvalCharacteristics[2].charValue|random
+c|approvalCharacteristics[2].name|RANDOM
+c|approvalCharacteristics[2].class|scoreCardPredictor
+c|approvalCharacteristics[2].variation|1
 c|predictorsList[0].name|MAX_DATE_OPEN_CARD
 c|predictorsList[1].name|CNT_CLOSED_CASH_POS
 c|predictorsList[2].name|AGE_YEARS_REAL

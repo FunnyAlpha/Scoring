@@ -5,6 +5,7 @@ from functools import reduce
 from typing import Any
 
 import pandas as pd
+import numpy as np
 
 import cx_Oracle
 from Config import (Auhorization, f_credit_bureau_tt_cb,
@@ -141,6 +142,21 @@ class BuilderVectorBlaze (Builder):
         self._product = Application(p_InputData)
         self._product.get_df_blaze()
 
+    def add_unknown_columns(self,df,features):
+
+
+        
+        for key,value in features.items():
+            if key not in df:
+
+                if value=='d':
+                    df[key]= np.datetime64('NaT')
+                elif value =='c':
+                    df[key] = str(np.nan)
+                else:
+                    df[key] = np.nan
+        pass
+
     @property
     def product(self) -> Application:
         # Should reset the builder, if we want to initiallizwe new object , using decorator
@@ -171,7 +187,18 @@ class BuilderVectorBlaze (Builder):
     def getPredictorCashData(self) -> None:
 
         self._product.predictor_cash_df = get_df_vct_blaze('PREDICTORSCASH', self._product.vector_dict)
-       # self._product.predictor_cash_df['VALUE'] = (self._product.predictor_cash_df['REALVALUE'])
+
+        self.add_unknown_columns(self._product.predictor_cash_df,{'REALVALUE':'n','CHARVALUE':'c','DATEVALUE':'c'})
+
+        self._product.predictor_cash_df['VALUE'] = np.where(self._product.predictor_cash_df["REALVALUE"].isna(),
+                                                            self._product.predictor_cash_df["CHARVALUE"],
+                                                            self._product.predictor_cash_df["REALVALUE"]      
+                                                            )
+        
+        self._product.predictor_cash_df['VALUE'] = np.where(self._product.predictor_cash_df['VALUE'].isna(),
+                                                            self._product.predictor_cash_df["DATEVALUE"],
+                                                            self._product.predictor_cash_df["VALUE"]
+                                                            )
         # print(self._product.predictor_cash_df)
 
 

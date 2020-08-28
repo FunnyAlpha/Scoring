@@ -357,14 +357,17 @@ class Predictors():
                 
                 if row['NAME'] == p_name and row['CLASS'] == 'scoreCardPredictor':
                     
-                    v_df = pd.DataFrame({
+                    return pd.DataFrame({
                         'SK_APPLICATION':[self.predictors_cash_df.loc[index,'SK_APPLICATION']],
                         row['NAME']:[self.predictors_cash_df.loc[index,'VALUE']]
                     })
-                    return v_df
+
+                else:
+ 
+                    return self.predictors_fun[p_name]()
         else:
                 
                 #print(row['NAME'])
-                v_df = self.predictors_fun[p_name]()
-        return v_df
+            return self.predictors_fun[p_name]()
+        
 
