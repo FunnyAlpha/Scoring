@@ -135,12 +135,12 @@ class BuilderVectorBlaze (Builder):
 
     def __init__(self, p_InputData) -> None:
         # Null object of the Application is creating
-        self.reset(p_InputData)
-
-    def reset(self, p_InputData) -> None:
-         # TO DO
         self._product = Application(p_InputData)
-        self._product.get_df_blaze()
+
+    # def reset(self, p_InputData) -> None:
+    #      # TO DO
+    #     self._product = Application(p_InputData)
+    #     # self._product.get_df_blaze()
 
     def add_unknown_columns(self,df,features):
 
@@ -215,8 +215,8 @@ class Application():
         self.Behavioral_df = None
         self.predictors_list_df = None
         self.predictor_cash_df = None
-        self.vector_dict = None
-        self.InputData = p_InputData
+        self.vector_dict = self.get_df_blaze(p_InputData)
+        # self.InputData = p_InputData
 
     def get_df_dwh(self, p_sql_query: Any):
 
@@ -231,22 +231,20 @@ class Application():
 
         return df
 
-    def get_df_blaze_file(self):
+    def get_df_blaze_file(self,p_InputData):
 
-        v_dict = parse_vct(self.InputData)
+        v_dict = parse_vct(self,p_InputData)
 
         self.vector_dict = v_dict
 
         pass
 
-    def get_df_blaze(self):
+    def get_df_blaze(self,p_InputData):
 
         # print(df_dict)
-        v_dict = parse_vct_str(self.InputData)
+        v_dict = parse_vct_str(p_InputData)
 
-        self.vector_dict = v_dict
-
-        pass
+        return v_dict
 
 
 #################################

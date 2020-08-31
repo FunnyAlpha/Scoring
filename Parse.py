@@ -92,8 +92,6 @@ def parse_vct_str(p_input,p_dict=_df_dict,p_rx_dict=_rx_dict):
 
 def get_df_vct_blaze(p_type,p_dict):
 
-    df = None
-
     df = pd.DataFrame(p_dict[p_type])
     #get columns name
 
@@ -112,7 +110,7 @@ def get_df_vct_blaze(p_type,p_dict):
 
         # df = df.drop(0,1)
         # df = df.set_index([1,2])
-        # df=df.unstack()
+        # df= df.unstack()
         # df= df.droplevel(0, axis=1)
         # df =df.rename_axis(index=None, columns=None)
         # df =df.reindex(column, axis=1)

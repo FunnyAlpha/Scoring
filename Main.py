@@ -63,9 +63,13 @@ if __name__ == "__main__":
         predictors_blaze_df.get_predictors_blaze_df()
         predictors_blaze = parse_df_json(predictors_blaze_df.rez_df)
         return predictors_blaze
+
+    def get_vector_str(p_input_str):
+
+        return p_input_str
     # print(tabulate(get_predictors_blaze(test_str), headers='keys',tablefmt='psql',disable_numparse=True))
 
-    # print(get_predictors_blaze_json(test_str))
+    print(get_predictors_blaze_json(test_str))
 
 
     # predObjArrVar = get_predictors_blaze(test_str)
